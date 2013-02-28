@@ -3,14 +3,16 @@
 #include <map>
 #include <fstream>
 #include <iostream>
-#include <cstdlib>
 #include <cassert>
 #include <sys/stat.h>
 #include <errno.h>
 #include <malloc.h>
 #include <string.h>
+#include <ctime>
 
 #include "mpi.h"
+#include "Particle.h"
+#include "Frame.h"
 
 #define TAG_TIMESTEP 1
 #define TAG_TIMESTEP_DATA 2
@@ -100,17 +102,20 @@ Simulator::Simulator()
   in_attributes_[0] = "xvelocity";
   in_attributes_[1] = "yvelocity";
   in_attributes_[2] = "zvelocity";
-  in_attributes_[3] = "density";
-  in_attributes_[4] = "entropy";
-  in_attributes_[5] = "pressure";
+  in_attributes_[3] = "entropy";
+  in_attributes_[4] = "density";
+  in_attributes_[5] = "temperature";
 
   out_attributes_.resize(6);
   out_attributes_[0] = "x";
   out_attributes_[1] = "y";
   out_attributes_[2] = "z";
-  out_attributes_[3] = "density";
-  out_attributes_[4] = "entropy";
-  out_attributes_[5] = "pressure";
+  out_attributes_[3] = "entropy";
+  out_attributes_[4] = "density";
+  out_attributes_[5] = "temperature";
+
+  config_reader_.SetFileName("configure.txt");
+  assert(config_reader_.Read());
 }
 
 Simulator::~Simulator()
@@ -146,12 +151,58 @@ void Simulator::simulate(int particle_count)
 //      flow_field_[i] = NULL;
 //    }
   }
+  // output frames
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
+  for (int i = 0; i < coretube_.GetCameraCount(); ++i)
+  {
+    Frame* sum = coretube_.GetFrame(i);
+    char proc_index_string[10];
+    sprintf(proc_index_string, "%02d", rank);
+    char cam_index_string[10];
+    sprintf(cam_index_string, "%02d", i);
+    char particle_count_string[100];
+    int resolution[2];
+    sum->GetSize(resolution);
+    sprintf(particle_count_string, "n%d_p%d_r%d_t%d", region_count_[0], particle_count, resolution[0], timestep_range_[1] - timestep_range_[0]);
+    std::string dir = out_root_ + "/" + particle_count_string + std::string("/cam") + cam_index_string;
+    std::string spt_path = dir + "/output_proc" + proc_index_string;
+    mkpath(dir.c_str(), 0777);
+    mkpath(dir.c_str(), 0777);
+    mkpath(dir.c_str(), 0777);
+    sum->SetFileName(spt_path.c_str());
+    sum->Write();
+  }
+  // output times
+  char particle_count_string[100];
+  int resolution[2];
+  coretube_.GetFrame(0)->GetSize(resolution);
+  sprintf(particle_count_string, "n%d_p%d_r%d_t%d", region_count_[0], particle_count, resolution[0], timestep_range_[1] - timestep_range_[0]);
+  char proc_index_string[10];
+  sprintf(proc_index_string, "%02d", rank);
+  std::string dir = out_root_ + "/" + particle_count_string + "/time";
+  std::string time_path = dir + "/proc" + proc_index_string + ".txt";
+  mkpath(dir.c_str(), 0777);
+  mkpath(dir.c_str(), 0777);
+  mkpath(dir.c_str(), 0777);
+  std::ofstream tout(time_path.c_str());
+  for (unsigned int i = 0; i < times_.size(); ++i)
+  {
+    tout << times_[i] << ",";
+  }
   // clean up
   for (int i = 0; i < 6; ++i)
   {
     delete [] flow_field_[i];
     flow_field_[i] = NULL;
   }
+}
+
+void Simulator::set_global_size(int global_size[3])
+{
+  for (int i = 0; i < 3; ++i)
+    global_size_[i] = global_size[i];
 }
 
 void Simulator::set_region_count(int region_count[3])
@@ -458,7 +509,7 @@ void Simulator::fillParticleScalars(Particle* particle) const
                        + flow_field_[3][index_010] * ratio_101 + flow_field_[3][index_011] * ratio_100
                        + flow_field_[3][index_100] * ratio_011 + flow_field_[3][index_101] * ratio_010
                        + flow_field_[3][index_110] * ratio_001 + flow_field_[3][index_111] * ratio_000;
-  particle->scalars[0] /= 100.0;
+  particle->scalars[0] *= 10.0;
   particle->scalars[1] = flow_field_[4][index_000] * ratio_111 + flow_field_[4][index_001] * ratio_110
                        + flow_field_[4][index_010] * ratio_101 + flow_field_[4][index_011] * ratio_100
                        + flow_field_[4][index_100] * ratio_011 + flow_field_[4][index_101] * ratio_010
@@ -471,7 +522,7 @@ void Simulator::fillParticleScalars(Particle* particle) const
       && lower_bound[1] < int(region_bound_[3] - region_bound_[2]) - 1
       && lower_bound[2] < int(region_bound_[5] - region_bound_[4]) - 1))
   {
-    std::cout << particle->scalars[0] << std::endl;
+//    std::cout << particle->scalars[0] << std::endl;
   }
   assert(lower_bound[0] < int(region_bound_[1] - region_bound_[0]) - 1
       && lower_bound[1] < int(region_bound_[3] - region_bound_[2]) - 1
@@ -630,7 +681,10 @@ void Simulator::writeToFile()
   ps1.insert(ps1.end(), inc_particles_current_.begin(), inc_particles_current_.end());
   ps2.insert(ps2.end(), inc_particles_next_.begin(), inc_particles_next_.end());
   assert(ps1.size() == ps2.size());
-  write(ps1, ps2);
+
+//  write(ps1, ps2);
+  sendtoinsitu(ps1, ps2);
+
   particles_current_ = ps2;
 }
 
@@ -655,6 +709,55 @@ std::vector<int> Simulator::getNeighborRanks() const
 
 bool Simulator::read(int timestep)
 {
+  int gsizes[3], psizes[3], lsizes[3], dims[3], periods[3], start_indices[3], local_array_size;
+  MPI_Datatype filetype;
+  MPI_File fh;
+  MPI_Status status;
+
+  gsizes[0] = global_size_[0];
+  gsizes[1] = global_size_[1];
+  gsizes[2] = global_size_[2];
+
+  psizes[0] = region_count_[0]; // no. of processes in vertical dimension
+  psizes[1] = region_count_[1]; // no. of processes in horizontal dimension
+  psizes[2] = region_count_[2];
+
+  lsizes[0] = gsizes[0] / psizes[0];
+  lsizes[1] = gsizes[1] / psizes[1];
+  lsizes[2] = gsizes[2] / psizes[2];
+  local_array_size = lsizes[0] * lsizes[1] * lsizes[2];
+
+  start_indices[0] = region_index_[0] * lsizes[0];
+  start_indices[1] = region_index_[1] * lsizes[1];
+  start_indices[2] = region_index_[2] * lsizes[2];
+
+  MPI_Type_create_subarray(3, gsizes, lsizes, start_indices, MPI_ORDER_FORTRAN, MPI_FLOAT, &filetype);
+  MPI_Type_commit(&filetype);
+
+  char timestep_string[10];
+  sprintf(timestep_string, "%4d", timestep);
+
+  for (int i = 0; i < 6; ++i)
+  {
+    std::string filename = root_ + in_attributes_[i] + timestep_string + ".dat";
+//    std::cout << filename << i << std::endl;
+    char* cfile = &filename[0];
+    if (flow_field_[i])
+      delete [] flow_field_[i];
+    flow_field_[i] = new float [local_array_size];
+
+    MPI_File_open(MPI_COMM_WORLD, cfile, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+    MPI_File_set_view(fh, 0, MPI_FLOAT, filetype, "native", MPI_INFO_NULL);
+
+//    std::cout << "begin" << std::endl;
+    MPI_File_read_all(fh, flow_field_[i], local_array_size, MPI_FLOAT, &status);
+//    std::cout << "end" << std::endl;
+
+    MPI_File_close(&fh);
+  }
+
+
+/*
   char timestep_string[10];
   sprintf(timestep_string, "%4d", timestep);
   int region_rank = regionIndexToRank(region_index_);
@@ -677,6 +780,7 @@ bool Simulator::read(int timestep)
     fin.read(reinterpret_cast<char *>(flow_field_[i]),
              region_size[0] * region_size[1] * region_size[2] * sizeof(float));
   }
+*/
   return true;
 }
 
@@ -753,4 +857,46 @@ bool Simulator::write(const std::vector<Particle>& particles1, const std::vector
   delete [] id1;
   delete [] id2;
   return true;
+}
+
+bool Simulator::sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2)
+{
+  std::vector<tube::Particle> p1 = translatetotubeparticle(particles1);
+  std::vector<tube::Particle> p2 = translatetotubeparticle(particles2);
+
+  static bool first_time = true;
+  if (first_time)
+  {
+    first_time = false;
+    coretube_.SetCameras(config_reader_.GetCameras());
+    coretube_.SetLightPosition(config_reader_.GetLightPosition());
+    double extent[6];
+    for (int i = 0; i < 6; ++i)
+      extent[i] = region_bound_[i];
+    coretube_.SetExtent(extent);
+  }
+
+  clock_t start, end, tick;
+  start = clock();
+  coretube_.GenerateTubes(p1, p2);
+  end = clock();
+  tick = end - start;
+  int milli = double(tick) / CLOCKS_PER_SEC * 1000.0;
+  times_.push_back(milli);
+
+  return true;
+}
+
+std::vector<tube::Particle> Simulator::translatetotubeparticle(const std::vector<Particle>& particles) const
+{
+  std::vector<tube::Particle> ret(particles.size());
+  for (unsigned int i = 0; i < particles.size(); ++i)
+  {
+    ret[i].x = particles[i].position[0];
+    ret[i].y = particles[i].position[1];
+    ret[i].z = particles[i].position[2];
+    ret[i].pd = particles[i].scalars[0];
+    ret[i].id = particles[i].tube_id;
+  }
+  return ret;
 }

@@ -1,8 +1,13 @@
 #ifndef __Simulator_h_
 #define __Simulator_h_
 
+#include <cstdlib>
 #include <string>
 #include <vector>
+
+#include "Particle.h"
+#include "ConfigReader.h"
+#include "CoreTube.h"
 
 class Particle
 {
@@ -20,7 +25,8 @@ public:
   ~Simulator();
 
   void simulate(int particle_count);
-
+ 
+  void set_global_size(int global_size[3]);
   void set_region_count(int region_count[3]);
   void set_region_index(int region_index[3]);
   void set_region_bound(float region_bound[6]);
@@ -30,6 +36,7 @@ public:
   void set_velocity(float velocity);
 
 protected:
+  int global_size_[3];
   int region_count_[3];
   int region_index_[3];
   float region_bound_[6]; // xmin, xmax, ymin, ymax, zmin, zmax
@@ -48,6 +55,9 @@ protected:
   std::vector<Particle> leaving_particles_next_;
   std::vector<Particle> inc_particles_current_;
   std::vector<Particle> inc_particles_next_;
+  ConfigReader config_reader_;
+  CoreTube coretube_;
+  std::vector<int> times_;
 
   void initializeParticles(int particle_count);
   int regionIndexToRank(const int region_index[3]) const;
@@ -63,6 +73,8 @@ protected:
   std::vector<int> getNeighborRanks() const;
   bool read(int timestep);
   bool write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const;
+  bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
+  std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;
 };
 
 #endif

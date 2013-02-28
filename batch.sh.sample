@@ -1,0 +1,9 @@
+#!/bin/bash
+#SBATCH -J simulator
+#SBATCH -o cout.o%j
+#SBATCH -e cout.e%j
+#SBATCH -n 4096
+#SBATCH -p normal
+#SBATCH -t 03:00:00
+export LD_LIBRARY_PATH=$MESA/lib:$LD_LIBRARY_PATH
+ibrun LD_LIBRARY_PATH=$MESA/lib:$LD_LIBRARY_PATH ./simulate
