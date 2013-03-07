@@ -121,11 +121,14 @@ Simulator::~Simulator()
 void Simulator::simulate(int particle_count)
 {
   current_timestep_ = timestep_range_[0];
-  assert(read(current_timestep_));
-  initializeParticles(particle_count);
-
   // use the begin timestep flow field to do streamline
-  assert(read(timestep_range_[0]));
+  READ_ERROR read_error = read(current_timestep_);
+  if (read_error != READ_SUCCESS)
+  {
+    printReadError(read_error);
+    return;
+  }
+  initializeParticles(particle_count);
 
   out_timestep_ = 0;
   for (current_timestep_ = timestep_range_[0] + 1;
@@ -413,51 +416,6 @@ void Simulator::getParticleVelocity(const Particle& particle, float velocity3[3]
                + flow_field_[2][index_010] * ratio_101 + flow_field_[2][index_011] * ratio_100
                + flow_field_[2][index_100] * ratio_011 + flow_field_[2][index_101] * ratio_010
                + flow_field_[2][index_110] * ratio_001 + flow_field_[2][index_111] * ratio_000;
-/*
-  float region_size[3] = {region_bound_[1] - region_bound_[0],
-                          region_bound_[3] - region_bound_[2],
-                          region_bound_[5] - region_bound_[4]};
-  float SIZE_X = region_size[0];
-  float SIZE_Y = region_size[1];
-  float SIZE_Z = region_size[2];
-  int floor[3];
-  floor[0] = int(particle.position[0] - region_bound_[0]);
-  floor[1] = int(particle.position[1] - region_bound_[2]);
-  floor[2] = int(particle.position[2] - region_bound_[4]);
-  floor[0] = std::min(int(region_bound_[1] - region_bound_[0]) - 2, floor[0]);
-  floor[1] = std::min(int(region_bound_[3] - region_bound_[2]) - 2, floor[1]);
-  floor[2] = std::min(int(region_bound_[5] - region_bound_[4]) - 2, floor[2]);
-  float ratio[3];
-  for (int i = 0; i < 3; ++i)
-    ratio[i] = particle.position[i] - float(floor[i]);
-  for (int i = 0; i < 3; ++i)
-  {
-    // z
-    int index[8];
-    index[0] = floor[2] * SIZE_X * SIZE_Y + floor[1] * SIZE_X + floor[0];
-    index[1] = floor[2] * SIZE_X * SIZE_Y + floor[1] * SIZE_X + floor[0] + 1;
-    index[2] = floor[2] * SIZE_X * SIZE_Y + (floor[1] + 1) * SIZE_X + floor[0];
-    index[3] = floor[2] * SIZE_X * SIZE_Y + (floor[1] + 1) * SIZE_X + floor[0] + 1;
-    index[4] = (floor[2] + 1) * SIZE_X * SIZE_Y + floor[1] * SIZE_X + floor[0];
-    index[5] = (floor[2] + 1) * SIZE_X * SIZE_Y + floor[1] * SIZE_X + floor[0] + 1;
-    index[6] = (floor[2] + 1) * SIZE_X * SIZE_Y + (floor[1] + 1) * SIZE_X + floor[0];
-    index[7] = (floor[2] + 1) * SIZE_X * SIZE_Y + (floor[1] + 1) * SIZE_X + floor[0] + 1;
-    float xyz[8];
-    for (int j = 0; j < 8; ++j)
-      xyz[j] = flow_field_[i][index[j]];
-    float xy[4];
-    xy[0] = xyz[0] * (1 - ratio[2]) + xyz[4] * ratio[2];
-    xy[1] = xyz[1] * (1 - ratio[2]) + xyz[5] * ratio[2];
-    xy[2] = xyz[2] * (1 - ratio[2]) + xyz[6] * ratio[2];
-    xy[3] = xyz[3] * (1 - ratio[2]) + xyz[7] * ratio[2];
-    // y
-    float x[2];
-    x[0] = xy[0] * (1 - ratio[1]) + xy[2] * ratio[1];
-    x[1] = xy[1] * (1 - ratio[1]) + xy[3] * ratio[1];
-    // x
-    velocity3[i] = x[0] * (1 - ratio[0]) + x[1] * ratio[0];
-  }
-*/
 }
 
 void Simulator::fillParticleScalars(Particle* particle) const
@@ -702,7 +660,20 @@ std::vector<int> Simulator::getNeighborRanks() const
   return ranks;
 }
 
-bool Simulator::read(int timestep)
+void Simulator::printReadError(READ_ERROR read_error) const
+{
+  switch (read_error)
+  {
+  case RAW_FAIL:
+    std::cout << "Error: failed to read raw flow field files!" << std::endl;
+    break;
+  case HDF5_FAIL:
+    std::cout << "Error: falied to read flow field file!" << std::endl;
+    break;
+  }
+}
+
+Simulator::READ_ERROR Simulator::read(int timestep)
 {
   if (config_reader_.GetFileFormat() == "hdf5")
   {
@@ -716,7 +687,7 @@ bool Simulator::read(int timestep)
                         region_index_, region_count_,
                         attributes, attribute_count,
                         flow_field_);
-    return (ret == 1) ? true : false;
+    return (ret == 1) ? READ_SUCCESS : HDF5_FAIL;
   }
 
   // default to read raw folder format, which means when the file format is not specified in the configure.txt file, raw format is assumed.
@@ -757,17 +728,19 @@ bool Simulator::read(int timestep)
         delete [] flow_field_[i];
       flow_field_[i] = new float [local_array_size];
   
-      MPI_File_open(MPI_COMM_WORLD, cfile, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+      int error_code = MPI_File_open(MPI_COMM_WORLD, cfile, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+      if (error_code != MPI_SUCCESS)
+        return RAW_FAIL;
       MPI_File_set_view(fh, 0, MPI_FLOAT, filetype, const_cast<char *>("native"), MPI_INFO_NULL);
 
       MPI_File_read_all(fh, flow_field_[i], local_array_size, MPI_FLOAT, &status);
 
       MPI_File_close(&fh);
     }
-    return true;
+    return READ_SUCCESS;
   }
 
-  return true;
+  return READ_SUCCESS;
 }
 
 bool Simulator::write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const

@@ -59,6 +59,8 @@ protected:
   CoreTube coretube_;
   std::vector<int> times_;
 
+  enum READ_ERROR {READ_SUCCESS, RAW_FAIL, HDF5_FAIL};
+
   void initializeParticles(int particle_count);
   int regionIndexToRank(const int region_index[3]) const;
   void rankToRegionIndex(int rank, int region_index[3]) const;
@@ -71,7 +73,8 @@ protected:
   void communicateWithNeighbors();
   void writeToFile();
   std::vector<int> getNeighborRanks() const;
-  bool read(int timestep);
+  void printReadError(READ_ERROR read_error) const;
+  READ_ERROR read(int timestep);
   bool write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const;
   bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
   std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;
