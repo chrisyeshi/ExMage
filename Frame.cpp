@@ -207,7 +207,7 @@ bool Frame::Read()
   Camera.ViewUp = Vector(cam[6], cam[7], cam[8]);
   fin.read(reinterpret_cast<char *>(Domain), sizeof(double) * 6);
   fin.read(reinterpret_cast<char *>(&Size[0]), sizeof(int) * 2);
-  int num_element = Size[0] * Size[1];
+//  int num_element = Size[0] * Size[1];
   fin.close();
   // depth
   PNGReader depth_reader(FileName + "_depth.png");

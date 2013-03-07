@@ -28,9 +28,9 @@ int main(int argc, char* argv[])
   int REGION_COUNT_X = config.GetRegionCount()[0];
   int REGION_COUNT_Y = config.GetRegionCount()[1];
   int REGION_COUNT_Z = config.GetRegionCount()[2];
-  int TOTAL_REGION_COUNT = REGION_COUNT_X * REGION_COUNT_Y * REGION_COUNT_Z;
+//  int TOTAL_REGION_COUNT = REGION_COUNT_X * REGION_COUNT_Y * REGION_COUNT_Z;
   int REGION_PARTICLE_COUNT = config.GetRegionParticleCount();
-  int TOTAL_PARTICLE_COUNT = REGION_PARTICLE_COUNT * TOTAL_REGION_COUNT;
+//  int TOTAL_PARTICLE_COUNT = REGION_PARTICLE_COUNT * TOTAL_REGION_COUNT;
   const std::string& ROOT_DIRECTORY = config.GetReadRoot();
   const std::string& OUT_ROOT_DIRECTORY = config.GetOutRoot();
   int TIMESTEP_START = config.GetTimeStepRange()[0];

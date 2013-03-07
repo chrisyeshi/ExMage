@@ -692,7 +692,7 @@ Simulator::READ_ERROR Simulator::read(int timestep)
 
   // default to read raw folder format, which means when the file format is not specified in the configure.txt file, raw format is assumed.
   {
-    int gsizes[3], psizes[3], lsizes[3], dims[3], periods[3], start_indices[3], local_array_size;
+    int gsizes[3], psizes[3], lsizes[3], start_indices[3], local_array_size;
     MPI_Datatype filetype;
     MPI_File fh;
     MPI_Status status;
@@ -739,8 +739,6 @@ Simulator::READ_ERROR Simulator::read(int timestep)
     }
     return READ_SUCCESS;
   }
-
-  return READ_SUCCESS;
 }
 
 bool Simulator::write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const
