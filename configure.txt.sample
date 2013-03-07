@@ -4,8 +4,11 @@ light position
 time step range
 1403 1420
 
+file format
+hdf5
+
 read root
-/home/chrisyeshi/v/supernova_down/cube300
+/home/chrisyeshi/v/supernova_down/supernova300.h5
 
 out root
 /home/chrisyeshi/flowsimulate/output
@@ -22,7 +25,7 @@ region count
 2 2 2
 
 region particle count
-10
+5
 
 velocity
 4.0
@@ -35,3 +38,19 @@ tube radius
 
 max particle gap
 5.0
+
+input attributes
+xvelocity
+yvelocity
+zvelocity
+entropy
+density
+pressure
+
+output attributes
+x
+y
+zkjkjk
+entropy
+density
+pressure

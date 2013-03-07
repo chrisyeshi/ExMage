@@ -1,4 +1,6 @@
-CC			= /home/chrisyeshi/Libs/mpich2-1.4.1p1/install/bin/mpic++
+#CC			= /home/chrisyeshi/Libs/mpich2-1.4.1p1/install/bin/mpic++
+CC		= mpic++
+C		= h5pcc
 DEBUG		= 
 MESA		= $(HOME)/Libs/Mesa-8.0.2
 
@@ -7,13 +9,13 @@ MESA_INCLUDE	= -I$(MESA)/include
 INCLUDES	= $(MESA_INCLUDE)
 
 OBJLIBS		= Geometry/geometry.a
-LIBS		= -lOSMesa -lGLU -lpng -lz
+LIBS		= -lOSMesa -lGLU -lpng -lz -lhdf5
 
 //MESALIBPATH	= -L/opt/apps/intel13/mvapich2_1_9/visit/current/linux-x86_64/lib
 MESALIBPATH	= -L$(MESA)/lib
 LIBPATHS	= $(MESALIBPATH)
 
-OBJS		= main.o PNGReader.o PNGWriter.o Frame.o CoreTube.o TransferFunction.o ConfigReader.o Simulator.o
+OBJS		= main.o PNGReader.o PNGWriter.o Frame.o CoreTube.o TransferFunction.o ConfigReader.o Simulator.o cread.o
 
 
 
@@ -47,6 +49,9 @@ TransferFunction.o : TransferFunction.cpp TransferFunction.h
 
 ConfigReader.o : ConfigReader.cpp ConfigReader.h
 	$(CC) $(DEBUG) $(INCLUDES) -c ConfigReader.cpp
+
+cread.o: cread.c
+	$(C) $(DEBUG) $(INCLUDES) -c cread.c
 
 $(OBJLIBS) : force_look
 	cd Geometry; $(MAKE) $(MFLAGS)

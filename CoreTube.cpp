@@ -628,7 +628,7 @@ void CoreTube::snapshot()
   // normal
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 1 + 1]);
   unsigned char* normal = new unsigned char [WINDOW_WIDTH * WINDOW_HEIGHT * 4];
-  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, normal);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_BYTE, normal);
   Frames[CurCamIndex]->SetNormalMap(normal);
   delete [] normal;
   // mf

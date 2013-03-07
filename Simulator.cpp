@@ -14,6 +14,13 @@
 #include "Particle.h"
 #include "Frame.h"
 
+extern "C" {
+  int readData(const char* filename,
+                int region_index[3], int region_count[3],
+                char attributes[][50], int attribute_count,
+                float* flow_field[6]);
+}
+
 #define TAG_TIMESTEP 1
 #define TAG_TIMESTEP_DATA 2
 
@@ -98,24 +105,12 @@ Simulator::Simulator()
   for (int i = 0; i < 6; ++i)
     flow_field_[i] = NULL;
 
-  in_attributes_.resize(6);
-  in_attributes_[0] = "xvelocity";
-  in_attributes_[1] = "yvelocity";
-  in_attributes_[2] = "zvelocity";
-  in_attributes_[3] = "entropy";
-  in_attributes_[4] = "density";
-  in_attributes_[5] = "temperature";
-
-  out_attributes_.resize(6);
-  out_attributes_[0] = "x";
-  out_attributes_[1] = "y";
-  out_attributes_[2] = "z";
-  out_attributes_[3] = "entropy";
-  out_attributes_[4] = "density";
-  out_attributes_[5] = "temperature";
-
   config_reader_.SetFileName("configure.txt");
   assert(config_reader_.Read());
+
+  in_attributes_ = config_reader_.GetInputAttributes();
+  out_attributes_ = config_reader_.GetOutputAttributes();
+  assert(in_attributes_.size() > 0 && in_attributes_.size() == out_attributes_.size());
 }
 
 Simulator::~Simulator()
@@ -126,7 +121,7 @@ Simulator::~Simulator()
 void Simulator::simulate(int particle_count)
 {
   current_timestep_ = timestep_range_[0];
-  read(current_timestep_);
+  assert(read(current_timestep_));
   initializeParticles(particle_count);
 
   // use the begin timestep flow field to do streamline
@@ -709,77 +704,69 @@ std::vector<int> Simulator::getNeighborRanks() const
 
 bool Simulator::read(int timestep)
 {
-  int gsizes[3], psizes[3], lsizes[3], dims[3], periods[3], start_indices[3], local_array_size;
-  MPI_Datatype filetype;
-  MPI_File fh;
-  MPI_Status status;
-
-  gsizes[0] = global_size_[0];
-  gsizes[1] = global_size_[1];
-  gsizes[2] = global_size_[2];
-
-  psizes[0] = region_count_[0]; // no. of processes in vertical dimension
-  psizes[1] = region_count_[1]; // no. of processes in horizontal dimension
-  psizes[2] = region_count_[2];
-
-  lsizes[0] = gsizes[0] / psizes[0];
-  lsizes[1] = gsizes[1] / psizes[1];
-  lsizes[2] = gsizes[2] / psizes[2];
-  local_array_size = lsizes[0] * lsizes[1] * lsizes[2];
-
-  start_indices[0] = region_index_[0] * lsizes[0];
-  start_indices[1] = region_index_[1] * lsizes[1];
-  start_indices[2] = region_index_[2] * lsizes[2];
-
-  MPI_Type_create_subarray(3, gsizes, lsizes, start_indices, MPI_ORDER_FORTRAN, MPI_FLOAT, &filetype);
-  MPI_Type_commit(&filetype);
-
-  char timestep_string[10];
-  sprintf(timestep_string, "%4d", timestep);
-
-  for (int i = 0; i < 6; ++i)
+  if (config_reader_.GetFileFormat() == "hdf5")
   {
-    std::string filename = root_ + "/" + in_attributes_[i] + timestep_string + ".dat";
-    char* cfile = &filename[0];
-    if (flow_field_[i])
-      delete [] flow_field_[i];
-    flow_field_[i] = new float [local_array_size];
-
-    MPI_File_open(MPI_COMM_WORLD, cfile, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-    MPI_File_set_view(fh, 0, MPI_FLOAT, filetype, const_cast<char *>("native"), MPI_INFO_NULL);
-
-//    std::cout << "begin" << std::endl;
-    MPI_File_read_all(fh, flow_field_[i], local_array_size, MPI_FLOAT, &status);
-//    std::cout << "end" << std::endl;
-
-    MPI_File_close(&fh);
+    std::string filename = root_;
+    const std::vector<std::string>& input_attributes = config_reader_.GetInputAttributes();
+    int attribute_count = input_attributes.size();
+    char attributes[attribute_count][50];
+    for (int i = 0; i < attribute_count; ++i)
+      sprintf(attributes[i], "%s", input_attributes[i].c_str());
+    int ret =  readData(filename.c_str(),
+                        region_index_, region_count_,
+                        attributes, attribute_count,
+                        flow_field_);
+    return (ret == 1) ? true : false;
   }
 
-
-/*
-  char timestep_string[10];
-  sprintf(timestep_string, "%4d", timestep);
-  int region_rank = regionIndexToRank(region_index_);
-  char region_rank_string[20];
-  sprintf(region_rank_string, "region_%03d/", region_rank);
-  for (int i = 0; i < 6; ++i)
+  // default to read raw folder format, which means when the file format is not specified in the configure.txt file, raw format is assumed.
   {
-    std::string filename = root_ + region_rank_string + in_attributes_[i]
-                         + "/" + in_attributes_[i] + timestep_string + ".dat";
-    std::ifstream fin;
-    fin.open(filename.c_str(), std::ifstream::in | std::ifstream::binary);
-    if (!fin.good())
-      return false;
-    if (flow_field_[i])
-      delete [] flow_field_[i];
-    int region_size[3] = {int(region_bound_[1] - region_bound_[0] + 0.5),
-                          int(region_bound_[3] - region_bound_[2] + 0.5),
-                          int(region_bound_[5] - region_bound_[4] + 0.5)};
-    flow_field_[i] = new float [region_size[0] * region_size[1] * region_size[2]];
-    fin.read(reinterpret_cast<char *>(flow_field_[i]),
-             region_size[0] * region_size[1] * region_size[2] * sizeof(float));
+    int gsizes[3], psizes[3], lsizes[3], dims[3], periods[3], start_indices[3], local_array_size;
+    MPI_Datatype filetype;
+    MPI_File fh;
+    MPI_Status status;
+
+    gsizes[0] = global_size_[0];
+    gsizes[1] = global_size_[1];
+    gsizes[2] = global_size_[2];
+
+    psizes[0] = region_count_[0]; // no. of processes in vertical dimension
+    psizes[1] = region_count_[1]; // no. of processes in horizontal dimension
+    psizes[2] = region_count_[2];
+
+    lsizes[0] = gsizes[0] / psizes[0];
+    lsizes[1] = gsizes[1] / psizes[1];
+    lsizes[2] = gsizes[2] / psizes[2];
+    local_array_size = lsizes[0] * lsizes[1] * lsizes[2];
+
+    start_indices[0] = region_index_[0] * lsizes[0];
+    start_indices[1] = region_index_[1] * lsizes[1];
+    start_indices[2] = region_index_[2] * lsizes[2];
+
+    MPI_Type_create_subarray(3, gsizes, lsizes, start_indices, MPI_ORDER_FORTRAN, MPI_FLOAT, &filetype);
+    MPI_Type_commit(&filetype);
+
+    char timestep_string[10];
+    sprintf(timestep_string, "%4d", timestep);
+
+    for (int i = 0; i < 6; ++i)
+    {
+      std::string filename = root_ + "/" + in_attributes_[i] + timestep_string + ".dat";
+      char* cfile = &filename[0];
+      if (flow_field_[i])
+        delete [] flow_field_[i];
+      flow_field_[i] = new float [local_array_size];
+  
+      MPI_File_open(MPI_COMM_WORLD, cfile, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+      MPI_File_set_view(fh, 0, MPI_FLOAT, filetype, const_cast<char *>("native"), MPI_INFO_NULL);
+
+      MPI_File_read_all(fh, flow_field_[i], local_array_size, MPI_FLOAT, &status);
+
+      MPI_File_close(&fh);
+    }
+    return true;
   }
-*/
+
   return true;
 }
 

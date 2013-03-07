@@ -34,6 +34,9 @@ public:
   const int* GetResolution() const {return Resolution;};
   float GetTubeRadius() const {return TubeRadius;};
   float GetMaxParticleGap() const {return MaxParticleGap;};
+  const std::vector<std::string>& GetInputAttributes() const {return InputAttributes;}
+  const std::vector<std::string>& GetOutputAttributes() const {return OutputAttributes;}
+  const std::string& GetFileFormat() const {return FileFormat;}
 
 protected:
   std::fstream fin;
@@ -50,6 +53,9 @@ protected:
   int Resolution[2];
   float TubeRadius;
   float MaxParticleGap;
+  std::vector<std::string> InputAttributes;
+  std::vector<std::string> OutputAttributes;
+  std::string FileFormat;
 
   bool readCamera();
   bool readLightPosition();
@@ -63,6 +69,9 @@ protected:
   bool readResolution();
   bool readTubeRadius();
   bool readMaxParticleGap();
+  bool readInputAttributes();
+  bool readOutputAttributes();
+  bool readFileFormat();
 
   bool readPoint(Point* pt);
   bool readVector(Vector* vec);

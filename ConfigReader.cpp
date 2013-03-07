@@ -129,6 +129,23 @@ bool ConfigReader::Read()
       continue;
     }
 
+    if (line == "input attributes")
+    {
+      if (!readInputAttributes()) return false;
+      continue;
+    }
+
+    if (line == "output attributes")
+    {
+      if (!readOutputAttributes()) return false;
+      continue;
+    }
+
+    if (line == "file format")
+    {
+      if (!readFileFormat()) return false;
+      continue;
+    }
   }
 
   fin.close();
@@ -260,6 +277,42 @@ bool ConfigReader::readMaxParticleGap()
   std::stringstream oss;
   oss.str(line);
   oss >> MaxParticleGap;
+  return true;
+}
+
+bool ConfigReader::readInputAttributes()
+{
+  if (!fin.good())
+    return false;
+  std::string line;
+  while (std::getline(fin, line))
+  {
+    if (line == "") break;
+    InputAttributes.push_back(line);
+  }
+  
+  return true;
+}
+
+bool ConfigReader::readOutputAttributes()
+{
+  if (!fin.good())
+    return false;
+  std::string line;
+  while (std::getline(fin, line))
+  {
+    if (line == "") break;
+    OutputAttributes.push_back(line);
+  }
+  
+  return true;
+}
+
+bool ConfigReader::readFileFormat()
+{
+  if (!fin.good())
+    return false;
+  std::getline(fin, FileFormat);
   return true;
 }
 
