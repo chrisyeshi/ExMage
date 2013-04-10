@@ -1,5 +1,250 @@
 #include "ConfigReader.h"
 
+#include <fstream>
+
+ConfigReader::ConfigReader(const std::string& filename)
+{
+    std::ifstream fin(filename.c_str());
+    fin >> v;
+}
+
+std::vector<CameraCore> ConfigReader::GetCameras() const
+{
+    std::vector<CameraCore> ret;
+
+    picojson::value camera = v.get("camera");
+    if (camera.is<picojson::null>())
+    {
+        std::cout << "Warning: No Camera Found!" << std::endl;
+        return ret;
+    }
+    picojson::array campos = camera.get("position").get<picojson::array>();
+    picojson::array camfoc = camera.get("focal").get<picojson::array>();
+    picojson::array viewup = camera.get("up").get<picojson::array>();
+
+    Point camPos;
+    camPos.x = campos[0].get<double>();
+    camPos.y = campos[1].get<double>();
+    camPos.z = campos[2].get<double>();
+
+    Point camFoc;
+    camFoc.x = camfoc[0].get<double>();
+    camFoc.y = camfoc[1].get<double>();
+    camFoc.z = camfoc[2].get<double>();
+
+    Vector viewUp;
+    viewUp.x = viewup[0].get<double>();
+    viewUp.y = viewup[1].get<double>();
+    viewUp.z = viewup[2].get<double>();
+
+    CameraCore cam;
+    cam.Position = camPos;
+    cam.Focal = camFoc;
+    cam.ViewUp = viewUp;
+
+    ret.push_back(cam);
+    return ret;
+}
+
+Point ConfigReader::GetLightPosition() const
+{
+    if (!v.contains("light position"))
+    {
+        std::cout << "Warning: Using default light position!" << std::endl;
+        Point empty;
+        return empty;
+    }
+
+    Point ret;
+    picojson::array litposa = v.get("light position").get<picojson::array>();
+    ret.x = litposa[0].get<double>();
+    ret.y = litposa[1].get<double>();
+    ret.z = litposa[2].get<double>();
+    
+    return ret;
+}
+
+std::vector<int> ConfigReader::GetTimeStepRange() const
+{
+    if (!v.contains("time step range"))
+    {
+        std::cout << "Warning: No time step range found!" << std::endl;
+        std::vector<int> ret(2);
+        ret[0] = ret[1] = 0;
+        return ret;
+    }
+
+    std::vector<int> ret(2);
+    picojson::array tsa = v.get("time step range").get<picojson::array>();
+    ret[0] = tsa[0].get<double>();
+    ret[1] = tsa[1].get<double>();
+
+    return ret;
+}
+
+std::string ConfigReader::GetReadRoot() const
+{
+    if (!v.contains("read root"))
+    {
+        std::cout << "Warning: Using the current directory as the read root!" << std::endl;
+        return "";
+    }
+
+    return v.get("read root").get<std::string>();
+}
+
+std::string ConfigReader::GetOutRoot() const
+{
+    if (!v.contains("out root"))
+    {
+        std::cout << "Warning: Using the current/output directory as the output directory!" << std::endl;
+        return "output";
+    }
+
+    return v.get("out root").get<std::string>();
+}
+
+std::vector<int> ConfigReader::GetTotalSize() const
+{
+    if (!v.contains("total size"))
+    {
+        std::cout << "Warning: Missing total size!" << std::endl;
+        std::vector<int> ret(3);
+        return ret;
+    }
+
+    picojson::array tsa = v.get("total size").get<picojson::array>();
+    std::vector<int> ret(3);
+    for (unsigned int i = 0; i < ret.size(); ++i)
+        ret[i] = tsa[i].get<double>();
+
+    return ret;
+}
+
+std::vector<int> ConfigReader::GetRegionCount() const
+{
+    if (!v.contains("region count"))
+    {
+        std::cout << "Warning: Missing region count!" << std::endl;
+        std::vector<int> ret(3);
+        ret[0] = ret[1] = ret[2] = 2;
+        return ret;
+    }
+
+    picojson::array rca = v.get("region count").get<picojson::array>();
+    std::vector<int> ret(3);
+    for (unsigned int i = 0; i < ret.size(); ++i)
+        ret[i] = rca[i].get<double>();
+
+    return ret;
+}
+
+int ConfigReader::GetRegionParticleCount() const
+{
+    if (!v.contains("region particle count"))
+    {
+        std::cout << "Warning: Using default region particle count!" << std::endl;
+        return 1;
+    }
+
+    return v.get("region particle count").get<double>();
+}
+
+double ConfigReader::GetVelocity() const
+{
+    if (!v.contains("velocity"))
+    {
+        std::cout << "Warning: Using default velocity!" << std::endl;
+        return 1.0;
+    }
+
+    return v.get("velocity").get<double>();
+}
+
+std::vector<int> ConfigReader::GetResolution() const
+{
+    if (!v.contains("resolution"))
+    {
+        std::cout << "Warning: Using default resolution, 512x512!" << std::endl;
+        std::vector<int> ret(2);
+        ret[0] = ret[1] = 512;
+        return ret;
+    }
+
+    picojson::array ra = v.get("resolution").get<picojson::array>();
+    std::vector<int> ret(2);
+    for (unsigned int i = 0; i < ret.size(); ++i)
+        ret[i] = ra[i].get<double>();
+
+    return ret;
+}
+
+double ConfigReader::GetTubeRadius() const
+{
+    if (!v.contains("tube radius"))
+    {
+        std::cout << "Warning: Using default tube radius, 1.0!" << std::endl;
+        return 1.0;
+    }
+
+    return v.get("tube radius").get<double>();
+}
+
+double ConfigReader::GetMaxParticleGap() const
+{
+    if (!v.contains("max particle gap"))
+    {
+        std::cout << "Warning: Using 2xtube radius as max particle gap!" << std::endl;
+        return 2.0 * GetTubeRadius();
+    }
+
+    return v.get("max particle gap").get<double>();
+}
+
+std::vector<std::string> ConfigReader::GetInputAttributes() const
+{
+    if (!v.contains("input attributes"))
+    {
+        std::cout << "Warning: No input attributes!" << std::endl;
+        return std::vector<std::string>();
+    }
+
+    picojson::array iaa = v.get("input attributes").get<picojson::array>();
+    std::vector<std::string> ret(iaa.size());
+    for (unsigned int i = 0; i < iaa.size(); ++i)
+        ret[i] = iaa[i].get<std::string>();
+
+    return ret;
+}
+
+std::vector<std::string> ConfigReader::GetOutputAttributes() const
+{
+    if (!v.contains("output attributes"))
+    {
+        std::cout << "Warning: No output attributes!" << std::endl;
+        return std::vector<std::string>();
+    }
+
+    picojson::array oaa = v.get("output attributes").get<picojson::array>();
+    std::vector<std::string> ret(oaa.size());
+    for (unsigned int i = 0; i < oaa.size(); ++i)
+        ret[i] = oaa[i].get<std::string>();
+
+    return ret;
+}
+
+std::string ConfigReader::GetFileFormat() const
+{
+    if (!v.contains("file format"))
+    {
+        std::cout << "Warning: Using raw has default file format!" << std::endl;
+        return "raw";
+    }
+
+    return v.get("file format").get<std::string>();
+}
+
+/*
 #include <sstream>
 
 ConfigReader::ConfigReader()
@@ -339,3 +584,4 @@ bool ConfigReader::readVector(Vector* vec)
   oss >> vec->x >> vec->y >> vec->z;
   return true;
 }
+*/

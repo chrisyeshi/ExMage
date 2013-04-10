@@ -13,6 +13,7 @@
 #include "mpi.h"
 #include "Particle.h"
 #include "Frame.h"
+#include "ConfigReader.h"
 
 extern "C" {
   int readData(const char* filename,
@@ -105,11 +106,10 @@ Simulator::Simulator()
   for (int i = 0; i < 6; ++i)
     flow_field_[i] = NULL;
 
-  config_reader_.SetFileName("configure.txt");
-  assert(config_reader_.Read());
+  ConfigReader& config = ConfigReader::getInstance();
 
-  in_attributes_ = config_reader_.GetInputAttributes();
-  out_attributes_ = config_reader_.GetOutputAttributes();
+  in_attributes_ = config.GetInputAttributes();
+  out_attributes_ = config.GetOutputAttributes();
   assert(in_attributes_.size() > 0 && in_attributes_.size() == out_attributes_.size());
 }
 
@@ -675,10 +675,11 @@ void Simulator::printReadError(READ_ERROR read_error) const
 
 Simulator::READ_ERROR Simulator::read(int timestep)
 {
-  if (config_reader_.GetFileFormat() == "hdf5")
+  ConfigReader& config = ConfigReader::getInstance();
+  if (config.GetFileFormat() == "hdf5")
   {
     std::string filename = root_;
-    const std::vector<std::string>& input_attributes = config_reader_.GetInputAttributes();
+    std::vector<std::string> input_attributes = config.GetInputAttributes();
     int attribute_count = input_attributes.size();
     char attributes[attribute_count][50];
     for (int i = 0; i < attribute_count; ++i)
@@ -825,8 +826,9 @@ bool Simulator::sendtoinsitu(const std::vector<Particle>& particles1, const std:
   if (first_time)
   {
     first_time = false;
-    coretube_.SetCameras(config_reader_.GetCameras());
-    coretube_.SetLightPosition(config_reader_.GetLightPosition());
+    ConfigReader& config = ConfigReader::getInstance();
+    coretube_.SetCameras(config.GetCameras());
+    coretube_.SetLightPosition(config.GetLightPosition());
     double extent[6];
     for (int i = 0; i < 6; ++i)
       extent[i] = region_bound_[i];

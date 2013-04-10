@@ -24,6 +24,6 @@ enum Error {
 };
 
 // utility macros
-#define	abs(x)		((x) >= 0 ? x : -(x));
+//#define	abs(x)		((x) >= 0 ? x : -(x));
 
 #endif

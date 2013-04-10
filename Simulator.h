@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "Particle.h"
-#include "ConfigReader.h"
 #include "CoreTube.h"
 
 class Particle
@@ -55,7 +54,6 @@ protected:
   std::vector<Particle> leaving_particles_next_;
   std::vector<Particle> inc_particles_current_;
   std::vector<Particle> inc_particles_next_;
-  ConfigReader config_reader_;
   CoreTube coretube_;
   std::vector<int> times_;
 

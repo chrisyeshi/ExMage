@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
   srand(time(0) * rank);
 
   // read configure file
-  ConfigReader config("configure.txt");
+  ConfigReader& config = ConfigReader::getInstance();
   int TOTAL_SIZE_X = config.GetTotalSize()[0];
   int TOTAL_SIZE_Y = config.GetTotalSize()[1];
   int TOTAL_SIZE_Z = config.GetTotalSize()[2];

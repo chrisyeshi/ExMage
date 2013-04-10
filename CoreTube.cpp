@@ -135,7 +135,7 @@ Frame* CoreTube::GetFrame(const int index)
 
 void CoreTube::loadConfigureFile()
 {
-  ConfigReader config("configure.txt");
+  ConfigReader& config = ConfigReader::getInstance();
   WINDOW_WIDTH = config.GetResolution()[0];
   WINDOW_HEIGHT = config.GetResolution()[1];
   RADIUS = config.GetTubeRadius();
