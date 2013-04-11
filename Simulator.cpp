@@ -99,56 +99,70 @@ int mkpath(const char *path, mode_t mode)
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-Simulator::Simulator()
+Simulator::Simulator() : current_timestep_(0)
 {
-  current_timestep_ = 0;
-
-  for (int i = 0; i < 6; ++i)
-    flow_field_[i] = NULL;
-
-  ConfigReader& config = ConfigReader::getInstance();
-
-  in_attributes_ = config.GetInputAttributes();
-  out_attributes_ = config.GetOutputAttributes();
-  assert(in_attributes_.size() > 0 && in_attributes_.size() == out_attributes_.size());
 }
 
 Simulator::~Simulator()
 {
 }
 
-
-void Simulator::simulate(int particle_count)
+void Simulator::loadConfig()
 {
-  current_timestep_ = timestep_range_[0];
-  // use the begin timestep flow field to do streamline
-  READ_ERROR read_error = read(current_timestep_);
-  if (read_error != READ_SUCCESS)
-  {
-    printReadError(read_error);
-    return;
-  }
-  initializeParticles(particle_count);
+    ConfigReader& config = ConfigReader::getInstance();
 
-  out_timestep_ = 0;
-  for (current_timestep_ = timestep_range_[0] + 1;
-       current_timestep_ <= timestep_range_[1]; ++current_timestep_)
-  {
-    // read each time would result in a pathline
-//    if (!read(current_timestep_))
-//      continue;
-    std::cout << "Timestep: " << out_timestep_ << std::endl;
-    ++out_timestep_;
-    traceParticles();
-    communicateWithNeighbors();
-    writeToFile();
-    // clean up
-//    for (int i = 0; i < 6; ++i)
-//    {
-//      delete [] flow_field_[i];
-//      flow_field_[i] = NULL;
-//    }
-  }
+    for (int i = 0; i < 3; ++i)
+    {
+        global_size_[i] = config.GetTotalSize()[i];
+        region_count_[i] = config.GetRegionCount()[i];
+    }
+    root_ = config.GetReadRoot();
+    out_root_ = config.GetOutRoot();
+    for (int i = 0; i < 2; ++i)
+        timestep_range_[i] = config.GetTimeStepRange()[i];
+    velocity_ = config.GetVelocity();
+    
+    in_attributes_ = config.GetInputAttributes();
+    out_attributes_ = config.GetOutputAttributes();
+    assert(in_attributes_.size() > 0 && in_attributes_.size() == out_attributes_.size());
+
+    flow_field_.resize(numInAttr());
+    for (int i = 0; i < numInAttr(); ++i)
+        flow_field_[i] = NULL;
+}
+
+void Simulator::simulate()
+{
+    int particle_count = ConfigReader::getInstance().GetRegionParticleCount();
+    current_timestep_ = timestep_range_[0];
+    // use the begin timestep flow field to do streamline
+    READ_ERROR read_error = read(current_timestep_);
+    if (read_error != READ_SUCCESS)
+    {
+        printReadError(read_error);
+        return;
+    }
+    initializeParticles(particle_count);
+
+    out_timestep_ = 0;
+    for (current_timestep_ = timestep_range_[0] + 1;
+        current_timestep_ <= timestep_range_[1]; ++current_timestep_)
+    {
+        // read each time would result in a pathline
+        //    if (!read(current_timestep_))
+        //      continue;
+        std::cout << "Timestep: " << out_timestep_ << std::endl;
+        ++out_timestep_;
+        traceParticles();
+        communicateWithNeighbors();
+        writeToFile();
+        // clean up
+        //    for (int i = 0; i < 6; ++i)
+        //    {
+        //      delete [] flow_field_[i];
+        //      flow_field_[i] = NULL;
+        //    }
+    }
   // output frames
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -190,7 +204,7 @@ void Simulator::simulate(int particle_count)
     tout << times_[i] << ",";
   }
   // clean up
-  for (int i = 0; i < 6; ++i)
+  for (int i = 0; i < numInAttr(); ++i)
   {
     delete [] flow_field_[i];
     flow_field_[i] = NULL;
@@ -535,26 +549,25 @@ void Simulator::communicateWithNeighbors()
       std::vector<unsigned int> ps = map_rank_particles[neighbor_ranks[i]];
       int particle_count = ps.size();
       MPI_Send(&particle_count, 1, MPI_INT, neighbor_ranks[i], TAG_TIMESTEP, MPI_COMM_WORLD);
-      float* data = new float [particle_count * 6 * 2];
+      float* data = new float [particle_count * numInAttr() * 2];
       int* id = new int [particle_count * 2];
       for (int j = 0; j < particle_count; ++j)
       { // current
         Particle p1 = leaving_particles_current_[ps[j]];
         fillParticleScalars(&p1);
-        data[j * 6 * 2 + 0] = p1.position[0];
-        data[j * 6 * 2 + 1] = p1.position[1];
-        data[j * 6 * 2 + 2] = p1.position[2];
-        data[j * 6 * 2 + 3] = p1.scalars[0];
-        data[j * 6 * 2 + 4] = p1.scalars[1];
-        data[j * 6 * 2 + 5] = p1.scalars[2];
+        int inc = 0;
+        data[j * numInAttr() * 2 + inc++] = p1.position[0];
+        data[j * numInAttr() * 2 + inc++] = p1.position[1];
+        data[j * numInAttr() * 2 + inc++] = p1.position[2];
+        for (int k = 0; k < numScalar(); ++k)
+            data[j * numInAttr() * 2 + inc++] = p1.scalars[k];
         id[j * 2 + 0] = p1.tube_id;
         // next
-        data[j * 6 * 2 + 6] = leaving_particles_next_[ps[j]].position[0];
-        data[j * 6 * 2 + 7] = leaving_particles_next_[ps[j]].position[1];
-        data[j * 6 * 2 + 8] = leaving_particles_next_[ps[j]].position[2];
-        data[j * 6 * 2 + 9] = leaving_particles_next_[ps[j]].scalars[0];
-        data[j * 6 * 2 + 10] = leaving_particles_next_[ps[j]].scalars[1];
-        data[j * 6 * 2 + 11] = leaving_particles_next_[ps[j]].scalars[2];
+        data[j * numInAttr() * 2 + inc++] = leaving_particles_next_[ps[j]].position[0];
+        data[j * numInAttr() * 2 + inc++] = leaving_particles_next_[ps[j]].position[1];
+        data[j * numInAttr() * 2 + inc++] = leaving_particles_next_[ps[j]].position[2];
+        for (int k = 0; k < numScalar(); ++k)
+            data[j * numInAttr() * 2 + inc++] = leaving_particles_next_[ps[j]].scalars[k];
         id[j * 2 + 1] = leaving_particles_next_[ps[j]].tube_id;
       }
 //      std::cout << "    Rank: " << this_rank_region
@@ -675,24 +688,23 @@ void Simulator::printReadError(READ_ERROR read_error) const
 
 Simulator::READ_ERROR Simulator::read(int timestep)
 {
-  ConfigReader& config = ConfigReader::getInstance();
-  if (config.GetFileFormat() == "hdf5")
-  {
-    std::string filename = root_;
-    std::vector<std::string> input_attributes = config.GetInputAttributes();
-    int attribute_count = input_attributes.size();
-    char attributes[attribute_count][50];
-    for (int i = 0; i < attribute_count; ++i)
-      sprintf(attributes[i], "%s", input_attributes[i].c_str());
-    int ret =  readData(filename.c_str(),
-                        region_index_, region_count_,
-                        attributes, attribute_count,
-                        flow_field_);
-    return (ret == 1) ? READ_SUCCESS : HDF5_FAIL;
-  }
+    ConfigReader& config = ConfigReader::getInstance();
+    if (config.GetFileFormat() == "hdf5")
+    {
+        std::string filename = root_;
+        std::vector<std::string> input_attributes = config.GetInputAttributes();
+        int attribute_count = numInAttr();
+        char attributes[attribute_count][50];
+        for (int i = 0; i < attribute_count; ++i)
+            sprintf(attributes[i], "%s", input_attributes[i].c_str());
+        int ret =  readData(filename.c_str(),
+                            region_index_, region_count_,
+                            attributes, attribute_count,
+                            &flow_field_[0]);
+        return (ret == 1) ? READ_SUCCESS : HDF5_FAIL;
+    }
 
-  // default to read raw folder format, which means when the file format is not specified in the configure.txt file, raw format is assumed.
-  {
+    // default to read raw folder format, which means when the file format is not specified in the configure.txt file, raw format is assumed.
     int gsizes[3], psizes[3], lsizes[3], start_indices[3], local_array_size;
     MPI_Datatype filetype;
     MPI_File fh;
@@ -739,7 +751,6 @@ Simulator::READ_ERROR Simulator::read(int timestep)
       MPI_File_close(&fh);
     }
     return READ_SUCCESS;
-  }
 }
 
 bool Simulator::write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const
@@ -858,4 +869,9 @@ std::vector<tube::Particle> Simulator::translatetotubeparticle(const std::vector
     ret[i].id = particles[i].tube_id;
   }
   return ret;
+}
+
+int Simulator::numInAttr() const
+{
+    return ConfigReader::getInstance().GetInputAttributeCount();
 }

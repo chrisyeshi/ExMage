@@ -23,7 +23,8 @@ public:
   Simulator();
   ~Simulator();
 
-  void simulate(int particle_count);
+  void loadConfig();
+  void simulate();
  
   void set_global_size(int global_size[3]);
   void set_region_count(int region_count[3]);
@@ -49,7 +50,7 @@ protected:
   int out_timestep_;
   std::vector<std::string> in_attributes_;
   std::vector<std::string> out_attributes_;
-  float* flow_field_[6];
+  std::vector<float*> flow_field_;
   std::vector<Particle> leaving_particles_current_;
   std::vector<Particle> leaving_particles_next_;
   std::vector<Particle> inc_particles_current_;
@@ -76,6 +77,8 @@ protected:
   bool write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const;
   bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
   std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;
+  int numInAttr() const;
+  int numScalar() const {return numInAttr() - 3;}
 };
 
 #endif

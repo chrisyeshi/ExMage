@@ -20,6 +20,9 @@ int main(int argc, char* argv[])
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   srand(time(0) * rank);
 
+  // choose configure file
+  ConfigReader::setFile("configure.json");
+
   // read configure file
   ConfigReader& config = ConfigReader::getInstance();
   int TOTAL_SIZE_X = config.GetTotalSize()[0];
@@ -64,34 +67,14 @@ int main(int argc, char* argv[])
     std::cout << region_bound[i] << ", ";
   }
   std::cout << "\n";
-  // timestep range
-  int timestep_range[2] = {TIMESTEP_START, TIMESTEP_END};
-  // total size
-  int total_size[3] = {TOTAL_SIZE_X, TOTAL_SIZE_Y, TOTAL_SIZE_Z};
-  // region_count
-  int region_count[3] = {REGION_COUNT_X, REGION_COUNT_Y, REGION_COUNT_Z};
-//  for (int i = 0; i < 19; ++i)
   {
-    // particle count and out root directory
-//    int total_particle_count = 100 * 256;
-//    std::cout << "Generating Particle Count " << total_particle_count << std::endl;
-//    int region_particle_count = total_particle_count / TOTAL_REGION_COUNT;
-//    char out_root_directory[100];
-//    sprintf(out_root_directory, "/home/cluster/shared_space/Yucong/supernova/p%d/", total_particle_count);
     // simulation
     Simulator sim;
-    sim.set_global_size(total_size);
-    sim.set_region_count(region_count);
+    sim.loadConfig();
     sim.set_region_index(region_index);
     sim.set_region_bound(region_bound);
-    sim.set_root(ROOT_DIRECTORY);
-//    sim.set_out_root(out_root_directory);
-    sim.set_out_root(OUT_ROOT_DIRECTORY);
-    sim.set_timestep_range(timestep_range);
-    sim.set_velocity(VELOCITY);
 
-//    sim.simulate(region_particle_count);
-    sim.simulate(REGION_PARTICLE_COUNT);
+    sim.simulate();
   }
 
   std::cout << "finalize" << std::endl;

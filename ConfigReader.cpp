@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+std::string ConfigReader::filename = "configure.json";
+
 ConfigReader::ConfigReader(const std::string& filename)
 {
     std::ifstream fin(filename.c_str());
@@ -231,6 +233,17 @@ std::vector<std::string> ConfigReader::GetOutputAttributes() const
         ret[i] = oaa[i].get<std::string>();
 
     return ret;
+}
+
+int ConfigReader::GetInputAttributeCount() const
+{
+    if (!v.contains("input attributes"))
+    {
+        std::cout << "Warning: No input attributes!" << std::endl;
+        return 0;
+    }
+
+    return v.get("input attributes").get<picojson::array>().size();
 }
 
 std::string ConfigReader::GetFileFormat() const
