@@ -34,7 +34,7 @@ public:
     double GetMaxParticleGap() const;
     std::vector<std::string> GetInputAttributes() const;
     std::vector<std::string> GetOutputAttributes() const;
-    int GetInputAttributeCount() const;
+    int GetAttributeCount() const;
     std::string GetFileFormat() const;
 
 private:

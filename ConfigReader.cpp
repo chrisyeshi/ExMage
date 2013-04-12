@@ -235,7 +235,7 @@ std::vector<std::string> ConfigReader::GetOutputAttributes() const
     return ret;
 }
 
-int ConfigReader::GetInputAttributeCount() const
+int ConfigReader::GetAttributeCount() const
 {
     if (!v.contains("input attributes"))
     {

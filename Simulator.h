@@ -25,6 +25,8 @@ public:
 
   void loadConfig();
   void simulate();
+  void trace(std::vector<float*> fields);
+  void output();
  
   void set_global_size(int global_size[3]);
   void set_region_count(int region_count[3]);

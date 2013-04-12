@@ -14,6 +14,7 @@
 #include "Particle.h"
 #include "Frame.h"
 #include "ConfigReader.h"
+#include "ProcIndex.h"
 
 extern "C" {
   int readData(const char* filename,
@@ -111,6 +112,7 @@ void Simulator::loadConfig()
 {
     ConfigReader& config = ConfigReader::getInstance();
 
+    // general information
     for (int i = 0; i < 3; ++i)
     {
         global_size_[i] = config.GetTotalSize()[i];
@@ -122,13 +124,89 @@ void Simulator::loadConfig()
         timestep_range_[i] = config.GetTimeStepRange()[i];
     velocity_ = config.GetVelocity();
     
+    // attributes
     in_attributes_ = config.GetInputAttributes();
     out_attributes_ = config.GetOutputAttributes();
     assert(in_attributes_.size() > 0 && in_attributes_.size() == out_attributes_.size());
 
+    // process index
+    ProcIndex procIndex;
+    for (int i = 0; i < 3; ++i)
+        region_index_[i] = procIndex.getRegionIndex()[i];
+    region_bound_[0] = global_size_[0] / region_count_[0] * (region_index_[0] + 0);
+    region_bound_[1] = global_size_[0] / region_count_[0] * (region_index_[0] + 1);
+    region_bound_[2] = global_size_[1] / region_count_[1] * (region_index_[1] + 0);
+    region_bound_[3] = global_size_[1] / region_count_[1] * (region_index_[1] + 1);
+    region_bound_[4] = global_size_[2] / region_count_[2] * (region_index_[2] + 0);
+    region_bound_[5] = global_size_[2] / region_count_[2] * (region_index_[2] + 1);
+
+    // fields
     flow_field_.resize(numInAttr());
     for (int i = 0; i < numInAttr(); ++i)
         flow_field_[i] = NULL;
+}
+
+void Simulator::trace(std::vector<float*> fields)
+{
+    flow_field_ = fields;
+    static bool first_time = true;
+    if (first_time)
+    {
+        int particle_count = ConfigReader::getInstance().GetRegionParticleCount();
+        initializeParticles(particle_count);
+        out_timestep_ = 0;
+        first_time = false;
+    }
+    std::cout << "Timestep: " << out_timestep_ << std::endl;
+    ++out_timestep_;
+    traceParticles();
+    communicateWithNeighbors();
+    writeToFile();
+}
+
+void Simulator::output()
+{
+    // output frames
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
+    int particle_count = ConfigReader::getInstance().GetRegionParticleCount();
+    for (int i = 0; i < coretube_.GetCameraCount(); ++i)
+    {
+        Frame* sum = coretube_.GetFrame(i);
+        char proc_index_string[10];
+        sprintf(proc_index_string, "%02d", rank);
+        char cam_index_string[10];
+        sprintf(cam_index_string, "%02d", i);
+        char particle_count_string[100];
+        int resolution[2];
+        sum->GetSize(resolution);
+        sprintf(particle_count_string, "n%d_p%d_r%d_t%d", region_count_[0], particle_count, resolution[0], timestep_range_[1] - timestep_range_[0]);
+        std::string dir = out_root_ + "/" + particle_count_string + std::string("/cam") + cam_index_string;
+        std::string spt_path = dir + "/output_proc" + proc_index_string;
+        mkpath(dir.c_str(), 0777);
+        mkpath(dir.c_str(), 0777);
+        mkpath(dir.c_str(), 0777);
+        sum->SetFileName(spt_path.c_str());
+        sum->Write();
+    }
+    // output times
+    char particle_count_string[100];
+    int resolution[2];
+    coretube_.GetFrame(0)->GetSize(resolution);
+    sprintf(particle_count_string, "n%d_p%d_r%d_t%d", region_count_[0], particle_count, resolution[0], timestep_range_[1] - timestep_range_[0]);
+    char proc_index_string[10];
+    sprintf(proc_index_string, "%02d", rank);
+    std::string dir = out_root_ + "/" + particle_count_string + "/time";
+    std::string time_path = dir + "/proc" + proc_index_string + ".txt";
+    mkpath(dir.c_str(), 0777);
+    mkpath(dir.c_str(), 0777);
+    mkpath(dir.c_str(), 0777);
+    std::ofstream tout(time_path.c_str());
+    for (unsigned int i = 0; i < times_.size(); ++i)
+    {
+        tout << times_[i] << ",";
+    }
 }
 
 void Simulator::simulate()
@@ -270,18 +348,22 @@ void Simulator::set_velocity(float velocity)
 
 void Simulator::initializeParticles(int particle_count)
 {
+    std::cout << "1" << std::endl;
   particles_current_.resize(particle_count);
   for (int j = 0; j < particle_count; ++j)
   {
     float range[3] = {region_bound_[1] - region_bound_[0],
                       region_bound_[3] - region_bound_[2],
                       region_bound_[5] - region_bound_[4]};
+    std::cout << "2" << std::endl;
     for (int i = 0; i < 3; ++i)
     {
       particles_current_[j].position[i] = float(rand() % int(range[i] * 1000)) / 1000.0 + region_bound_[i * 2];
     }
+    std::cout << "3" << std::endl;
     // fill scalars
     fillParticleScalars(&particles_current_[j]);
+    std::cout << "4" << std::endl;
     // id
     particles_current_[j].tube_id = j;
   }
@@ -873,5 +955,5 @@ std::vector<tube::Particle> Simulator::translatetotubeparticle(const std::vector
 
 int Simulator::numInAttr() const
 {
-    return ConfigReader::getInstance().GetInputAttributeCount();
+    return ConfigReader::getInstance().GetAttributeCount();
 }
