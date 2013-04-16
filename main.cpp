@@ -36,7 +36,6 @@ int main(int argc, char* argv[])
 
     // trace particles
     Simulator sim;
-    sim.loadConfig();
     std::vector<int> range = config.GetTimeStepRange();
     for (int timestep = range[0]; timestep <= range[1]; ++timestep)
     {
