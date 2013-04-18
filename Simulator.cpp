@@ -341,16 +341,19 @@ void Simulator::communicateWithNeighbors()
     for (unsigned int i = 0; i < leaving_particles_next_.size(); ++i)
     {
         Particle particle = leaving_particles_next_[i];
-        std::vector<int> next_region_index(3);
-        next_region_index[0] = region_index()[0];
-        next_region_index[1] = region_index()[1];
-        next_region_index[2] = region_index()[2];
+        std::vector<int> next_region_index = region_index();
         for (int j = 0; j < 3; ++j)
         {
             if (particle.position[j] < region_bound()[2 * j])
+            {
                 --next_region_index[j];
+                break;
+            }
             else if (particle.position[j] >= region_bound()[2 * j + 1])
+            {
                 ++next_region_index[j];
+                break;
+            }
         }
         if (next_region_index[0] >= 0 && next_region_index[0] < region_count()[0]
          && next_region_index[1] >= 0 && next_region_index[1] < region_count()[1]
@@ -362,6 +365,12 @@ void Simulator::communicateWithNeighbors()
     }
   // send
   std::vector<int> neighbor_ranks = getNeighborRanks();
+//  std::cout << "Rank: " << global_index() << " :: ";
+//  for (unsigned int i = 0; i < neighbor_ranks.size(); ++i)
+//  {
+//      std::cout << neighbor_ranks[i] << ", ";
+//  }
+//  std::cout << std::endl;
   for (unsigned int i = 0; i < neighbor_ranks.size(); ++i)
   {
     if (map_rank_particles.count(neighbor_ranks[i]) == 0)
@@ -481,7 +490,28 @@ void Simulator::writeToFile()
 
 std::vector<int> Simulator::getNeighborRanks() const
 {
-  std::vector<int> ranks;
+    std::vector<int> ranks;
+    for (int i = 0; i < 3; ++i)
+    {
+        std::vector<int> minus = region_index();
+        minus[i] -= 1;
+        if (minus[i] >= 0 && minus[i] < region_count()[i])
+        {
+            ProcIndex minus_index(minus);
+            int minus_rank = minus_index.getGlobalIndex();
+            ranks.push_back(minus_rank);
+        }
+
+        std::vector<int> plus = region_index();
+        plus[i] += 1;
+        if (plus[i] >= 0 && plus[i] < region_count()[i])
+        {
+            ProcIndex plus_index(plus);
+            int plus_rank = plus_index.getGlobalIndex();
+            ranks.push_back(plus_rank);
+        }
+    }
+/*
   for (int i = -1; i <= 1; ++i)
     for (int j = -1; j <= 1; ++j)
       for (int k = -1; k <= 1; ++k)
@@ -497,86 +527,8 @@ std::vector<int> Simulator::getNeighborRanks() const
         if (rank >= 0 && rank < total_region_count())
           ranks.push_back(rank);
       }
+*/
   return ranks;
-}
-
-void Simulator::printReadError(READ_ERROR read_error) const
-{
-  switch (read_error)
-  {
-  case RAW_FAIL:
-    std::cout << "Error: failed to read raw flow field files!" << std::endl;
-    break;
-  case HDF5_FAIL:
-    std::cout << "Error: falied to read flow field file!" << std::endl;
-    break;
-  }
-}
-
-Simulator::READ_ERROR Simulator::read(int timestep)
-{
-    if (config().GetFileFormat() == "hdf5")
-    {
-        std::string filename = read_root();
-        std::vector<std::string> input_attributes = config().GetInputAttributes();
-        int attribute_count = nAttributes();
-        char attributes[attribute_count][50];
-        for (int i = 0; i < attribute_count; ++i)
-            sprintf(attributes[i], "%s", input_attributes[i].c_str());
-        int ret =  readData(filename.c_str(),
-                            &region_index()[0], &region_count()[0],
-                            attributes, attribute_count,
-                            &flow_field_[0]);
-        return (ret == 1) ? READ_SUCCESS : HDF5_FAIL;
-    }
-
-    // default to read raw folder format, which means when the file format is not specified in the configure.txt file, raw format is assumed.
-    int gsizes[3], psizes[3], lsizes[3], start_indices[3], local_array_size;
-    MPI_Datatype filetype;
-    MPI_File fh;
-    MPI_Status status;
-
-    gsizes[0] = global_size()[0];
-    gsizes[1] = global_size()[1];
-    gsizes[2] = global_size()[2];
-
-    psizes[0] = region_count()[0]; // no. processes in vertical dimension
-    psizes[1] = region_count()[1]; // no. processes in horizontal dimension
-    psizes[2] = region_count()[2];
-
-    lsizes[0] = gsizes[0] / psizes[0];
-    lsizes[1] = gsizes[1] / psizes[1];
-    lsizes[2] = gsizes[2] / psizes[2];
-    local_array_size = lsizes[0] * lsizes[1] * lsizes[2];
-
-    start_indices[0] = region_index()[0] * lsizes[0];
-    start_indices[1] = region_index()[1] * lsizes[1];
-    start_indices[2] = region_index()[2] * lsizes[2];
-
-    MPI_Type_create_subarray(3, gsizes, lsizes, start_indices, MPI_ORDER_FORTRAN, MPI_FLOAT, &filetype);
-    MPI_Type_commit(&filetype);
-
-    char timestep_string[10];
-    sprintf(timestep_string, "%4d", timestep);
-
-    for (int i = 0; i < 6; ++i)
-    {
-      std::string filename = read_root() + "/" + config().GetInputAttributes()[i] + timestep_string + ".dat";
-      char* cfile = &filename[0];
-      if (flow_field_[i])
-        delete [] flow_field_[i];
-      flow_field_[i] = new float [local_array_size];
-  
-      int error_code = MPI_File_open(MPI_COMM_WORLD, cfile, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-      if (error_code != MPI_SUCCESS)
-        return RAW_FAIL;
-      MPI_File_set_view(fh, 0, MPI_FLOAT, filetype, const_cast<char *>("native"), MPI_INFO_NULL);
-
-      MPI_File_read_all(fh, flow_field_[i], local_array_size, MPI_FLOAT, &status);
-
-      MPI_File_close(&fh);
-    }
-    return READ_SUCCESS;
 }
 
 bool Simulator::write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const

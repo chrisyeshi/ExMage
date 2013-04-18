@@ -30,14 +30,7 @@ using namespace tube;
 
 CoreTube::CoreTube()
 {
-//  MainCamera.Position = Point(4930.24623706986, -370.246252559031, 1627.44585529119);
-//  MainCamera.Focal = Point(891.733540025678, 785.708061632162, 195.770365282592);
-//  MainCamera.ViewUp = Vector(-0.235339067356239, 0.3160989083403, 0.919073992408645);
-//  MainCamera.Position = Point(884.296203613281, 715.386840820312, 4597.93386965504);
-//  MainCamera.Focal = Point(884.296203613281, 715.386840820312, 159.97151184082);
-//  MainCamera.ViewUp = Vector(0.0, 1.0, 0.0);
-
-  loadConfigureFile();
+//  loadConfigureFile();
   initGLContext();
   initGLEnv();
   initShaders();
@@ -105,7 +98,7 @@ void CoreTube::GenerateTubes(const std::vector<Particle>& particles1,
       {
         Point p1(double(particles1[i].x), double(particles1[i].y), double(particles1[i].z));
         Point p2(double(particles2[i].x), double(particles2[i].y), double(particles2[i].z));
-        if (d(p1, p2) > MAX_PARTICLE_GAP)
+        if (d(p1, p2) > max_particle_gap())
           continue;
         drawTube(particles1[i], particles2[i]);
         drawSphere(particles1[i], particles2[i]);
@@ -132,7 +125,7 @@ Frame* CoreTube::GetFrame(const int index)
   snapshot();
   return Frames[index];
 }
-
+/*
 void CoreTube::loadConfigureFile()
 {
   ConfigReader& config = ConfigReader::getInstance();
@@ -140,6 +133,27 @@ void CoreTube::loadConfigureFile()
   WINDOW_HEIGHT = config.GetResolution()[1];
   RADIUS = config.GetTubeRadius();
   MAX_PARTICLE_GAP = config.GetMaxParticleGap();
+}
+*/
+
+int CoreTube::window_width() const
+{
+    return config().GetResolution()[0];
+}
+
+int CoreTube::window_height() const
+{
+    return config().GetResolution()[1];
+}
+
+float CoreTube::radius() const
+{
+    return config().GetTubeRadius();
+}
+
+float CoreTube::max_particle_gap() const
+{
+    return config().GetMaxParticleGap();
 }
 
 void CoreTube::createDisplayList(const std::vector<Particle>& particles1,
@@ -151,7 +165,7 @@ void CoreTube::createDisplayList(const std::vector<Particle>& particles1,
     {
       Point p1(double(particles1[i].x), double(particles1[i].y), double(particles1[i].z));
       Point p2(double(particles2[i].x), double(particles2[i].y), double(particles2[i].z));
-      if (d(p1, p2) > MAX_PARTICLE_GAP)
+      if (d(p1, p2) > max_particle_gap())
         continue;
       drawTube(particles1[i], particles2[i]);
       drawSphere(particles1[i], particles2[i]);
@@ -186,7 +200,7 @@ void CoreTube::initGLContext()
    }
 
    /* Allocate the image buffer */
-   ColorBuffer = new GLubyte [WINDOW_WIDTH * WINDOW_HEIGHT * 4];
+   ColorBuffer = new GLubyte [window_area() * 4];
 //   buffer = malloc( Width * Height * 4 * sizeof(GLubyte) );
    if (!ColorBuffer) {
       printf("Alloc image buffer failed!\n");
@@ -194,7 +208,7 @@ void CoreTube::initGLContext()
    }
 
    /* Bind the buffer to the context and make it current */
-   if (!OSMesaMakeCurrent( Ctx, ColorBuffer, GL_UNSIGNED_BYTE, WINDOW_WIDTH, WINDOW_HEIGHT )) {
+   if (!OSMesaMakeCurrent( Ctx, ColorBuffer, GL_UNSIGNED_BYTE, window_width(), window_height() )) {
       printf("OSMesaMakeCurrent failed!\n");
       return;
    }
@@ -319,7 +333,8 @@ void CoreTube::initFBO()
 void CoreTube::initDepthTexture(int texture_index)
 {
   glBindTexture(GL_TEXTURE_2D, BufTex[texture_index]); // depth
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32,
+                 window_width(), window_height(), 0,
                  GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -333,7 +348,8 @@ void CoreTube::initDepthTexture(int texture_index)
 void CoreTube::initColorTexture(int texture_index)
 {
   glBindTexture(GL_TEXTURE_2D, BufTex[texture_index]); // color
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+                 window_width(), window_height(), 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -347,7 +363,8 @@ void CoreTube::initColorTexture(int texture_index)
 void CoreTube::initNormalTexture(int texture_index)
 {
   glBindTexture(GL_TEXTURE_2D, BufTex[texture_index]); // normal
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8,
+                 window_width(), window_height(), 0,
                  GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -361,7 +378,8 @@ void CoreTube::initNormalTexture(int texture_index)
 void CoreTube::initScalarTexture(int texture_index)
 {
   glBindTexture(GL_TEXTURE_2D, BufTex[texture_index]); // mixture fraction
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 window_width(), window_height(), 0,
                  GL_LUMINANCE, GL_FLOAT, NULL);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -538,10 +556,10 @@ void CoreTube::drawTube(const Particle& p1, const Particle& p2)
   glBegin(GL_QUADS);
   for (int i = 0; i < num_slices; ++i)
   {
-    float x1 = RADIUS * cos(angle_per_slice * i);
-    float y1 = RADIUS * sin(angle_per_slice * i);
-    float x2 = RADIUS * cos(angle_per_slice * (i + 1));
-    float y2 = RADIUS * sin(angle_per_slice * (i + 1));
+    float x1 = radius() * cos(angle_per_slice * i);
+    float y1 = radius() * sin(angle_per_slice * i);
+    float x2 = radius() * cos(angle_per_slice * (i + 1));
+    float y2 = radius() * sin(angle_per_slice * (i + 1));
 //    Color color[2];
 //    color[0] = Tf.GetColor(p1.pd);
 //    color[1] = Tf.GetColor(p2.pd);
@@ -602,7 +620,7 @@ void CoreTube::drawSphere(const Particle& p1, const Particle& p2)
 
   GLUquadric* q = gluNewQuadric();
   gluQuadricNormals(q, GLU_SMOOTH);
-  gluSphere(q, RADIUS, 30, 20);
+  gluSphere(q, radius(), 30, 20);
   gluDeleteQuadric(q);
 
   glPopMatrix();
@@ -610,42 +628,42 @@ void CoreTube::drawSphere(const Particle& p1, const Particle& p2)
 
 void CoreTube::snapshot()
 {
-  Frames[CurCamIndex]->SetSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+  Frames[CurCamIndex]->SetSize(window_width(), window_height());
   Frames[CurCamIndex]->SetNumberOfScalarMaps(3);
   glEnable(GL_TEXTURE_2D);
   // depth
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 0 + 0]);
-  float* depth = new float [WINDOW_WIDTH * WINDOW_HEIGHT];
+  float* depth = new float [window_area()];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, depth);
   Frames[CurCamIndex]->SetDepthMap(depth);
   delete [] depth;
   // color
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 0 + 1]);
-  unsigned char* color = new unsigned char [WINDOW_WIDTH * WINDOW_HEIGHT * 4];
+  unsigned char* color = new unsigned char [window_area() * 4];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, color);
   Frames[CurCamIndex]->SetColorMap(color);
   delete [] color;
   // normal
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 1 + 1]);
-  unsigned char* normal = new unsigned char [WINDOW_WIDTH * WINDOW_HEIGHT * 4];
+  unsigned char* normal = new unsigned char [window_area() * 4];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_BYTE, normal);
   Frames[CurCamIndex]->SetNormalMap(normal);
   delete [] normal;
   // mf
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 2 + 1]);
-  float* mf = new float [WINDOW_WIDTH * WINDOW_HEIGHT];
+  float* mf = new float [window_area()];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, mf);
   Frames[CurCamIndex]->SetScalarMap(0, reinterpret_cast<float *>(mf));
   delete [] mf;
   // temperature
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 3 + 1]);
-  float* temperature = new float [WINDOW_WIDTH * WINDOW_HEIGHT];
+  float* temperature = new float [window_area()];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, temperature);
   Frames[CurCamIndex]->SetScalarMap(1, temperature);
   delete [] temperature;
   // id
   glBindTexture(GL_TEXTURE_2D, BufTex[2 * 5 * CurCamIndex + 2 * 4 + 1]);
-  float* id = new float [WINDOW_WIDTH * WINDOW_HEIGHT];
+  float* id = new float [window_area()];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, id);
   Frames[CurCamIndex]->SetScalarMap(2, id);
   delete [] id;
@@ -677,8 +695,8 @@ void CoreTube::calcDomain()
   double expand_extent[6];
   for (int i = 0; i < 3; ++i)
   {
-    expand_extent[i * 2] = Extent[i * 2] - 2 * RADIUS;
-    expand_extent[i * 2 + 1] = Extent[i * 2 + 1] + 2 * RADIUS;
+    expand_extent[i * 2] = Extent[i * 2] - 2 * radius();
+    expand_extent[i * 2 + 1] = Extent[i * 2 + 1] + 2 * radius();
   }
   double domain[6] = {FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX};
 

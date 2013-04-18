@@ -24,6 +24,8 @@ public:
   Simulator();
   ~Simulator();
 
+  enum FLAT_INDEX {X_MINUS, X_PLUS, Y_MINUS, Y_PLUS, Z_MINUS, Z_PLUS};
+
   void trace(std::vector<float*> fields);
   void output();
  
@@ -40,8 +42,6 @@ protected:
   CoreTube coretube_;
   std::vector<int> times_;
 
-  enum READ_ERROR {READ_SUCCESS, RAW_FAIL, HDF5_FAIL};
-
   void initializeParticles(int particle_count);
   Particle findBoundaryParticle(const Particle& curr, const Particle& next) const;
   void traceParticles();
@@ -52,8 +52,6 @@ protected:
   void communicateWithNeighbors();
   void writeToFile();
   std::vector<int> getNeighborRanks() const;
-  void printReadError(READ_ERROR read_error) const;
-  READ_ERROR read(int timestep);
   bool write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const;
   bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
   std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;

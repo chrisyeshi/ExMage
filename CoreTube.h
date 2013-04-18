@@ -17,12 +17,8 @@
 #include "TransferFunction.h"
 #include "CameraCore.h"
 #include "Geometry/point.h"
-/*
-#define WINDOW_WIDTH 128
-#define WINDOW_HEIGHT 128
-#define RADIUS 2.0
-#define MAX_PARTICLE_GAP 5.0
-*/
+#include "ConfigReader.h"
+
 class Frame;
 
 class CoreTube
@@ -60,12 +56,18 @@ protected:
   GLhandleARB FragShader[5];
   GLhandleARB ProgShader[5];
   int BufferIndex;
-  int WINDOW_WIDTH;
-  int WINDOW_HEIGHT;
-  float RADIUS;
-  float MAX_PARTICLE_GAP;
+//  int WINDOW_WIDTH;
+//  int WINDOW_HEIGHT;
+//  float RADIUS;
+//  float MAX_PARTICLE_GAP;
 
-  void loadConfigureFile();
+  ConfigReader& config() const {return ConfigReader::getInstance();}
+  int window_width() const;
+  int window_height() const;
+  int window_area() const {return window_width() * window_height();}
+  float radius() const;
+  float max_particle_gap() const;
+//  void loadConfigureFile();
   void createDisplayList(const std::vector<tube::Particle>& particles1, const std::vector<tube::Particle>& particles2);
   void deleteDisplayList();
   void initGLContext();
