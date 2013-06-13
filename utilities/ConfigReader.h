@@ -4,7 +4,7 @@
 #include <string>
 #include "./picojson.h"
 #include "CameraCore.h"
-#include "Geometry/point.h"
+#include "point.h"
 
 class ConfigReader
 {

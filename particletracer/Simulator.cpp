@@ -11,7 +11,7 @@
 #include <ctime>
 
 #include "mpi.h"
-#include "Particle.h"
+//#include "Particle.h"
 #include "Frame.h"
 #include "ConfigReader.h"
 #include "ProcIndex.h"
@@ -60,9 +60,10 @@ void Simulator::trace(std::vector<float*> fields)
     ++out_timestep_;
     traceParticles();
     communicateWithNeighbors();
-    writeToFile();
+//    writeToFile();
 }
 
+/*
 void Simulator::output()
 {
     // output frames
@@ -112,6 +113,21 @@ void Simulator::output()
     {
         tout << times_[i] << ",";
     }
+}
+*/
+
+std::vector<Particle> Simulator::prevParticles() const
+{
+    std::vector<Particle> p = particles_current_;
+    p.insert(p.end(), inc_particles_current_.begin(), inc_particles_current_.end());
+    return p;
+}
+
+std::vector<Particle> Simulator::nextParticles() const
+{
+    std::vector<Particle> p = particles_next_;
+    p.insert(p.end(), inc_particles_next_.begin(), inc_particles_next_.end());
+    return p;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +487,7 @@ void Simulator::communicateWithNeighbors()
     delete [] id;
   }
 }
-
+/*
 void Simulator::writeToFile()
 {
   std::vector<Particle> ps1, ps2;
@@ -487,7 +503,7 @@ void Simulator::writeToFile()
 
   particles_current_ = ps2;
 }
-
+*/
 std::vector<int> Simulator::getNeighborRanks() const
 {
     std::vector<int> ranks;
@@ -607,6 +623,7 @@ bool Simulator::write(const std::vector<Particle>& particles1, const std::vector
   return true;
 }
 
+/*
 bool Simulator::sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2)
 {
   std::vector<tube::Particle> p1 = translatetotubeparticle(particles1);
@@ -635,7 +652,9 @@ bool Simulator::sendtoinsitu(const std::vector<Particle>& particles1, const std:
 
   return true;
 }
+*/
 
+/*
 std::vector<tube::Particle> Simulator::translatetotubeparticle(const std::vector<Particle>& particles) const
 {
   std::vector<tube::Particle> ret(particles.size());
@@ -649,6 +668,7 @@ std::vector<tube::Particle> Simulator::translatetotubeparticle(const std::vector
   }
   return ret;
 }
+*/
 
 std::vector<int> Simulator::global_size() const
 {

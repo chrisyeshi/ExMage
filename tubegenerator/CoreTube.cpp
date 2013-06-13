@@ -12,9 +12,11 @@
 #include <fstream>
 
 #include "Frame.h"
-#include "Geometry/vector.h"
+#include "vector.h"
 #include "PNGWriter.h"
 #include "ConfigReader.h"
+#include "ProcIndex.h"
+#include "mkpath.h"
 
 #ifdef USE_OSMESA
 #else
@@ -30,11 +32,6 @@ using namespace tube;
 
 CoreTube::CoreTube()
 {
-//  loadConfigureFile();
-  initGLContext();
-  initGLEnv();
-  initShaders();
-  initTF();
 }
 
 CoreTube::~CoreTube()
@@ -55,6 +52,15 @@ CoreTube::~CoreTube()
 #else
   glXDestroyContext(dpy, ctx);
 #endif
+}
+
+void CoreTube::Initialize()
+{
+//  loadConfigureFile();
+  initGLContext();
+  initGLEnv();
+  initShaders();
+  initTF();
 }
 
 void CoreTube::SetCameras(const std::vector<CameraCore>& cameras)
@@ -79,6 +85,8 @@ void CoreTube::SetExtent(double extent[6])
 void CoreTube::GenerateTubes(const std::vector<Particle>& particles1,
                              const std::vector<Particle>& particles2)
 {
+  clock_t start, end, tick;
+  start = clock();
 //  std::cout << "particles2: " << particles2.size() << "\n";
   for (CurCamIndex = 0; CurCamIndex < Frames.size(); ++CurCamIndex)
   {
@@ -125,6 +133,63 @@ Frame* CoreTube::GetFrame(const int index)
   snapshot();
   return Frames[index];
 }
+
+void CoreTube::Output()
+{
+    ProcIndex procindex;
+    int rank = procindex.getGlobalIndex();
+    std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
+    for (int i = 0; i < GetCameraCount(); ++i)
+    {
+        Frame* sum = GetFrame(i);
+        char proc_index_string[10];
+        sprintf(proc_index_string, "%02d", rank);
+        char cam_index_string[10];
+        sprintf(cam_index_string, "%02d", i);
+
+        char pcs[100];
+        int resolution[2];
+        sum->GetSize(resolution);
+        sprintf(pcs, "n%d_p%d_r%d_t%d",
+                config().GetRegionCount()[0],
+                config().GetRegionParticleCount(),
+                resolution[0],
+                config().GetTimeStepRange()[1] - config().GetTimeStepRange()[0]);
+
+        std::string dir = config().GetOutRoot() + "/" + pcs
+                        + std::string("/cam") + cam_index_string;
+        std::string spt_path = dir + "/output_proc" + proc_index_string;
+        mkpath(dir.c_str(), 0777);
+        mkpath(dir.c_str(), 0777);
+        mkpath(dir.c_str(), 0777);
+        sum->SetFileName(spt_path.c_str());
+        sum->Write();
+    }
+    // output times
+    Frame* sum = GetFrame(0);
+    char pcs[100];
+    int resolution[2];
+    sum->GetSize(resolution);
+    sprintf(pcs, "n%d_p%d_r%d_t%d",
+            config().GetRegionCount()[0],
+            config().GetRegionParticleCount(),
+            resolution[0],
+            config().GetTimeStepRange()[1] - config().GetTimeStepRange()[0]);
+
+    std::string dir = config().GetOutRoot() + "/" + pcs + "/time";
+    char global_index_string[10];
+    sprintf(global_index_string, "%02d", rank);
+    std::string time_path = dir + "/proc" + global_index_string + ".txt";
+    mkpath(dir.c_str(), 0777);
+    mkpath(dir.c_str(), 0777);
+    mkpath(dir.c_str(), 0777);
+    std::ofstream tout(time_path.c_str());
+    for (unsigned int i = 0; i < times.size(); ++i)
+    {
+        tout << times[i] << ",";
+    }
+}
+
 /*
 void CoreTube::loadConfigureFile()
 {

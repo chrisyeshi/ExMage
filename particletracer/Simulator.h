@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "Particle.h"
-#include "CoreTube.h"
+//#include "Particle.h"
+//#include "CoreTube.h"
 #include "ConfigReader.h"
 
 class Particle
@@ -28,6 +28,9 @@ public:
 
   void trace(std::vector<float*> fields);
   void output();
+  std::vector<Particle> prevParticles() const;
+  std::vector<Particle> nextParticles() const;
+  std::vector<float> region_bound() const;
  
 protected:
   std::vector<Particle> particles_current_;
@@ -39,8 +42,8 @@ protected:
   std::vector<Particle> leaving_particles_next_;
   std::vector<Particle> inc_particles_current_;
   std::vector<Particle> inc_particles_next_;
-  CoreTube coretube_;
-  std::vector<int> times_;
+//  CoreTube coretube_;
+//  std::vector<int> times_;
 
   void initializeParticles(int particle_count);
   Particle findBoundaryParticle(const Particle& curr, const Particle& next) const;
@@ -50,11 +53,11 @@ protected:
   void fillParticleScalars(Particle* particle) const;
   bool isParticleInside(const Particle& particle) const;
   void communicateWithNeighbors();
-  void writeToFile();
+//  void writeToFile();
   std::vector<int> getNeighborRanks() const;
   bool write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const;
-  bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
-  std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;
+//  bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
+//  std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;
   ConfigReader& config() const {return ConfigReader::getInstance();}
   std::vector<int> global_size() const;
   std::vector<int> region_count() const;
@@ -62,7 +65,6 @@ protected:
   int total_region_count() const;
   int global_index() const;
   std::string global_index_string() const;
-  std::vector<float> region_bound() const;
   std::vector<float> region_range() const;
   std::string read_root() const;
   std::string out_root() const;

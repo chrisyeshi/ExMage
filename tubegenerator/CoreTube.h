@@ -16,7 +16,7 @@
 
 #include "TransferFunction.h"
 #include "CameraCore.h"
-#include "Geometry/point.h"
+#include "point.h"
 #include "ConfigReader.h"
 
 class Frame;
@@ -27,12 +27,14 @@ public:
   CoreTube();
   ~CoreTube();
 
+  void Initialize();
   void SetCameras(const std::vector<CameraCore>& cameras);
   void SetLightPosition(const Point& light) {LightPosition = light;};
   void SetExtent(double extent[6]);
   void GenerateTubes(const std::vector<tube::Particle>& particles1, const std::vector<tube::Particle>& particles2);
   int GetCameraCount() const {return Frames.size();};
   Frame* GetFrame(const int index);// {return Frames[index];};
+  void Output();
 
 protected:
   double Extent[6];
@@ -60,6 +62,7 @@ protected:
 //  int WINDOW_HEIGHT;
 //  float RADIUS;
 //  float MAX_PARTICLE_GAP;
+  std::vector<int> times;
 
   ConfigReader& config() const {return ConfigReader::getInstance();}
   int window_width() const;

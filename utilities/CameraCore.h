@@ -1,8 +1,8 @@
 #ifndef __CameraCore_h
 #define __CameraCore_h
 
-#include "Geometry/point.h"
-#include "Geometry/vector.h"
+#include "point.h"
+#include "vector.h"
 
 class CameraCore
 {

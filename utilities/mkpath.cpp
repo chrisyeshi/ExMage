@@ -1,8 +1,11 @@
+#include "mkpath.h"
+
 #include <cassert>
-#include <sys/stat.h>
 #include <errno.h>
 #include <malloc.h>
 #include <string.h>
+
+typedef struct stat Stat;
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -13,8 +16,6 @@
 //
 //
 /////////////////////////////////////////////////////////////////////////
-
-typedef struct stat Stat;
 
 static int do_mkdir(const char *path, mode_t mode)
 {
