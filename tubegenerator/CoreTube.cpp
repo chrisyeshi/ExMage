@@ -28,8 +28,6 @@ typedef Bool (*glXMakeContextCurrentARBProc)
 static glXMakeContextCurrentARBProc glXMakeContextCurrentARB = 0;
 #endif
 
-using namespace tube;
-
 CoreTube::CoreTube()
 {
 }
@@ -82,8 +80,8 @@ void CoreTube::SetExtent(double extent[6])
     Extent[i] = extent[i];
 }
 
-void CoreTube::GenerateTubes(const std::vector<Particle>& particles1,
-                             const std::vector<Particle>& particles2)
+void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
+                             const std::vector<Particle<> >& particles2)
 {
   clock_t start, end, tick;
   start = clock();
@@ -104,8 +102,8 @@ void CoreTube::GenerateTubes(const std::vector<Particle>& particles1,
       //    glCallList(DisplayListIndex);
       for (unsigned int i = 0; i < particles1.size(); ++i)
       {
-        Point p1(double(particles1[i].x), double(particles1[i].y), double(particles1[i].z));
-        Point p2(double(particles2[i].x), double(particles2[i].y), double(particles2[i].z));
+        Point p1(double(particles1[i].x()), double(particles1[i].y()), double(particles1[i].z()));
+        Point p2(double(particles2[i].x()), double(particles2[i].y()), double(particles2[i].z()));
         if (d(p1, p2) > max_particle_gap())
           continue;
         drawTube(particles1[i], particles2[i]);
@@ -190,17 +188,6 @@ void CoreTube::Output()
     }
 }
 
-/*
-void CoreTube::loadConfigureFile()
-{
-  ConfigReader& config = ConfigReader::getInstance();
-  WINDOW_WIDTH = config.GetResolution()[0];
-  WINDOW_HEIGHT = config.GetResolution()[1];
-  RADIUS = config.GetTubeRadius();
-  MAX_PARTICLE_GAP = config.GetMaxParticleGap();
-}
-*/
-
 int CoreTube::window_width() const
 {
     return config().GetResolution()[0];
@@ -221,15 +208,15 @@ float CoreTube::max_particle_gap() const
     return config().GetMaxParticleGap();
 }
 
-void CoreTube::createDisplayList(const std::vector<Particle>& particles1,
-                                 const std::vector<Particle>& particles2)
+void CoreTube::createDisplayList(const std::vector<Particle<> >& particles1,
+                                 const std::vector<Particle<> >& particles2)
 {
   DisplayListIndex = glGenLists(1);
   glNewList(DisplayListIndex, GL_COMPILE);
     for (unsigned int i = 0; i < particles1.size(); ++i)
     {
-      Point p1(double(particles1[i].x), double(particles1[i].y), double(particles1[i].z));
-      Point p2(double(particles2[i].x), double(particles2[i].y), double(particles2[i].z));
+      Point p1(double(particles1[i].x()), double(particles1[i].y()), double(particles1[i].z()));
+      Point p2(double(particles2[i].x()), double(particles2[i].y()), double(particles2[i].z()));
       if (d(p1, p2) > max_particle_gap())
         continue;
       drawTube(particles1[i], particles2[i]);
@@ -599,9 +586,9 @@ void CoreTube::setupLightEnv()
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
-void CoreTube::drawTube(const Particle& p1, const Particle& p2)
+void CoreTube::drawTube(const Particle<>& p1, const Particle<>& p2)
 {
-  Vector pa(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
+  Vector pa(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
   double len = pa.len();
   pa.normalize();
   Vector za(0.0, 0.0, 1.0);
@@ -612,7 +599,7 @@ void CoreTube::drawTube(const Particle& p1, const Particle& p2)
 
   glPushMatrix();
 
-  glTranslatef(p1.x, p1.y, p1.z);
+  glTranslatef(p1.x(), p1.y(), p1.z());
   glRotatef(-angle * 180.0 / M_PI, cr.x, cr.y, cr.z);
 
   int num_slices = 30;
@@ -631,30 +618,28 @@ void CoreTube::drawTube(const Particle& p1, const Particle& p2)
     Vector n;
     n = Vector(x1, y1, 0.0);
     n.normalize();
-//    glColor4f(color[0].r, color[0].g, color[0].b, color[0].a);
-    glMultiTexCoord1f(GL_TEXTURE0, p1.pd);
-    glMultiTexCoord1f(GL_TEXTURE1, p1.pd);
-    glMultiTexCoord1f(GL_TEXTURE2, p1.id);
+
+    for (unsigned int i = 0; i < p1.numScalars(); ++i)
+      glMultiTexCoord1f(GL_TEXTURE0 + i, p1.scalar(i));
+    glMultiTexCoord1f(GL_TEXTURE0 + p1.numScalars(), p1.id());
     glNormal3f(n.x, n.y, n.z); glVertex3f(x1, y1, 0.0);
 
-//    glColor4f(color[1].r, color[1].g, color[1].b, color[1].a);
-    glMultiTexCoord1f(GL_TEXTURE0, p2.pd);
-    glMultiTexCoord1f(GL_TEXTURE1, p2.pd);
-    glMultiTexCoord1f(GL_TEXTURE2, p2.id);
+    for (unsigned int i = 0; i < p2.numScalars(); ++i)
+      glMultiTexCoord1f(GL_TEXTURE0 + i, p2.scalar(i));
+    glMultiTexCoord1f(GL_TEXTURE0 + p2.numScalars(), p2.id());
     glNormal3f(n.x, n.y, n.z); glVertex3f(x1, y1, len);
 
     n = Vector(x2, y2, 0.0);
     n.normalize();
-//    glColor4f(color[0].r, color[0].g, color[0].b, color[0].a);
-    glMultiTexCoord1f(GL_TEXTURE0, p2.pd);
-    glMultiTexCoord1f(GL_TEXTURE1, p2.pd);
-    glMultiTexCoord1f(GL_TEXTURE2, p2.id);
+
+    for (unsigned int i = 0; i < p2.numScalars(); ++i)
+      glMultiTexCoord1f(GL_TEXTURE0 + i, p2.scalar(i));
+    glMultiTexCoord1f(GL_TEXTURE0 + p2.numScalars(), p2.id());
     glNormal3f(n.x, n.y, n.z); glVertex3f(x2, y2, len);
 
-//    glColor4f(color[1].r, color[1].g, color[1].b, color[1].a);
-    glMultiTexCoord1f(GL_TEXTURE0, p1.pd);
-    glMultiTexCoord1f(GL_TEXTURE1, p1.pd);
-    glMultiTexCoord1f(GL_TEXTURE2, p1.id);
+    for (unsigned int i = 0; i < p1.numScalars(); ++i)
+      glMultiTexCoord1f(GL_TEXTURE0 + i, p1.scalar(i));
+    glMultiTexCoord1f(GL_TEXTURE0 + p1.numScalars(), p1.id());
     glNormal3f(n.x, n.y, n.z); glVertex3f(x2, y2, 0.0);
   }
   glEnd();
@@ -662,9 +647,9 @@ void CoreTube::drawTube(const Particle& p1, const Particle& p2)
   glPopMatrix();
 }
 
-void CoreTube::drawSphere(const Particle& p1, const Particle& p2)
+void CoreTube::drawSphere(const Particle<>& p1, const Particle<>& p2)
 {
-  Vector pa(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
+  Vector pa(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
   double len = pa.len();
   pa.normalize();
   Vector za(0.0, 0.0, 1.0);
@@ -674,13 +659,12 @@ void CoreTube::drawSphere(const Particle& p1, const Particle& p2)
   double angle = acos(pa * za);
 
   glPushMatrix();
-//  Color color = Tf.GetColor(p1.pd);
-//  glColor4f(color.r, color.g, color.b, color.a);
-  glMultiTexCoord1f(GL_TEXTURE0, p1.pd);
-  glMultiTexCoord1f(GL_TEXTURE1, p1.pd);
-  glMultiTexCoord1f(GL_TEXTURE2, p1.id);
 
-  glTranslatef(p1.x, p1.y, p1.z);
+  for (unsigned int i = 0; i < p1.numScalars(); ++i)
+    glMultiTexCoord1f(GL_TEXTURE0 + i, p1.scalar(i));
+  glMultiTexCoord1f(GL_TEXTURE0 + p1.numScalars(), p1.id());
+
+  glTranslatef(p1.x(), p1.y(), p1.z());
   glRotatef(-angle * 180.0 / M_PI, cr.x, cr.y, cr.z);
 
   GLUquadric* q = gluNewQuadric();

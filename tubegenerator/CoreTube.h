@@ -31,7 +31,7 @@ public:
   void SetCameras(const std::vector<CameraCore>& cameras);
   void SetLightPosition(const Point& light) {LightPosition = light;};
   void SetExtent(double extent[6]);
-  void GenerateTubes(const std::vector<tube::Particle>& particles1, const std::vector<tube::Particle>& particles2);
+  void GenerateTubes(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2);
   int GetCameraCount() const {return Frames.size();};
   Frame* GetFrame(const int index);// {return Frames[index];};
   void Output();
@@ -71,7 +71,7 @@ protected:
   float radius() const;
   float max_particle_gap() const;
 //  void loadConfigureFile();
-  void createDisplayList(const std::vector<tube::Particle>& particles1, const std::vector<tube::Particle>& particles2);
+  void createDisplayList(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2);
   void deleteDisplayList();
   void initGLContext();
   void initGLEnv();
@@ -86,8 +86,8 @@ protected:
   void printInfoLog(GLhandleARB obj);
   void setupCamera();
   void setupLightEnv();
-  void drawTube(const tube::Particle& p1, const tube::Particle& p2);
-  void drawSphere(const tube::Particle& p1, const tube::Particle& p2);
+  void drawTube(const Particle<>& p1, const Particle<>& p2);
+  void drawSphere(const Particle<>& p1, const Particle<>& p2);
   void snapshot();
   void mvMult(double matrix[16], double vec[4], double out[4]) const;
   void calcDomain();

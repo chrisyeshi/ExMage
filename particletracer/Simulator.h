@@ -5,18 +5,8 @@
 #include <string>
 #include <vector>
 
-//#include "Particle.h"
-//#include "CoreTube.h"
 #include "ConfigReader.h"
-
-class Particle
-{
-public:
-  Particle() {position.resize(3); scalars.resize(3);}
-  std::vector<float> position;
-  std::vector<float> scalars;
-  int tube_id;
-};
+#include "Particle.h"
 
 class Simulator
 {
@@ -28,36 +18,36 @@ public:
 
   void trace(std::vector<float*> fields);
   void output();
-  std::vector<Particle> prevParticles() const;
-  std::vector<Particle> nextParticles() const;
+  std::vector<Particle<> > prevParticles() const;
+  std::vector<Particle<> > nextParticles() const;
   std::vector<float> region_bound() const;
  
 protected:
-  std::vector<Particle> particles_current_;
-  std::vector<Particle> particles_next_;
+  std::vector<Particle<> > particles_current_;
+  std::vector<Particle<> > particles_next_;
   int current_timestep_;
   int out_timestep_;
   std::vector<float*> flow_field_;
-  std::vector<Particle> leaving_particles_current_;
-  std::vector<Particle> leaving_particles_next_;
-  std::vector<Particle> inc_particles_current_;
-  std::vector<Particle> inc_particles_next_;
+  std::vector<Particle<> > leaving_particles_current_;
+  std::vector<Particle<> > leaving_particles_next_;
+  std::vector<Particle<> > inc_particles_current_;
+  std::vector<Particle<> > inc_particles_next_;
 //  CoreTube coretube_;
 //  std::vector<int> times_;
 
   void initializeParticles(int particle_count);
-  Particle findBoundaryParticle(const Particle& curr, const Particle& next) const;
+  Particle<> findBoundaryParticle(const Particle<> & curr, const Particle<>& next) const;
   void traceParticles();
-  Particle traceParticle(const Particle& particle) const;
-  void getParticleVelocity(const Particle& particle, float velocity3[3]) const;
-  void fillParticleScalars(Particle* particle) const;
-  bool isParticleInside(const Particle& particle) const;
+  Particle<> traceParticle(const Particle<>& particle) const;
+  void getParticleVelocity(const Particle<>& particle, float velocity3[3]) const;
+  void fillParticleScalars(Particle<>* particle) const;
+  bool isParticleInside(const Particle<>& particle) const;
   void communicateWithNeighbors();
 //  void writeToFile();
   std::vector<int> getNeighborRanks() const;
-  bool write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const;
-//  bool sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2);
-//  std::vector<tube::Particle> translatetotubeparticle(const std::vector<Particle>& particles) const;
+  bool write(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2) const;
+//  bool sendtoinsitu(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2);
+//  std::vector<tube::Particle<> > translatetotubeparticle(const std::vector<Particle<> >& particles) const;
   ConfigReader& config() const {return ConfigReader::getInstance();}
   std::vector<int> global_size() const;
   std::vector<int> region_count() const;
