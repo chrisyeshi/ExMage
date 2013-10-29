@@ -11,7 +11,6 @@
 #include <ctime>
 
 #include "mpi.h"
-//#include "Particle.h"
 #include "Frame.h"
 #include "ConfigReader.h"
 #include "ProcIndex.h"
@@ -116,16 +115,16 @@ void Simulator::output()
 }
 */
 
-std::vector<Particle> Simulator::prevParticles() const
+std::vector<Particle<> > Simulator::prevParticles() const
 {
-    std::vector<Particle> p = particles_current_;
+    std::vector<Particle<> > p = particles_current_;
     p.insert(p.end(), inc_particles_current_.begin(), inc_particles_current_.end());
     return p;
 }
 
-std::vector<Particle> Simulator::nextParticles() const
+std::vector<Particle<> > Simulator::nextParticles() const
 {
-    std::vector<Particle> p = particles_next_;
+    std::vector<Particle<> > p = particles_next_;
     p.insert(p.end(), inc_particles_next_.begin(), inc_particles_next_.end());
     return p;
 }
@@ -147,44 +146,43 @@ void Simulator::initializeParticles(int particle_count)
     {
         for (int i = 0; i < 3; ++i)
         {
-              particles_current_[j].position[i] = float(rand() % int(region_range()[i] * 1000)) / 1000.0 + region_bound()[i * 2];
+              particles_current_[j].coord()[i] = float(rand() % int(region_range()[i] * 1000)) / 1000.0 + region_bound()[i * 2];
         }
-        // fill scalars
         fillParticleScalars(&particles_current_[j]);
         // id
-        particles_current_[j].tube_id = j;
+        particles_current_[j].id() = j;
     }
 }
 
-Particle Simulator::findBoundaryParticle(const Particle& curr, const Particle& next) const
+Particle<> Simulator::findBoundaryParticle(const Particle<>& curr, const Particle<>& next) const
 {
 //  for (int i = 0; i < 3; ++i)
-//    if (particle.position[i] < region_bound_[2 * i]
-//     || particle.position[i] >= region_bound_[2 * i + 1] + 1.0)
+//    if (particle.coord()[i] < region_bound_[2 * i]
+//     || particle.coord()[i] >= region_bound_[2 * i + 1] + 1.0)
 //      return false;
 //  return true;
   float vector_full[3];
   for (int i = 0; i < 3; ++i)
-    vector_full[i] = next.position[i] - curr.position[i];
+    vector_full[i] = next.coord()[i] - curr.coord()[i];
   float ratio = 1.0;
   for (int i = 0; i < 3; ++i)
   {
     float r = 1.0;
     if (vector_full[i] < 0)
     {
-      if (next.position[i] < region_bound()[2 * i])
-        r = (region_bound()[2 * i] - curr.position[i]) / (next.position[i] - curr.position[i]);
+      if (next.coord()[i] < region_bound()[2 * i])
+        r = (region_bound()[2 * i] - curr.coord()[i]) / (next.coord()[i] - curr.coord()[i]);
     } else if (vector_full[i] > 0)
     {
-      if (next.position[i] >= region_bound()[2 * i + 1] + 1.0)
-        r = (region_bound()[2 * i + 1] + 1.0 - curr.position[i]) / (next.position[i] - curr.position[i]);
+      if (next.coord()[i] >= region_bound()[2 * i + 1] + 1.0)
+        r = (region_bound()[2 * i + 1] + 1.0 - curr.coord()[i]) / (next.coord()[i] - curr.coord()[i]);
     }
     ratio = std::min(r, ratio);
   }
-  Particle ret;
+  Particle<> ret;
   for (int i = 0; i < 3; ++i)
-    ret.position[i] = curr.position[i] + vector_full[i] * ratio;
-  ret.tube_id = curr.tube_id;
+    ret.coord()[i] = curr.coord()[i] + vector_full[i] * ratio;
+  ret.id() = curr.id();
   return ret;
 }
 
@@ -192,11 +190,11 @@ void Simulator::traceParticles()
 {
   leaving_particles_current_.clear();
   leaving_particles_next_.clear();
-  std::vector<Particle> particles_current;
-  std::vector<Particle> particles_next;
+  std::vector<Particle<> > particles_current;
+  std::vector<Particle<> > particles_next;
   for (unsigned int i = 0; i < particles_current_.size(); ++i)
   {
-    Particle next_particle = traceParticle(particles_current_[i]);
+    Particle<> next_particle = traceParticle(particles_current_[i]);
     if (isParticleInside(next_particle))
     {
       particles_current.push_back(particles_current_[i]);
@@ -204,7 +202,7 @@ void Simulator::traceParticles()
       particles_next.push_back(next_particle);
     } else
     {
-      Particle current_particle = particles_current_[i];
+      Particle<> current_particle = particles_current_[i];
 //      Particle boundary_particle = findBoundaryParticle(current_particle, next_particle);
 //      fillParticleScalars(&boundary_particle);
 //      particles_current.push_back(current_particle);
@@ -217,31 +215,31 @@ void Simulator::traceParticles()
   particles_next_ = particles_next;
 }
 
-Particle Simulator::traceParticle(const Particle& particle) const
+Particle<> Simulator::traceParticle(const Particle<>& particle) const
 {
   float velocity3[3];
   getParticleVelocity(particle, velocity3);
 //  std::cout << "Velocity: " << velocity3[0] << ", " << velocity3[1] << ", " << velocity3[2] << std::endl;
-  Particle ret;
-  ret.position[0] = particle.position[0] + velocity3[0] * velocity();
-  ret.position[1] = particle.position[1] + velocity3[1] * velocity();
-  ret.position[2] = particle.position[2] + velocity3[2] * velocity();
-  ret.tube_id = particle.tube_id;
+  Particle<> ret;
+  ret.coord()[0] = particle.coord()[0] + velocity3[0] * velocity();
+  ret.coord()[1] = particle.coord()[1] + velocity3[1] * velocity();
+  ret.coord()[2] = particle.coord()[2] + velocity3[2] * velocity();
+  ret.id() = particle.id();
   return ret;
 }
 
-void Simulator::getParticleVelocity(const Particle& particle, float velocity3[3]) const
+void Simulator::getParticleVelocity(const Particle<>& particle, float velocity3[3]) const
 {
   int lower_bound[3];
-  lower_bound[0] = int(particle.position[0] - region_bound()[0]);
-  lower_bound[1] = int(particle.position[1] - region_bound()[2]);
-  lower_bound[2] = int(particle.position[2] - region_bound()[4]);
+  lower_bound[0] = int(particle.coord()[0] - region_bound()[0]);
+  lower_bound[1] = int(particle.coord()[1] - region_bound()[2]);
+  lower_bound[2] = int(particle.coord()[2] - region_bound()[4]);
   lower_bound[0] = std::min(int(region_bound()[1] - region_bound()[0]) - 2, lower_bound[0]);
   lower_bound[1] = std::min(int(region_bound()[3] - region_bound()[2]) - 2, lower_bound[1]);
   lower_bound[2] = std::min(int(region_bound()[5] - region_bound()[4]) - 2, lower_bound[2]);
-  float ratio_xyz[3] = {particle.position[0] - region_bound()[0] - float(lower_bound[0]),
-                        particle.position[1] - region_bound()[2] - float(lower_bound[1]),
-                        particle.position[2] - region_bound()[4] - float(lower_bound[2])};
+  float ratio_xyz[3] = {particle.coord()[0] - region_bound()[0] - float(lower_bound[0]),
+                        particle.coord()[1] - region_bound()[2] - float(lower_bound[1]),
+                        particle.coord()[2] - region_bound()[4] - float(lower_bound[2])};
   float ratio_000 = ratio_xyz[0] * ratio_xyz[1] * ratio_xyz[2];
   float ratio_001 = ratio_xyz[0] * ratio_xyz[1] * (1.0 - ratio_xyz[2]);
   float ratio_010 = ratio_xyz[0] * (1.0 - ratio_xyz[1]) * ratio_xyz[2];
@@ -280,19 +278,19 @@ void Simulator::getParticleVelocity(const Particle& particle, float velocity3[3]
                + flow_field_[2][index_110] * ratio_001 + flow_field_[2][index_111] * ratio_000;
 }
 
-void Simulator::fillParticleScalars(Particle* particle) const
+void Simulator::fillParticleScalars(Particle<>* particle) const
 {
   int lower_bound[3];
-  lower_bound[0] = int(particle->position[0] - region_bound()[0]);
+  lower_bound[0] = int(particle->coord()[0] - region_bound()[0]);
   lower_bound[0] = std::min(int(region_bound()[1] - region_bound()[0]) - 2, lower_bound[0]);
-  lower_bound[1] = int(particle->position[1] - region_bound()[2]);
+  lower_bound[1] = int(particle->coord()[1] - region_bound()[2]);
   lower_bound[1] = std::min(int(region_bound()[3] - region_bound()[2]) - 2, lower_bound[1]);
-  lower_bound[2] = int(particle->position[2] - region_bound()[4]);
+  lower_bound[2] = int(particle->coord()[2] - region_bound()[4]);
   lower_bound[2] = std::min(int(region_bound()[5] - region_bound()[4]) - 2, lower_bound[2]);
   assert(lower_bound[0] >= 0 && lower_bound[1] >= 0 && lower_bound[2] >= 0);
-  float ratio_xyz[3] = {particle->position[0] - region_bound()[0] - float(lower_bound[0]),
-                        particle->position[1] - region_bound()[2] - float(lower_bound[1]),
-                        particle->position[2] - region_bound()[4] - float(lower_bound[2])};
+  float ratio_xyz[3] = {particle->coord()[0] - region_bound()[0] - float(lower_bound[0]),
+                        particle->coord()[1] - region_bound()[2] - float(lower_bound[1]),
+                        particle->coord()[2] - region_bound()[4] - float(lower_bound[2])};
   float ratio_000 = ratio_xyz[0] * ratio_xyz[1] * ratio_xyz[2];
   float ratio_001 = ratio_xyz[0] * ratio_xyz[1] * (1.0 - ratio_xyz[2]);
   float ratio_010 = ratio_xyz[0] * (1.0 - ratio_xyz[1]) * ratio_xyz[2];
@@ -317,16 +315,16 @@ void Simulator::fillParticleScalars(Particle* particle) const
                 + region_range()[0] * region_range()[1] * lower_bound[2];
   int index_111 = (lower_bound[0] + 1) + region_range()[0] * (lower_bound[1] + 1)
                 + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  particle->scalars[0] = flow_field_[3][index_000] * ratio_111 + flow_field_[3][index_001] * ratio_110
+  particle->scalar(0) = flow_field_[3][index_000] * ratio_111 + flow_field_[3][index_001] * ratio_110
                        + flow_field_[3][index_010] * ratio_101 + flow_field_[3][index_011] * ratio_100
                        + flow_field_[3][index_100] * ratio_011 + flow_field_[3][index_101] * ratio_010
                        + flow_field_[3][index_110] * ratio_001 + flow_field_[3][index_111] * ratio_000;
-  particle->scalars[0] *= 10.0;
-  particle->scalars[1] = flow_field_[4][index_000] * ratio_111 + flow_field_[4][index_001] * ratio_110
+  particle->scalar(0) *= 10.0;
+  particle->scalar(1) = flow_field_[4][index_000] * ratio_111 + flow_field_[4][index_001] * ratio_110
                        + flow_field_[4][index_010] * ratio_101 + flow_field_[4][index_011] * ratio_100
                        + flow_field_[4][index_100] * ratio_011 + flow_field_[4][index_101] * ratio_010
                        + flow_field_[4][index_110] * ratio_001 + flow_field_[4][index_111] * ratio_000;
-  particle->scalars[2] = flow_field_[5][index_000] * ratio_111 + flow_field_[5][index_001] * ratio_110
+  particle->scalar(2) = flow_field_[5][index_000] * ratio_111 + flow_field_[5][index_001] * ratio_110
                        + flow_field_[5][index_010] * ratio_101 + flow_field_[5][index_011] * ratio_100
                        + flow_field_[5][index_100] * ratio_011 + flow_field_[5][index_101] * ratio_010
                        + flow_field_[5][index_110] * ratio_001 + flow_field_[5][index_111] * ratio_000;
@@ -334,18 +332,18 @@ void Simulator::fillParticleScalars(Particle* particle) const
       && lower_bound[1] < int(region_bound()[3] - region_bound()[2]) - 1
       && lower_bound[2] < int(region_bound()[5] - region_bound()[4]) - 1))
   {
-//    std::cout << particle->scalars[0] << std::endl;
+//    std::cout << particle->scalar(0) << std::endl;
   }
   assert(lower_bound[0] < int(region_bound()[1] - region_bound()[0]) - 1
       && lower_bound[1] < int(region_bound()[3] - region_bound()[2]) - 1
       && lower_bound[2] < int(region_bound()[5] - region_bound()[4]) - 1);
 }
 
-bool Simulator::isParticleInside(const Particle& particle) const
+bool Simulator::isParticleInside(const Particle<>& particle) const
 {
   for (int i = 0; i < 3; ++i)
-    if (particle.position[i] < region_bound()[2 * i]
-     || particle.position[i] >= region_bound()[2 * i + 1] + 1.0)
+    if (particle.coord()[i] < region_bound()[2 * i]
+     || particle.coord()[i] >= region_bound()[2 * i + 1] + 1.0)
       return false;
   return true;
 }
@@ -356,16 +354,16 @@ void Simulator::communicateWithNeighbors()
     std::map<int, std::vector<unsigned int> > map_rank_particles;
     for (unsigned int i = 0; i < leaving_particles_next_.size(); ++i)
     {
-        Particle particle = leaving_particles_next_[i];
+        Particle<> particle = leaving_particles_next_[i];
         std::vector<int> next_region_index = region_index();
         for (int j = 0; j < 3; ++j)
         {
-            if (particle.position[j] < region_bound()[2 * j])
+            if (particle.coord()[j] < region_bound()[2 * j])
             {
                 --next_region_index[j];
                 break;
             }
-            else if (particle.position[j] >= region_bound()[2 * j + 1])
+            else if (particle.coord()[j] >= region_bound()[2 * j + 1])
             {
                 ++next_region_index[j];
                 break;
@@ -402,22 +400,22 @@ void Simulator::communicateWithNeighbors()
       int* id = new int [particle_count * 2];
       for (int j = 0; j < particle_count; ++j)
       { // current
-        Particle p1 = leaving_particles_current_[ps[j]];
+        Particle<> p1 = leaving_particles_current_[ps[j]];
         fillParticleScalars(&p1);
         int inc = 0;
-        data[j * nAttributes() * 2 + inc++] = p1.position[0];
-        data[j * nAttributes() * 2 + inc++] = p1.position[1];
-        data[j * nAttributes() * 2 + inc++] = p1.position[2];
+        data[j * nAttributes() * 2 + inc++] = p1.coord()[0];
+        data[j * nAttributes() * 2 + inc++] = p1.coord()[1];
+        data[j * nAttributes() * 2 + inc++] = p1.coord()[2];
         for (int k = 0; k < nScalars(); ++k)
-            data[j * nAttributes() * 2 + inc++] = p1.scalars[k];
-        id[j * 2 + 0] = p1.tube_id;
+            data[j * nAttributes() * 2 + inc++] = p1.scalar(k);
+        id[j * 2 + 0] = p1.id();
         // next
-        data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].position[0];
-        data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].position[1];
-        data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].position[2];
+        data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].coord()[0];
+        data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].coord()[1];
+        data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].coord()[2];
         for (int k = 0; k < nScalars(); ++k)
-            data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].scalars[k];
-        id[j * 2 + 1] = leaving_particles_next_[ps[j]].tube_id;
+            data[j * nAttributes() * 2 + inc++] = leaving_particles_next_[ps[j]].scalar(k);
+        id[j * 2 + 1] = leaving_particles_next_[ps[j]].id();
       }
 //      std::cout << "    Rank: " << this_rank_region
 //                << " sending " << particle_count
@@ -452,22 +450,22 @@ void Simulator::communicateWithNeighbors()
              TAG_TIMESTEP_DATA, MPI_COMM_WORLD, &status);
     for (int j = 0; j < particle_count; ++j)
     {
-      Particle p1, p2;
-      p1.position[0] = data[j * 6 * 2 + 0];
-      p1.position[1] = data[j * 6 * 2 + 1];
-      p1.position[2] = data[j * 6 * 2 + 2];
-      p1.scalars[0] = data[j * 6 * 2 + 3];
-      p1.scalars[1] = data[j * 6 * 2 + 4];
-      p1.scalars[2] = data[j * 6 * 2 + 5];
-      p1.tube_id = id[j * 2 + 0];
+      Particle<> p1, p2;
+      p1.coord()[0] = data[j * 6 * 2 + 0];
+      p1.coord()[1] = data[j * 6 * 2 + 1];
+      p1.coord()[2] = data[j * 6 * 2 + 2];
+      p1.scalar(0) = data[j * 6 * 2 + 3];
+      p1.scalar(1) = data[j * 6 * 2 + 4];
+      p1.scalar(2) = data[j * 6 * 2 + 5];
+      p1.id() = id[j * 2 + 0];
 
-      p2.position[0] = data[j * 6 * 2 + 6];
-      p2.position[1] = data[j * 6 * 2 + 7];
-      p2.position[2] = data[j * 6 * 2 + 8];
-      p2.scalars[0] = data[j * 6 * 2 + 9];
-      p2.scalars[1] = data[j * 6 * 2 + 10];
-      p2.scalars[2] = data[j * 6 * 2 + 11];
-      p2.tube_id = id[j * 2 + 1];
+      p2.coord()[0] = data[j * 6 * 2 + 6];
+      p2.coord()[1] = data[j * 6 * 2 + 7];
+      p2.coord()[2] = data[j * 6 * 2 + 8];
+      p2.scalar(0) = data[j * 6 * 2 + 9];
+      p2.scalar(1) = data[j * 6 * 2 + 10];
+      p2.scalar(2) = data[j * 6 * 2 + 11];
+      p2.id() = id[j * 2 + 1];
 
       if (!isParticleInside(p2))
         continue;
@@ -480,7 +478,7 @@ void Simulator::communicateWithNeighbors()
 //              << " Particles_: ";
 //    for (unsigned int j = 0; j < particles_.size(); ++j)
 //    {
-//      std::cout << particles_[j].position[0] << ", " << particles_[j].position[1] << ", " << particles_[j].position[2] << ";; ";
+//      std::cout << particles_[j].coord()[0] << ", " << particles_[j].coord()[1] << ", " << particles_[j].coord()[2] << ";; ";
 //    }
 //    std::cout << std::endl;
     delete [] data;
@@ -490,7 +488,7 @@ void Simulator::communicateWithNeighbors()
 /*
 void Simulator::writeToFile()
 {
-  std::vector<Particle> ps1, ps2;
+  std::vector<Particle<> > ps1, ps2;
   ps1 = particles_current_;
   ps2 = particles_next_;
   assert(ps1.size() == ps2.size());
@@ -547,7 +545,7 @@ std::vector<int> Simulator::getNeighborRanks() const
   return ranks;
 }
 
-bool Simulator::write(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2) const
+bool Simulator::write(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2) const
 {
   float* data1[6]; // x, y, z, density, entropy, pressure
   float* data2[6];
@@ -561,23 +559,23 @@ bool Simulator::write(const std::vector<Particle>& particles1, const std::vector
   for (unsigned int i = 0; i < particles1.size(); ++i)
   {
     // p1
-    Particle p1 = particles1[i];
-    data1[0][i] = p1.position[0];
-    data1[1][i] = p1.position[1];
-    data1[2][i] = p1.position[2];
-    data1[3][i] = p1.scalars[0];
-    data1[4][i] = p1.scalars[1];
-    data1[5][i] = p1.scalars[2];
-    id1[i] = p1.tube_id;
+    Particle<> p1 = particles1[i];
+    data1[0][i] = p1.coord()[0];
+    data1[1][i] = p1.coord()[1];
+    data1[2][i] = p1.coord()[2];
+    data1[3][i] = p1.scalar(0);
+    data1[4][i] = p1.scalar(1);
+    data1[5][i] = p1.scalar(2);
+    id1[i] = p1.id();
     // p2
-    Particle p2 = particles2[i];
-    data2[0][i] = p2.position[0];
-    data2[1][i] = p2.position[1];
-    data2[2][i] = p2.position[2];
-    data2[3][i] = p2.scalars[0];
-    data2[4][i] = p2.scalars[1];
-    data2[5][i] = p2.scalars[2];
-    id2[i] = p2.tube_id;
+    Particle<> p2 = particles2[i];
+    data2[0][i] = p2.coord()[0];
+    data2[1][i] = p2.coord()[1];
+    data2[2][i] = p2.coord()[2];
+    data2[3][i] = p2.scalar(0);
+    data2[4][i] = p2.scalar(1);
+    data2[5][i] = p2.scalar(2);
+    id2[i] = p2.id();
   }
   char timestep_string[10];
   sprintf(timestep_string, "%05d", out_timestep_);
@@ -624,10 +622,10 @@ bool Simulator::write(const std::vector<Particle>& particles1, const std::vector
 }
 
 /*
-bool Simulator::sendtoinsitu(const std::vector<Particle>& particles1, const std::vector<Particle>& particles2)
+bool Simulator::sendtoinsitu(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2)
 {
-  std::vector<tube::Particle> p1 = translatetotubeparticle(particles1);
-  std::vector<tube::Particle> p2 = translatetotubeparticle(particles2);
+  std::vector<tube::Particle<> > p1 = translatetotubeparticle(particles1);
+  std::vector<tube::Particle<> > p2 = translatetotubeparticle(particles2);
 
   static bool first_time = true;
   if (first_time)
@@ -655,16 +653,16 @@ bool Simulator::sendtoinsitu(const std::vector<Particle>& particles1, const std:
 */
 
 /*
-std::vector<tube::Particle> Simulator::translatetotubeparticle(const std::vector<Particle>& particles) const
+std::vector<tube::Particle<> > Simulator::translatetotubeparticle(const std::vector<Particle<> >& particles) const
 {
-  std::vector<tube::Particle> ret(particles.size());
+  std::vector<tube::Particle<> > ret(particles.size());
   for (unsigned int i = 0; i < particles.size(); ++i)
   {
-    ret[i].x = particles[i].position[0];
-    ret[i].y = particles[i].position[1];
-    ret[i].z = particles[i].position[2];
-    ret[i].pd = particles[i].scalars[0];
-    ret[i].id = particles[i].tube_id;
+    ret[i].x = particles[i].coord()[0];
+    ret[i].y = particles[i].coord()[1];
+    ret[i].z = particles[i].coord()[2];
+    ret[i].pd = particles[i].scalar(0);
+    ret[i].id = particles[i].id();
   }
   return ret;
 }
