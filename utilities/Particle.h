@@ -2,6 +2,7 @@
 #define __Particle_h__
 
 #include <vector>
+#include <cassert>
 
 template <class T = float>
 class Particle
@@ -25,6 +26,7 @@ public:
 	const std::vector<T>& coord() const { return Coord; }
 	std::vector<T>& coord() { return Coord; }
 	const std::vector<T>& scalars() const { return Scalars; }
+	unsigned int numScalars() const { return Scalars.size(); }
 	std::vector<T>& scalars() { return Scalars; }
 	T scalar(unsigned idx) const;
 	T& scalar(unsigned idx);
@@ -61,7 +63,9 @@ T Particle<T>::operator[](unsigned int idx) const
 {
 	if (idx < 3)
 		return Coord[idx];
-	return Scalars[idx - 3];
+	if (idx == 3)
+		return Id;
+	return Scalars[idx - 4];
 }
 
 template <class T>
@@ -69,7 +73,9 @@ T& Particle<T>::operator[](unsigned int idx)
 {
 	if (idx < 3)
 		return Coord[idx];
-	return Scalars[idx - 3];
+	if (idx == 3)
+		return Id;
+	return Scalars[idx - 4];
 }
 
 template <class T>

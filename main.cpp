@@ -15,7 +15,7 @@
 #include "mkpath.h"
 
 CoreTube coretube;
-std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
+// std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
 
 int main(int argc, char* argv[])
 {
@@ -57,9 +57,7 @@ int main(int argc, char* argv[])
     for (int timestep = range[0]; timestep <= range[1]; ++timestep)
     {
         sim.trace(fields);
-        coretube.GenerateTubes(
-                translate2tubeparticle(sim.prevParticles()),
-                translate2tubeparticle(sim.nextParticles()));
+        coretube.GenerateTubes(sim.prevParticles(), sim.nextParticles());
     }
 
     // output and finalize
@@ -72,16 +70,16 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles)
-{
-    std::vector<tube::Particle> ret(particles.size());
-    for (unsigned int i = 0; i < particles.size(); ++i)
-    {
-        ret[i].x = particles[i].coord()[0];
-        ret[i].y = particles[i].coord()[1];
-        ret[i].z = particles[i].coord()[2];
-        ret[i].pd = particles[i].scalar(0);
-        ret[i].id = particles[i].id();
-    }
-    return ret;
-}
+// std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles)
+// {
+//     std::vector<tube::Particle> ret(particles.size());
+//     for (unsigned int i = 0; i < particles.size(); ++i)
+//     {
+//         ret[i].x = particles[i].coord()[0];
+//         ret[i].y = particles[i].coord()[1];
+//         ret[i].z = particles[i].coord()[2];
+//         ret[i].pd = particles[i].scalar(0);
+//         ret[i].id = particles[i].id();
+//     }
+//     return ret;
+// }
