@@ -9,6 +9,7 @@ set(BUILD_TUBE_GENERATOR ON CACHE BOOL "whether to build the tube generator libr
 include_directories(geometry utilities)
 add_subdirectory(geometry)
 add_subdirectory(utilities)
+add_subdirectory(test)
 
 if( BUILD_PARTICLE_TRACER )
     include_directories(particletracer)
