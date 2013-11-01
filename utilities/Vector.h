@@ -1,5 +1,9 @@
+#ifndef __Vector_h__
+#define __Vector_h__
+
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 template <int Dim = 3, class T = float>
 class Vector
@@ -22,6 +26,9 @@ public:
 	T& w() { return Vals[4]; }
 
 	// operators
+	// 
+	// "<<"" stream extraction operator is provided
+	//
 	// ==
 	bool operator==(const Vector<Dim, T>& right) const;
 	bool operator!=(const Vector<Dim, T>& right) const;
@@ -38,12 +45,15 @@ public:
 	Vector<Dim, T> operator/(const T& right) const;
 	Vector<Dim, T> operator/(const Vector<Dim, T>& right) const;
 	// length
+	T length2() const;
 	T length() const;
 	// normalize
 	Vector<Dim, T> normal() const;
 	void normalize();
 	//
 	// dot product and cross product are provided as external functions in this file.
+	//
+	// distance and distance2 are provided as external functions in this file.
 	//
 
 protected:
@@ -87,6 +97,16 @@ T& Vector<Dim, T>::operator[](unsigned int idx)
 {
 	assert(idx < Dim);
 	return Vals[idx];
+}
+
+template <int Dim, class T>
+std::ostream& operator<<(std::ostream& os, const Vector<Dim, T>& v)
+{
+	os << '[';
+	for (int i = 0; i < Dim - 1; ++i)
+		os << v[i] << ',';
+	os << v[Dim - 1] << ']';
+	return os;
 }
 
 template <int Dim, class T>
@@ -177,6 +197,35 @@ Vector<Dim, T> Vector<Dim, T>::operator/(const Vector<Dim, T>& right) const
 }
 
 template <int Dim, class T>
+T Vector<Dim, T>::length2() const
+{
+	T sqsum = 0.0;
+	for (int i = 0; i < Dim; ++i)
+		sqsum += this->Vals[i] * this->Vals[i];
+	return sqsum;
+}
+
+template <int Dim, class T>
+T Vector<Dim, T>::length() const
+{
+	return sqrt(length2());
+}
+
+template <int Dim, class T>
+Vector<Dim, T> Vector<Dim, T>::normal() const
+{
+	return *this / this->length();
+}
+
+template <int Dim, class T>
+void Vector<Dim, T>::normalize()
+{
+	T len = this->length();
+	for (int i = 0; i < Dim; ++i)
+		this-> Vals[i] = this->Vals[i] / len;
+}
+
+template <int Dim, class T>
 T dot(const Vector<Dim, T>& l, const Vector<Dim, T>& r)
 {
 	T ret = 0.0;
@@ -197,24 +246,17 @@ Vector<Dim, T> cross(const Vector<Dim, T>& l, const Vector<Dim, T>& r)
 }
 
 template <int Dim, class T>
-T Vector<Dim, T>::length() const
+T distance2(const Vector<Dim, T>& l, const Vector<Dim, T>& r)
 {
-	T sqsum = 0.0;
-	for (int i = 0; i < Dim; ++i)
-		sqsum += this->Vals[i] * this->Vals[i];
-	return sqrt(sqsum);
+	T sum2 = 0.0;
+	Vector<Dim, T> delta = l - r;
+	return delta.length2();
 }
 
 template <int Dim, class T>
-Vector<Dim, T> Vector<Dim, T>::normal() const
+T distance(const Vector<Dim, T>& l, const Vector<Dim, T>& r)
 {
-	return *this / this->length();
+	return sqrt(distance2(l, r));
 }
 
-template <int Dim, class T>
-void Vector<Dim, T>::normalize()
-{
-	T len = this->length();
-	for (int i = 0; i < Dim; ++i)
-		this->Vals[i] / len;
-}
+#endif //__Vector_h__

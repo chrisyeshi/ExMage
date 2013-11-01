@@ -57,6 +57,13 @@ int main(void)
 	vr.normalize();
 	assert(n == vr);
 	assert(n == Vector<3>(0.f, 0.f, -1.f));
+	// normalize
+	Vector<3> three(3.f, 0.f, 0.f);
+	three.normalize();
+	assert(three == Vector<3>(1.f, 0.f, 0.f));
+	// distance
+	float dist = distance(Vector<3>(0.f, 0.f, 0.f), Vector<3>(1.f, 0.f, 0.f));
+	assert(fabs(dist - 1.f) < 0.0001);
 	std::cout << "all working!" << std::endl;
 
 	return 0;

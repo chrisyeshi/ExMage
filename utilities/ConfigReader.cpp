@@ -24,20 +24,20 @@ std::vector<CameraCore> ConfigReader::GetCameras() const
     picojson::array camfoc = camera.get("focal").get<picojson::array>();
     picojson::array viewup = camera.get("up").get<picojson::array>();
 
-    Point camPos;
-    camPos.x = campos[0].get<double>();
-    camPos.y = campos[1].get<double>();
-    camPos.z = campos[2].get<double>();
+    Vector<> camPos;
+    camPos.x() = campos[0].get<double>();
+    camPos.y() = campos[1].get<double>();
+    camPos.z() = campos[2].get<double>();
 
-    Point camFoc;
-    camFoc.x = camfoc[0].get<double>();
-    camFoc.y = camfoc[1].get<double>();
-    camFoc.z = camfoc[2].get<double>();
+    Vector<> camFoc;
+    camFoc.x() = camfoc[0].get<double>();
+    camFoc.y() = camfoc[1].get<double>();
+    camFoc.z() = camfoc[2].get<double>();
 
-    Vector viewUp;
-    viewUp.x = viewup[0].get<double>();
-    viewUp.y = viewup[1].get<double>();
-    viewUp.z = viewup[2].get<double>();
+    Vector<> viewUp;
+    viewUp.x() = viewup[0].get<double>();
+    viewUp.y() = viewup[1].get<double>();
+    viewUp.z() = viewup[2].get<double>();
 
     CameraCore cam;
     cam.Position = camPos;
@@ -48,20 +48,20 @@ std::vector<CameraCore> ConfigReader::GetCameras() const
     return ret;
 }
 
-Point ConfigReader::GetLightPosition() const
+Vector<> ConfigReader::GetLightPosition() const
 {
     if (!v.contains("light position"))
     {
         std::cout << "Warning: Using default light position!" << std::endl;
-        Point empty;
+        Vector<> empty;
         return empty;
     }
 
-    Point ret;
+    Vector<> ret;
     picojson::array litposa = v.get("light position").get<picojson::array>();
-    ret.x = litposa[0].get<double>();
-    ret.y = litposa[1].get<double>();
-    ret.z = litposa[2].get<double>();
+    ret.x() = litposa[0].get<double>();
+    ret.y() = litposa[1].get<double>();
+    ret.z() = litposa[2].get<double>();
     
     return ret;
 }

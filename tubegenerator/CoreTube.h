@@ -16,7 +16,6 @@
 
 #include "TransferFunction.h"
 #include "CameraCore.h"
-#include "point.h"
 #include "ConfigReader.h"
 
 class Frame;
@@ -29,7 +28,7 @@ public:
 
   void Initialize();
   void SetCameras(const std::vector<CameraCore>& cameras);
-  void SetLightPosition(const Point& light) {LightPosition = light;};
+  void SetLightPosition(const Vector<>& light) {LightPosition = light;};
   void SetExtent(double extent[6]);
   void GenerateTubes(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2);
   int GetCameraCount() const {return Frames.size();};
@@ -48,7 +47,7 @@ protected:
 #endif
   TransferFunction Tf;
   int CurCamIndex;
-  Point LightPosition;
+  Vector<> LightPosition;
   std::vector<Frame*> Frames;
   GLuint DisplayListIndex;
   GLuint* Fbo;

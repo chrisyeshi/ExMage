@@ -12,7 +12,6 @@
 #include <fstream>
 
 #include "Frame.h"
-#include "vector.h"
 #include "PNGWriter.h"
 #include "ConfigReader.h"
 #include "ProcIndex.h"
@@ -83,9 +82,6 @@ void CoreTube::SetExtent(double extent[6])
 void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
                              const std::vector<Particle<> >& particles2)
 {
-  clock_t start, end, tick;
-  start = clock();
-//  std::cout << "particles2: " << particles2.size() << "\n";
   for (CurCamIndex = 0; CurCamIndex < Frames.size(); ++CurCamIndex)
   {
     for (BufferIndex = 0; BufferIndex < 5; ++BufferIndex)
@@ -96,24 +92,17 @@ void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_1D, Tf.GetTexture());
       glEnable(GL_TEXTURE_1D);
-      //  createDisplayList(particles1, particles2);
+
       setupCamera();
       setupLightEnv();
-      //    glCallList(DisplayListIndex);
+
       for (unsigned int i = 0; i < particles1.size(); ++i)
       {
-        Point p1(double(particles1[i].x()), double(particles1[i].y()), double(particles1[i].z()));
-        Point p2(double(particles2[i].x()), double(particles2[i].y()), double(particles2[i].z()));
-        if (d(p1, p2) > max_particle_gap())
+        if (distance(particles1[i].coord(), particles2[i].coord()) > max_particle_gap())
           continue;
         drawTube(particles1[i], particles2[i]);
         drawSphere(particles1[i], particles2[i]);
-        //      drawSphere(particles2[i], particles1[i]);
-
-//        glFinish();
-        //snapshot();
       }
-      //  deleteDisplayList();
       glDisable(GL_TEXTURE_1D);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_1D, 0);
@@ -215,10 +204,11 @@ void CoreTube::createDisplayList(const std::vector<Particle<> >& particles1,
   glNewList(DisplayListIndex, GL_COMPILE);
     for (unsigned int i = 0; i < particles1.size(); ++i)
     {
-      Point p1(double(particles1[i].x()), double(particles1[i].y()), double(particles1[i].z()));
-      Point p2(double(particles2[i].x()), double(particles2[i].y()), double(particles2[i].z()));
-      if (d(p1, p2) > max_particle_gap())
+      if (distance(particles1[i].coord(), particles2[i].coord()) > max_particle_gap())
+      {
+        std::cout << "haha?" << std::endl;
         continue;
+      }
       drawTube(particles1[i], particles2[i]);
       drawSphere(particles1[i], particles2[i]);
 //      drawSphere(particles2[i], particles1[i]);
@@ -562,9 +552,9 @@ void CoreTube::setupCamera()
   glLoadIdentity();
 
   CameraCore cam = Frames[CurCamIndex]->GetCamera();
-  gluLookAt(cam.Position.x, cam.Position.y, cam.Position.z,
-            cam.Focal.x, cam.Focal.y, cam.Focal.z,
-            cam.ViewUp.x, cam.ViewUp.y, cam.ViewUp.z);
+  gluLookAt(cam.Position.x(), cam.Position.y(), cam.Position.z(),
+            cam.Focal.x(), cam.Focal.y(), cam.Focal.z(),
+            cam.ViewUp.x(), cam.ViewUp.y(), cam.ViewUp.z());
 
   calcDomain();
 
@@ -579,28 +569,28 @@ void CoreTube::setupCamera()
 
 void CoreTube::setupLightEnv()
 {
-  GLfloat light_position[] = {LightPosition.x,
-                              LightPosition.y,
-                              LightPosition.z,
+  GLfloat light_position[] = {LightPosition.x(),
+                              LightPosition.y(),
+                              LightPosition.z(),
                               0.0};
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
 void CoreTube::drawTube(const Particle<>& p1, const Particle<>& p2)
 {
-  Vector pa(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
-  double len = pa.len();
+  Vector<> pa = p2.coord() - p1.coord();
+  double len = pa.length();
   pa.normalize();
-  Vector za(0.0, 0.0, 1.0);
+  Vector<> za(0.0, 0.0, 1.0);
   za.normalize();
-  Vector cr = pa ^ za; // cross product
+  Vector<> cr = cross(pa, za); // cross product
   cr.normalize();
-  double angle = acos(pa * za);
+  double angle = acos(dot(pa, za));
 
   glPushMatrix();
 
   glTranslatef(p1.x(), p1.y(), p1.z());
-  glRotatef(-angle * 180.0 / M_PI, cr.x, cr.y, cr.z);
+  glRotatef(-angle * 180.0 / M_PI, cr.x(), cr.y(), cr.z());
 
   int num_slices = 30;
   double angle_per_slice = 2 * M_PI / float(num_slices);
@@ -615,32 +605,31 @@ void CoreTube::drawTube(const Particle<>& p1, const Particle<>& p2)
 //    Color color[2];
 //    color[0] = Tf.GetColor(p1.pd);
 //    color[1] = Tf.GetColor(p2.pd);
-    Vector n;
-    n = Vector(x1, y1, 0.0);
+    Vector<> n(x1, y1, 0.0);
     n.normalize();
 
     for (unsigned int i = 0; i < p1.numScalars(); ++i)
       glMultiTexCoord1f(GL_TEXTURE0 + i, p1.scalar(i));
     glMultiTexCoord1f(GL_TEXTURE0 + p1.numScalars(), p1.id());
-    glNormal3f(n.x, n.y, n.z); glVertex3f(x1, y1, 0.0);
+    glNormal3f(n.x(), n.y(), n.z()); glVertex3f(x1, y1, 0.0);
 
     for (unsigned int i = 0; i < p2.numScalars(); ++i)
       glMultiTexCoord1f(GL_TEXTURE0 + i, p2.scalar(i));
     glMultiTexCoord1f(GL_TEXTURE0 + p2.numScalars(), p2.id());
-    glNormal3f(n.x, n.y, n.z); glVertex3f(x1, y1, len);
+    glNormal3f(n.x(), n.y(), n.z()); glVertex3f(x1, y1, len);
 
-    n = Vector(x2, y2, 0.0);
+    n = Vector<>(x2, y2, 0.0);
     n.normalize();
 
     for (unsigned int i = 0; i < p2.numScalars(); ++i)
       glMultiTexCoord1f(GL_TEXTURE0 + i, p2.scalar(i));
     glMultiTexCoord1f(GL_TEXTURE0 + p2.numScalars(), p2.id());
-    glNormal3f(n.x, n.y, n.z); glVertex3f(x2, y2, len);
+    glNormal3f(n.x(), n.y(), n.z()); glVertex3f(x2, y2, len);
 
     for (unsigned int i = 0; i < p1.numScalars(); ++i)
       glMultiTexCoord1f(GL_TEXTURE0 + i, p1.scalar(i));
     glMultiTexCoord1f(GL_TEXTURE0 + p1.numScalars(), p1.id());
-    glNormal3f(n.x, n.y, n.z); glVertex3f(x2, y2, 0.0);
+    glNormal3f(n.x(), n.y(), n.z()); glVertex3f(x2, y2, 0.0);
   }
   glEnd();
 
@@ -649,14 +638,14 @@ void CoreTube::drawTube(const Particle<>& p1, const Particle<>& p2)
 
 void CoreTube::drawSphere(const Particle<>& p1, const Particle<>& p2)
 {
-  Vector pa(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
-  double len = pa.len();
+  Vector<> pa = p2.coord() - p1.coord();
+  double len = pa.length();
   pa.normalize();
-  Vector za(0.0, 0.0, 1.0);
+  Vector<> za(0.0, 0.0, 1.0);
   za.normalize();
-  Vector cr = pa ^ za; // cross product
+  Vector<> cr = cross(pa, za); // cross product
   cr.normalize();
-  double angle = acos(pa * za);
+  double angle = acos(dot(pa, za));
 
   glPushMatrix();
 
@@ -665,7 +654,7 @@ void CoreTube::drawSphere(const Particle<>& p1, const Particle<>& p2)
   glMultiTexCoord1f(GL_TEXTURE0 + p1.numScalars(), p1.id());
 
   glTranslatef(p1.x(), p1.y(), p1.z());
-  glRotatef(-angle * 180.0 / M_PI, cr.x, cr.y, cr.z);
+  glRotatef(-angle * 180.0 / M_PI, cr.x(), cr.y(), cr.z());
 
   GLUquadric* q = gluNewQuadric();
   gluQuadricNormals(q, GLU_SMOOTH);
@@ -766,13 +755,13 @@ void CoreTube::calcDomain()
   double t = -domain[4];
   domain[4] = -domain[5];
   domain[5] = t;
-/*
-  std::cout << "Domain: ";
-  for (int i = 0; i < 6; ++i)
-  {
-    std::cout << domain[i] << ", ";
-  }
-  std::cout << std::endl;
-*/
+
+  // std::cout << "Domain: ";
+  // for (int i = 0; i < 6; ++i)
+  // {
+  //   std::cout << domain[i] << ", ";
+  // }
+  // std::cout << std::endl;
+
   Frames[CurCamIndex]->SetDataDomain(domain);
 }
