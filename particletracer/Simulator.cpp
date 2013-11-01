@@ -146,7 +146,7 @@ void Simulator::initializeParticles(int particle_count)
     {
         for (int i = 0; i < 3; ++i)
         {
-              particles_current_[j].coord()[i] = float(rand() % int(region_range()[i] * 1000)) / 1000.0 + region_bound()[i * 2];
+            particles_current_[j].coord()[i] = float(rand() % int(region_range()[i] * 1000)) / 1000.0 + region_bound()[i * 2];
         }
         fillParticleScalars(&particles_current_[j]);
         // id
@@ -219,7 +219,7 @@ Particle<> Simulator::traceParticle(const Particle<>& particle) const
 {
   float velocity3[3];
   getParticleVelocity(particle, velocity3);
-//  std::cout << "Velocity: " << velocity3[0] << ", " << velocity3[1] << ", " << velocity3[2] << std::endl;
+  // std::cout << "Velocity: " << velocity3[0] << ", " << velocity3[1] << ", " << velocity3[2] << std::endl;
   Particle<> ret;
   ret.coord()[0] = particle.coord()[0] + velocity3[0] * velocity();
   ret.coord()[1] = particle.coord()[1] + velocity3[1] * velocity();

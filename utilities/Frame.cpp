@@ -202,9 +202,9 @@ bool Frame::Read()
   // read domain, size, depth buffer then color buffer
   double cam[9];
   fin.read(reinterpret_cast<char *>(cam), sizeof(double) * 9);
-  Camera.Position = Point(cam[0], cam[1], cam[2]);
-  Camera.Focal = Point(cam[3], cam[4], cam[5]);
-  Camera.ViewUp = Vector(cam[6], cam[7], cam[8]);
+  Camera.Position = Vector<>(cam[0], cam[1], cam[2]);
+  Camera.Focal = Vector<>(cam[3], cam[4], cam[5]);
+  Camera.ViewUp = Vector<>(cam[6], cam[7], cam[8]);
   fin.read(reinterpret_cast<char *>(Domain), sizeof(double) * 6);
   fin.read(reinterpret_cast<char *>(&Size[0]), sizeof(int) * 2);
 //  int num_element = Size[0] * Size[1];
@@ -249,9 +249,9 @@ bool Frame::Write()
     return false;
 
   // write domain, size
-  double cam[] = {Camera.Position.x, Camera.Position.y, Camera.Position.z,
-                  Camera.Focal.x, Camera.Focal.y, Camera.Focal.z,
-                  Camera.ViewUp.x, Camera.ViewUp.y, Camera.ViewUp.z};
+  double cam[] = {Camera.Position.x(), Camera.Position.y(), Camera.Position.z(),
+                  Camera.Focal.x(), Camera.Focal.y(), Camera.Focal.z(),
+                  Camera.ViewUp.x(), Camera.ViewUp.y(), Camera.ViewUp.z()};
   fout.write(reinterpret_cast<char *>(cam), sizeof(double) * 9);
   fout.write(reinterpret_cast<char *>(Domain), sizeof(double) * 6);
   fout.write(reinterpret_cast<char *>(&Size[0]), sizeof(int) * 2);

@@ -4,6 +4,8 @@
 #include <vector>
 #include <cassert>
 
+#include "Vector.h"
+
 template <class T = float>
 class Particle
 {
@@ -23,8 +25,8 @@ public:
 	T& y() { return Coord[1]; }
 	T z() const { return Coord[2]; }
 	T& z() { return Coord[2]; }
-	const std::vector<T>& coord() const { return Coord; }
-	std::vector<T>& coord() { return Coord; }
+	const Vector<3, T>& coord() const { return Coord; }
+	Vector<3, T>& coord() { return Coord; }
 	const std::vector<T>& scalars() const { return Scalars; }
 	unsigned int numScalars() const { return Scalars.size(); }
 	std::vector<T>& scalars() { return Scalars; }
@@ -35,7 +37,7 @@ public:
 
 protected:
 	unsigned int Id;
-	std::vector<T> Coord;
+	Vector<3, T> Coord;
 	std::vector<T> Scalars;
 
 private:
@@ -63,9 +65,7 @@ T Particle<T>::operator[](unsigned int idx) const
 {
 	if (idx < 3)
 		return Coord[idx];
-	if (idx == 3)
-		return Id;
-	return Scalars[idx - 4];
+	return Scalars[idx - 3];
 }
 
 template <class T>
@@ -73,9 +73,7 @@ T& Particle<T>::operator[](unsigned int idx)
 {
 	if (idx < 3)
 		return Coord[idx];
-	if (idx == 3)
-		return Id;
-	return Scalars[idx - 4];
+	return Scalars[idx - 3];
 }
 
 template <class T>

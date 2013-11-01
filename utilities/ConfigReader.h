@@ -4,7 +4,7 @@
 #include <string>
 #include "./picojson.h"
 #include "CameraCore.h"
-#include "point.h"
+#include "Vector.h"
 
 class ConfigReader
 {
@@ -21,7 +21,7 @@ public:
     }
 
     std::vector<CameraCore> GetCameras() const;
-    Point GetLightPosition() const;
+    Vector<> GetLightPosition() const;
     std::vector<int> GetTimeStepRange() const;
     std::string GetReadRoot() const;
     std::string GetOutRoot() const;

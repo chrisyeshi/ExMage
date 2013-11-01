@@ -6,9 +6,9 @@ set(BUILD_PARTICLE_TRACER ON CACHE BOOL "whether to build the particle tracer li
 set(BUILD_TUBE_GENERATOR ON CACHE BOOL "whether to build the tube generator library")
 
 # directories that are always built
-include_directories(geometry utilities)
-add_subdirectory(geometry)
+include_directories(utilities)
 add_subdirectory(utilities)
+add_subdirectory(test)
 
 if( BUILD_PARTICLE_TRACER )
     include_directories(particletracer)
@@ -35,6 +35,6 @@ link_directories( ${OSMESA_LIBRARY} )
 # only when both particletracer and tubegenerator are built, we then build the main function
 if( BUILD_PARTICLE_TRACER AND BUILD_TUBE_GENERATOR )
     add_executable(simulate main.cpp)
-    target_link_libraries(simulate geometry tubegenerator particletracer configreader mkpath)
-    file(COPY ${PROJECT_SOURCE_DIR}/tubegenerator/shaders ${PROJECT_SOURCE_DIR}/configure.json DESTINATION ${PROJECT_BINARY_DIR})
+    target_link_libraries(simulate tubegenerator particletracer configreader mkpath)
+    file(COPY ${PROJECT_SOURCE_DIR}/tubegenerator/shaders DESTINATION ${PROJECT_BINARY_DIR})
 endif( BUILD_PARTICLE_TRACER AND BUILD_TUBE_GENERATOR )
