@@ -15,6 +15,7 @@
 #include "ConfigReader.h"
 #include "ProcIndex.h"
 #include "mkpath.h"
+#include "VectorField.h"
 
 extern "C" {
   int readData(const char* filename,
@@ -46,7 +47,11 @@ Simulator::~Simulator()
 
 void Simulator::trace(std::vector<float*> fields)
 {
-    flow_field_ = fields;
+    flow_field_.resize(fields.size());
+    for (unsigned int i = 0; i < fields.size(); ++i)
+      flow_field_[i].setBuffer(fields[i], int(region_range()[0] + 0.5),
+                                          int(region_range()[1] + 0.5),
+                                          int(region_range()[2] + 0.5));
     static bool first_time = true;
     if (first_time)
     {
@@ -230,113 +235,20 @@ Particle<> Simulator::traceParticle(const Particle<>& particle) const
 
 void Simulator::getParticleVelocity(const Particle<>& particle, float velocity3[3]) const
 {
-  int lower_bound[3];
-  lower_bound[0] = int(particle.coord()[0] - region_bound()[0]);
-  lower_bound[1] = int(particle.coord()[1] - region_bound()[2]);
-  lower_bound[2] = int(particle.coord()[2] - region_bound()[4]);
-  lower_bound[0] = std::min(int(region_bound()[1] - region_bound()[0]) - 2, lower_bound[0]);
-  lower_bound[1] = std::min(int(region_bound()[3] - region_bound()[2]) - 2, lower_bound[1]);
-  lower_bound[2] = std::min(int(region_bound()[5] - region_bound()[4]) - 2, lower_bound[2]);
-  float ratio_xyz[3] = {particle.coord()[0] - region_bound()[0] - float(lower_bound[0]),
-                        particle.coord()[1] - region_bound()[2] - float(lower_bound[1]),
-                        particle.coord()[2] - region_bound()[4] - float(lower_bound[2])};
-  float ratio_000 = ratio_xyz[0] * ratio_xyz[1] * ratio_xyz[2];
-  float ratio_001 = ratio_xyz[0] * ratio_xyz[1] * (1.0 - ratio_xyz[2]);
-  float ratio_010 = ratio_xyz[0] * (1.0 - ratio_xyz[1]) * ratio_xyz[2];
-  float ratio_011 = ratio_xyz[0] * (1.0 - ratio_xyz[1]) * (1.0 - ratio_xyz[2]);
-  float ratio_100 = (1.0 - ratio_xyz[0]) * ratio_xyz[1] * ratio_xyz[2];
-  float ratio_101 = (1.0 - ratio_xyz[0]) * ratio_xyz[1] * (1.0 - ratio_xyz[2]);
-  float ratio_110 = (1.0 - ratio_xyz[0]) * (1.0 - ratio_xyz[1]) * ratio_xyz[2];
-  float ratio_111 = (1.0 - ratio_xyz[0]) * (1.0 - ratio_xyz[1]) * (1.0 - ratio_xyz[2]);
-  int index_000 = lower_bound[0] + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_001 = lower_bound[0] + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  int index_010 = lower_bound[0] + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_011 = lower_bound[0] + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  int index_100 = (lower_bound[0] + 1) + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_101 = (lower_bound[0] + 1) + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  int index_110 = (lower_bound[0] + 1) + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_111 = (lower_bound[0] + 1) + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  velocity3[0] = flow_field_[0][index_000] * ratio_111 + flow_field_[0][index_001] * ratio_110
-               + flow_field_[0][index_010] * ratio_101 + flow_field_[0][index_011] * ratio_100
-               + flow_field_[0][index_100] * ratio_011 + flow_field_[0][index_101] * ratio_010
-               + flow_field_[0][index_110] * ratio_001 + flow_field_[0][index_111] * ratio_000;
-  velocity3[1] = flow_field_[1][index_000] * ratio_111 + flow_field_[1][index_001] * ratio_110
-               + flow_field_[1][index_010] * ratio_101 + flow_field_[1][index_011] * ratio_100
-               + flow_field_[1][index_100] * ratio_011 + flow_field_[1][index_101] * ratio_010
-               + flow_field_[1][index_110] * ratio_001 + flow_field_[1][index_111] * ratio_000;
-  velocity3[2] = flow_field_[2][index_000] * ratio_111 + flow_field_[2][index_001] * ratio_110
-               + flow_field_[2][index_010] * ratio_101 + flow_field_[2][index_011] * ratio_100
-               + flow_field_[2][index_100] * ratio_011 + flow_field_[2][index_101] * ratio_010
-               + flow_field_[2][index_110] * ratio_001 + flow_field_[2][index_111] * ratio_000;
+    for (int i = 0; i < 3; ++i)
+        velocity3[i] = flow_field_[i].interpolate(Vector<>(particle.coord()[0] - region_bound()[0],
+                                                           particle.coord()[1] - region_bound()[2],
+                                                           particle.coord()[2] - region_bound()[4]));
 }
 
 void Simulator::fillParticleScalars(Particle<>* particle) const
 {
-  int lower_bound[3];
-  lower_bound[0] = int(particle->coord()[0] - region_bound()[0]);
-  lower_bound[0] = std::min(int(region_bound()[1] - region_bound()[0]) - 2, lower_bound[0]);
-  lower_bound[1] = int(particle->coord()[1] - region_bound()[2]);
-  lower_bound[1] = std::min(int(region_bound()[3] - region_bound()[2]) - 2, lower_bound[1]);
-  lower_bound[2] = int(particle->coord()[2] - region_bound()[4]);
-  lower_bound[2] = std::min(int(region_bound()[5] - region_bound()[4]) - 2, lower_bound[2]);
-  assert(lower_bound[0] >= 0 && lower_bound[1] >= 0 && lower_bound[2] >= 0);
-  float ratio_xyz[3] = {particle->coord()[0] - region_bound()[0] - float(lower_bound[0]),
-                        particle->coord()[1] - region_bound()[2] - float(lower_bound[1]),
-                        particle->coord()[2] - region_bound()[4] - float(lower_bound[2])};
-  float ratio_000 = ratio_xyz[0] * ratio_xyz[1] * ratio_xyz[2];
-  float ratio_001 = ratio_xyz[0] * ratio_xyz[1] * (1.0 - ratio_xyz[2]);
-  float ratio_010 = ratio_xyz[0] * (1.0 - ratio_xyz[1]) * ratio_xyz[2];
-  float ratio_011 = ratio_xyz[0] * (1.0 - ratio_xyz[1]) * (1.0 - ratio_xyz[2]);
-  float ratio_100 = (1.0 - ratio_xyz[0]) * ratio_xyz[1] * ratio_xyz[2];
-  float ratio_101 = (1.0 - ratio_xyz[0]) * ratio_xyz[1] * (1.0 - ratio_xyz[2]);
-  float ratio_110 = (1.0 - ratio_xyz[0]) * (1.0 - ratio_xyz[1]) * ratio_xyz[2];
-  float ratio_111 = (1.0 - ratio_xyz[0]) * (1.0 - ratio_xyz[1]) * (1.0 - ratio_xyz[2]);
-  int index_000 = lower_bound[0] + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_001 = lower_bound[0] + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  int index_010 = lower_bound[0] + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_011 = lower_bound[0] + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  int index_100 = (lower_bound[0] + 1) + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_101 = (lower_bound[0] + 1) + region_range()[0] * lower_bound[1]
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  int index_110 = (lower_bound[0] + 1) + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * lower_bound[2];
-  int index_111 = (lower_bound[0] + 1) + region_range()[0] * (lower_bound[1] + 1)
-                + region_range()[0] * region_range()[1] * (lower_bound[2] + 1);
-  particle->scalar(0) = flow_field_[3][index_000] * ratio_111 + flow_field_[3][index_001] * ratio_110
-                       + flow_field_[3][index_010] * ratio_101 + flow_field_[3][index_011] * ratio_100
-                       + flow_field_[3][index_100] * ratio_011 + flow_field_[3][index_101] * ratio_010
-                       + flow_field_[3][index_110] * ratio_001 + flow_field_[3][index_111] * ratio_000;
-  particle->scalar(0) *= 10.0;
-  particle->scalar(1) = flow_field_[4][index_000] * ratio_111 + flow_field_[4][index_001] * ratio_110
-                       + flow_field_[4][index_010] * ratio_101 + flow_field_[4][index_011] * ratio_100
-                       + flow_field_[4][index_100] * ratio_011 + flow_field_[4][index_101] * ratio_010
-                       + flow_field_[4][index_110] * ratio_001 + flow_field_[4][index_111] * ratio_000;
-  particle->scalar(2) = flow_field_[5][index_000] * ratio_111 + flow_field_[5][index_001] * ratio_110
-                       + flow_field_[5][index_010] * ratio_101 + flow_field_[5][index_011] * ratio_100
-                       + flow_field_[5][index_100] * ratio_011 + flow_field_[5][index_101] * ratio_010
-                       + flow_field_[5][index_110] * ratio_001 + flow_field_[5][index_111] * ratio_000;
-  if (!(lower_bound[0] < int(region_bound()[1] - region_bound()[0]) - 1
-      && lower_bound[1] < int(region_bound()[3] - region_bound()[2]) - 1
-      && lower_bound[2] < int(region_bound()[5] - region_bound()[4]) - 1))
-  {
-//    std::cout << particle->scalar(0) << std::endl;
-  }
-  assert(lower_bound[0] < int(region_bound()[1] - region_bound()[0]) - 1
-      && lower_bound[1] < int(region_bound()[3] - region_bound()[2]) - 1
-      && lower_bound[2] < int(region_bound()[5] - region_bound()[4]) - 1);
+    Vector<> loc(particle->coord()[0] - region_bound()[0],
+                 particle->coord()[1] - region_bound()[2],
+                 particle->coord()[2] - region_bound()[4]);
+    for (int i = 0; i < 3; ++i)
+        particle->scalar(i) = flow_field_[3 + i].interpolate(loc);
+    particle->scalar(0) *= 10.0;
 }
 
 bool Simulator::isParticleInside(const Particle<>& particle) const
