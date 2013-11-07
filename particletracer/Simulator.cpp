@@ -47,11 +47,9 @@ Simulator::~Simulator()
 
 void Simulator::trace(std::vector<float*> fields)
 {
-    flow_field_.resize(fields.size());
-    for (unsigned int i = 0; i < fields.size(); ++i)
-      flow_field_[i].setBuffer(fields[i], int(region_range()[0] + 0.5),
-                                          int(region_range()[1] + 0.5),
-                                          int(region_range()[2] + 0.5));
+    flow_field_.set(fields, int(region_range()[0] + 0.5),
+                            int(region_range()[1] + 0.5),
+                            int(region_range()[2] + 0.5));
     static bool first_time = true;
     if (first_time)
     {
@@ -235,19 +233,18 @@ Particle<> Simulator::traceParticle(const Particle<>& particle) const
 
 void Simulator::getParticleVelocity(const Particle<>& particle, float velocity3[3]) const
 {
+    Vector<> region_min(region_bound()[0], region_bound()[2], region_bound()[4]);
+    Vector<> velocity = flow_field_.getVelocity(particle.coord() - region_min);
     for (int i = 0; i < 3; ++i)
-        velocity3[i] = flow_field_[i].interpolate(Vector<>(particle.coord()[0] - region_bound()[0],
-                                                           particle.coord()[1] - region_bound()[2],
-                                                           particle.coord()[2] - region_bound()[4]));
+        velocity3[i] = velocity[i];
 }
 
 void Simulator::fillParticleScalars(Particle<>* particle) const
 {
-    Vector<> loc(particle->coord()[0] - region_bound()[0],
-                 particle->coord()[1] - region_bound()[2],
-                 particle->coord()[2] - region_bound()[4]);
-    for (int i = 0; i < 3; ++i)
-        particle->scalar(i) = flow_field_[3 + i].interpolate(loc);
+    Vector<> region_min(region_bound()[0], region_bound()[2], region_bound()[4]);
+    std::vector<float> scalars = flow_field_.getScalars(particle->coord() - region_min);
+    for (int i = 0; i < scalars.size(); ++i)
+        particle->scalar(i) = scalars[i];
     particle->scalar(0) *= 10.0;
 }
 

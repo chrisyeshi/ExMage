@@ -28,7 +28,7 @@ protected:
   std::vector<Particle<> > particles_next_;
   int current_timestep_;
   int out_timestep_;
-  std::vector<VectorField<> > flow_field_;
+  VectorField<> flow_field_;
   std::vector<Particle<> > leaving_particles_current_;
   std::vector<Particle<> > leaving_particles_next_;
   std::vector<Particle<> > inc_particles_current_;
