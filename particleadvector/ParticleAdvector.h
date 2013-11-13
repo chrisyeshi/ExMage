@@ -1,5 +1,5 @@
-#ifndef __Simulator_h_
-#define __Simulator_h_
+#ifndef __ParticleAdvector_h__
+#define __ParticleAdvector_h__
 
 #include <cstdlib>
 #include <string>
@@ -9,11 +9,11 @@
 #include "Particle.h"
 #include "VectorField.h"
 
-class Simulator
+class ParticleAdvector
 {
 public:
-  Simulator();
-  ~Simulator();
+  ParticleAdvector();
+  ~ParticleAdvector();
 
   enum FLAT_INDEX {X_MINUS, X_PLUS, Y_MINUS, Y_PLUS, Z_MINUS, Z_PLUS};
 

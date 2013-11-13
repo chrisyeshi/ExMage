@@ -7,7 +7,7 @@
 
 #include "mpi.h"
 
-#include "Simulator.h"
+#include "ParticleAdvector.h"
 #include "ConfigReader.h"
 #include "VectorFieldReader.h"
 #include "CoreTube.h"
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     fields = reader.getFields();
 
     // particle tracer
-    Simulator sim;
+    ParticleAdvector sim;
 
     // tube generator
     coretube.Initialize();

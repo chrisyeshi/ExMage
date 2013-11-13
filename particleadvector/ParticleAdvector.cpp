@@ -1,4 +1,4 @@
-#include "Simulator.h"
+#include "ParticleAdvector.h"
 
 #include <map>
 #include <fstream>
@@ -37,15 +37,15 @@ extern "C" {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-Simulator::Simulator() : current_timestep_(0)
+ParticleAdvector::ParticleAdvector() : current_timestep_(0)
 {
 }
 
-Simulator::~Simulator()
+ParticleAdvector::~ParticleAdvector()
 {
 }
 
-void Simulator::trace(std::vector<float*> fields)
+void ParticleAdvector::trace(std::vector<float*> fields)
 {
     flow_field_.set(fields, int(region_range()[0] + 0.5),
                             int(region_range()[1] + 0.5),
@@ -66,7 +66,7 @@ void Simulator::trace(std::vector<float*> fields)
 }
 
 /*
-void Simulator::output()
+void ParticleAdvector::output()
 {
     // output frames
     int rank;
@@ -118,14 +118,14 @@ void Simulator::output()
 }
 */
 
-std::vector<Particle<> > Simulator::prevParticles() const
+std::vector<Particle<> > ParticleAdvector::prevParticles() const
 {
     std::vector<Particle<> > p = particles_current_;
     p.insert(p.end(), inc_particles_current_.begin(), inc_particles_current_.end());
     return p;
 }
 
-std::vector<Particle<> > Simulator::nextParticles() const
+std::vector<Particle<> > ParticleAdvector::nextParticles() const
 {
     std::vector<Particle<> > p = particles_next_;
     p.insert(p.end(), inc_particles_next_.begin(), inc_particles_next_.end());
@@ -142,7 +142,7 @@ std::vector<Particle<> > Simulator::nextParticles() const
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-void Simulator::initializeParticles(int particle_count)
+void ParticleAdvector::initializeParticles(int particle_count)
 {
     particles_current_.resize(particle_count);
     for (int j = 0; j < particle_count; ++j)
@@ -157,7 +157,7 @@ void Simulator::initializeParticles(int particle_count)
     }
 }
 
-Particle<> Simulator::findBoundaryParticle(const Particle<>& curr, const Particle<>& next) const
+Particle<> ParticleAdvector::findBoundaryParticle(const Particle<>& curr, const Particle<>& next) const
 {
 //  for (int i = 0; i < 3; ++i)
 //    if (particle.coord()[i] < region_bound_[2 * i]
@@ -189,7 +189,7 @@ Particle<> Simulator::findBoundaryParticle(const Particle<>& curr, const Particl
   return ret;
 }
 
-void Simulator::traceParticles()
+void ParticleAdvector::traceParticles()
 {
   leaving_particles_current_.clear();
   leaving_particles_next_.clear();
@@ -218,7 +218,7 @@ void Simulator::traceParticles()
   particles_next_ = particles_next;
 }
 
-Particle<> Simulator::traceParticle(const Particle<>& particle) const
+Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
 {
   float velocity3[3];
   getParticleVelocity(particle, velocity3);
@@ -231,7 +231,7 @@ Particle<> Simulator::traceParticle(const Particle<>& particle) const
   return ret;
 }
 
-void Simulator::getParticleVelocity(const Particle<>& particle, float velocity3[3]) const
+void ParticleAdvector::getParticleVelocity(const Particle<>& particle, float velocity3[3]) const
 {
     Vector<> region_min(region_bound()[0], region_bound()[2], region_bound()[4]);
     Vector<> velocity = flow_field_.getVelocity(particle.coord() - region_min);
@@ -239,7 +239,7 @@ void Simulator::getParticleVelocity(const Particle<>& particle, float velocity3[
         velocity3[i] = velocity[i];
 }
 
-void Simulator::fillParticleScalars(Particle<>* particle) const
+void ParticleAdvector::fillParticleScalars(Particle<>* particle) const
 {
     Vector<> region_min(region_bound()[0], region_bound()[2], region_bound()[4]);
     std::vector<float> scalars = flow_field_.getScalars(particle->coord() - region_min);
@@ -248,7 +248,7 @@ void Simulator::fillParticleScalars(Particle<>* particle) const
     particle->scalar(0) *= 10.0;
 }
 
-bool Simulator::isParticleInside(const Particle<>& particle) const
+bool ParticleAdvector::isParticleInside(const Particle<>& particle) const
 {
   for (int i = 0; i < 3; ++i)
     if (particle.coord()[i] < region_bound()[2 * i]
@@ -257,7 +257,7 @@ bool Simulator::isParticleInside(const Particle<>& particle) const
   return true;
 }
 
-void Simulator::communicateWithNeighbors()
+void ParticleAdvector::communicateWithNeighbors()
 {
     // catagorize the particles
     std::map<int, std::vector<unsigned int> > map_rank_particles;
@@ -395,7 +395,7 @@ void Simulator::communicateWithNeighbors()
   }
 }
 /*
-void Simulator::writeToFile()
+void ParticleAdvector::writeToFile()
 {
   std::vector<Particle<> > ps1, ps2;
   ps1 = particles_current_;
@@ -411,7 +411,7 @@ void Simulator::writeToFile()
   particles_current_ = ps2;
 }
 */
-std::vector<int> Simulator::getNeighborRanks() const
+std::vector<int> ParticleAdvector::getNeighborRanks() const
 {
     std::vector<int> ranks;
     for (int i = 0; i < 3; ++i)
@@ -454,7 +454,7 @@ std::vector<int> Simulator::getNeighborRanks() const
   return ranks;
 }
 
-bool Simulator::write(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2) const
+bool ParticleAdvector::write(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2) const
 {
   float* data1[6]; // x, y, z, density, entropy, pressure
   float* data2[6];
@@ -531,7 +531,7 @@ bool Simulator::write(const std::vector<Particle<> >& particles1, const std::vec
 }
 
 /*
-bool Simulator::sendtoinsitu(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2)
+bool ParticleAdvector::sendtoinsitu(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2)
 {
   std::vector<tube::Particle<> > p1 = translatetotubeparticle(particles1);
   std::vector<tube::Particle<> > p2 = translatetotubeparticle(particles2);
@@ -562,7 +562,7 @@ bool Simulator::sendtoinsitu(const std::vector<Particle<> >& particles1, const s
 */
 
 /*
-std::vector<tube::Particle<> > Simulator::translatetotubeparticle(const std::vector<Particle<> >& particles) const
+std::vector<tube::Particle<> > ParticleAdvector::translatetotubeparticle(const std::vector<Particle<> >& particles) const
 {
   std::vector<tube::Particle<> > ret(particles.size());
   for (unsigned int i = 0; i < particles.size(); ++i)
@@ -577,41 +577,41 @@ std::vector<tube::Particle<> > Simulator::translatetotubeparticle(const std::vec
 }
 */
 
-std::vector<int> Simulator::global_size() const
+std::vector<int> ParticleAdvector::global_size() const
 {
     return config().GetTotalSize();
 }
 
-std::vector<int> Simulator::region_count() const
+std::vector<int> ParticleAdvector::region_count() const
 {
     return config().GetRegionCount();
 }
 
-int Simulator::total_region_count() const
+int ParticleAdvector::total_region_count() const
 {
     return region_count()[0] * region_count()[1] * region_count()[2];
 }
 
-std::vector<int> Simulator::region_index() const
+std::vector<int> ParticleAdvector::region_index() const
 {
     ProcIndex procIndex;
     return procIndex.getRegionIndex();
 }
 
-int Simulator::global_index() const
+int ParticleAdvector::global_index() const
 {
     ProcIndex procIndex;
     return procIndex.getGlobalIndex();
 }
 
-std::string Simulator::global_index_string() const
+std::string ParticleAdvector::global_index_string() const
 {
     char gis[10];
     sprintf(gis, "%02d", global_index());
     return std::string(gis);
 }
 
-std::vector<float> Simulator::region_bound() const
+std::vector<float> ParticleAdvector::region_bound() const
 {
     std::vector<float> rb(6);
     rb[0] = global_size()[0] / region_count()[0] * (region_index()[0] + 0);
@@ -623,37 +623,37 @@ std::vector<float> Simulator::region_bound() const
     return rb;
 }
 
-std::string Simulator::read_root() const
+std::string ParticleAdvector::read_root() const
 {
     return config().GetReadRoot();
 }
 
-std::string Simulator::out_root() const
+std::string ParticleAdvector::out_root() const
 {
     return config().GetOutRoot();
 }
 
-std::vector<int> Simulator::timestep_range() const
+std::vector<int> ParticleAdvector::timestep_range() const
 {
     return config().GetTimeStepRange();
 }
 
-float Simulator::velocity() const
+float ParticleAdvector::velocity() const
 {
     return config().GetVelocity();
 }
 
-int Simulator::particle_count() const
+int ParticleAdvector::particle_count() const
 {
     return config().GetRegionParticleCount();
 }
 
-int Simulator::timestep_diff() const
+int ParticleAdvector::timestep_diff() const
 {
     return timestep_range()[1] - timestep_range()[0];
 }
 
-std::vector<float> Simulator::region_range() const
+std::vector<float> ParticleAdvector::region_range() const
 {
     std::vector<float> range(3);
     range[0] = region_bound()[1] - region_bound()[0];
