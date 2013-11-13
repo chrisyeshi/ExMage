@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 project(explorable_image)
 
+# test suites
+set(BUILD_TEST ON CACHE BOOL "build the tests?")
+if( BUILD_TEST )
+    enable_testing()
+endif( BUILD_TEST )
+
 # What to build?
 set(BUILD_PARTICLE_TRACER ON CACHE BOOL "whether to build the particle tracer library")
 set(BUILD_TUBE_GENERATOR ON CACHE BOOL "whether to build the tube generator library")
