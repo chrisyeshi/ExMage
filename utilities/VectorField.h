@@ -56,9 +56,11 @@ public:
 	std::vector<T> getScalars(const Vector<vDim, U>& loc) const;
 	template <class U>
 	std::vector<T> get(const Vector<vDim, U>& loc) const ;
+	unsigned int nVelocities() const { return vDim; }
+	unsigned int nScalars() const { return fields.size() - vDim; }
+	unsigned int nFields() const { return nVelocities() + nScalars(); }
 
 protected:
-	unsigned int nScalars() const { return fields.size() - vDim; }
 
 private:
 	std::vector<Field<T> > fields;

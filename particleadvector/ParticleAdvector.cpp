@@ -57,79 +57,35 @@ void ParticleAdvector::trace(std::vector<float*> fields)
         initializeParticles(particle_count);
         out_timestep_ = 0;
         first_time = false;
+    } else
+    {
+        particles_current_ = particles_next_;
+        particles_next_.clear();
     }
-    std::cout << "Timestep: " << out_timestep_ << std::endl;
+    std::cout << "Timestep: " << out_timestep_;
     ++out_timestep_;
+    std::cout << ", " << particles_current_.size() << std::endl;
     traceParticles();
     communicateWithNeighbors();
 //    writeToFile();
 }
 
-/*
-void ParticleAdvector::output()
-{
-    // output frames
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
-    for (int i = 0; i < coretube_.GetCameraCount(); ++i)
-    {
-        Frame* sum = coretube_.GetFrame(i);
-        char proc_index_string[10];
-        sprintf(proc_index_string, "%02d", rank);
-        char cam_index_string[10];
-        sprintf(cam_index_string, "%02d", i);
-
-        char pcs[100];
-        int resolution[2];
-        sum->GetSize(resolution);
-        sprintf(pcs, "n%d_p%d_r%d_t%d",
-                region_count()[0], particle_count(),
-                resolution[0], timestep_diff());
-
-        std::string dir = out_root() + "/" + pcs
-                        + std::string("/cam") + cam_index_string;
-        std::string spt_path = dir + "/output_proc" + proc_index_string;
-        mkpath(dir.c_str(), 0777);
-        mkpath(dir.c_str(), 0777);
-        mkpath(dir.c_str(), 0777);
-        sum->SetFileName(spt_path.c_str());
-        sum->Write();
-    }
-    // output times
-    Frame* sum = coretube_.GetFrame(0);
-    char pcs[100];
-    int resolution[2];
-    sum->GetSize(resolution);
-    sprintf(pcs, "n%d_p%d_r%d_t%d",
-            region_count()[0], particle_count(),
-            resolution[0], timestep_diff());
-
-    std::string dir = out_root() + "/" + pcs + "/time";
-    std::string time_path = dir + "/proc" + global_index_string() + ".txt";
-    mkpath(dir.c_str(), 0777);
-    mkpath(dir.c_str(), 0777);
-    mkpath(dir.c_str(), 0777);
-    std::ofstream tout(time_path.c_str());
-    for (unsigned int i = 0; i < times_.size(); ++i)
-    {
-        tout << times_[i] << ",";
-    }
-}
-*/
-
 std::vector<Particle<> > ParticleAdvector::prevParticles() const
 {
-    std::vector<Particle<> > p = particles_current_;
-    p.insert(p.end(), inc_particles_current_.begin(), inc_particles_current_.end());
-    return p;
+    // std::cout << particles_current_.size() << std::endl;
+    return particles_current_;
+    // std::vector<Particle<> > p = particles_current_;
+    // p.insert(p.end(), inc_particles_current_.begin(), inc_particles_current_.end());
+    // return p;
 }
 
 std::vector<Particle<> > ParticleAdvector::nextParticles() const
 {
-    std::vector<Particle<> > p = particles_next_;
-    p.insert(p.end(), inc_particles_next_.begin(), inc_particles_next_.end());
-    return p;
+    return particles_next_;
+    // std::vector<Particle<> > p = particles_next_;
+    // p.insert(p.end(), inc_particles_next_.begin(), inc_particles_next_.end());
+    // std::cout << inc_particles_next_.size() << " p.size() = " << p.size() << std::endl;
+    // return p;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -250,15 +206,24 @@ void ParticleAdvector::fillParticleScalars(Particle<>* particle) const
 
 bool ParticleAdvector::isParticleInside(const Particle<>& particle) const
 {
-  for (int i = 0; i < 3; ++i)
-    if (particle.coord()[i] < region_bound()[2 * i]
-     || particle.coord()[i] >= region_bound()[2 * i + 1] + 1.0)
-      return false;
-  return true;
+    for (int i = 0; i < 3; ++i)
+        if (particle.coord()[i] < region_bound()[2 * i]
+         || particle.coord()[i] >= region_bound()[2 * i + 1] + 1.0)
+            return false;
+    return true;
 }
 
 void ParticleAdvector::communicateWithNeighbors()
 {
+    comm_.scatter(leaving_particles_current_, leaving_particles_next_, flow_field_);
+    inc_particles_current_ = comm_.getCurrInc();
+    inc_particles_next_ = comm_.getNextInc();
+    // std::cout << inc_particles_current_.size() << " :::: " << inc_particles_next_.size() << std::endl;
+    assert(inc_particles_current_.size() == inc_particles_next_.size());
+    particles_current_.insert(particles_current_.end(), inc_particles_current_.begin(), inc_particles_current_.end());
+    particles_next_.insert(particles_next_.end(), inc_particles_next_.begin(), inc_particles_next_.end());
+    assert(particles_current_.size() == particles_next_.size());
+/*
     // catagorize the particles
     std::map<int, std::vector<unsigned int> > map_rank_particles;
     for (unsigned int i = 0; i < leaving_particles_next_.size(); ++i)
@@ -383,34 +348,13 @@ void ParticleAdvector::communicateWithNeighbors()
       fillParticleScalars(&p2);
       inc_particles_next_.push_back(p2);
     }
-//    std::cout << "    Rank: " << this_rank_region
-//              << " Particles_: ";
-//    for (unsigned int j = 0; j < particles_.size(); ++j)
-//    {
-//      std::cout << particles_[j].coord()[0] << ", " << particles_[j].coord()[1] << ", " << particles_[j].coord()[2] << ";; ";
-//    }
-//    std::cout << std::endl;
+
     delete [] data;
     delete [] id;
   }
-}
-/*
-void ParticleAdvector::writeToFile()
-{
-  std::vector<Particle<> > ps1, ps2;
-  ps1 = particles_current_;
-  ps2 = particles_next_;
-  assert(ps1.size() == ps2.size());
-  ps1.insert(ps1.end(), inc_particles_current_.begin(), inc_particles_current_.end());
-  ps2.insert(ps2.end(), inc_particles_next_.begin(), inc_particles_next_.end());
-  assert(ps1.size() == ps2.size());
-
-//  write(ps1, ps2);
-  sendtoinsitu(ps1, ps2);
-
-  particles_current_ = ps2;
-}
 */
+}
+
 std::vector<int> ParticleAdvector::getNeighborRanks() const
 {
     std::vector<int> ranks;
@@ -434,24 +378,8 @@ std::vector<int> ParticleAdvector::getNeighborRanks() const
             ranks.push_back(plus_rank);
         }
     }
-/*
-  for (int i = -1; i <= 1; ++i)
-    for (int j = -1; j <= 1; ++j)
-      for (int k = -1; k <= 1; ++k)
-      {
-        if (i == 0 && j == 0 && k == 0)
-          continue;
-        std::vector<int> index3(3);
-        index3[0] = region_index()[0] + i;
-        index3[1] = region_index()[1] + j;
-        index3[2] = region_index()[2] + k;
-        ProcIndex procIndex(index3);
-        int rank = procIndex.getGlobalIndex();
-        if (rank >= 0 && rank < total_region_count())
-          ranks.push_back(rank);
-      }
-*/
-  return ranks;
+
+    return ranks;
 }
 
 bool ParticleAdvector::write(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2) const
@@ -529,53 +457,6 @@ bool ParticleAdvector::write(const std::vector<Particle<> >& particles1, const s
   delete [] id2;
   return true;
 }
-
-/*
-bool ParticleAdvector::sendtoinsitu(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2)
-{
-  std::vector<tube::Particle<> > p1 = translatetotubeparticle(particles1);
-  std::vector<tube::Particle<> > p2 = translatetotubeparticle(particles2);
-
-  static bool first_time = true;
-  if (first_time)
-  {
-    first_time = false;
-    ConfigReader& config = ConfigReader::getInstance();
-    coretube_.SetCameras(config.GetCameras());
-    coretube_.SetLightPosition(config.GetLightPosition());
-    double extent[6];
-    for (int i = 0; i < 6; ++i)
-      extent[i] = region_bound()[i];
-    coretube_.SetExtent(extent);
-  }
-
-  clock_t start, end, tick;
-  start = clock();
-  coretube_.GenerateTubes(p1, p2);
-  end = clock();
-  tick = end - start;
-  int milli = double(tick) / CLOCKS_PER_SEC * 1000.0;
-  times_.push_back(milli);
-
-  return true;
-}
-*/
-
-/*
-std::vector<tube::Particle<> > ParticleAdvector::translatetotubeparticle(const std::vector<Particle<> >& particles) const
-{
-  std::vector<tube::Particle<> > ret(particles.size());
-  for (unsigned int i = 0; i < particles.size(); ++i)
-  {
-    ret[i].x = particles[i].coord()[0];
-    ret[i].y = particles[i].coord()[1];
-    ret[i].z = particles[i].coord()[2];
-    ret[i].pd = particles[i].scalar(0);
-    ret[i].id = particles[i].id();
-  }
-  return ret;
-}
-*/
 
 std::vector<int> ParticleAdvector::global_size() const
 {

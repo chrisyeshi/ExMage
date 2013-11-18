@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    srand(time(0) * rank);
+    // srand(time(0) * rank);
 
     // choose configure file
     ConfigReader::setFile("configure.json");
@@ -69,17 +69,3 @@ int main(int argc, char* argv[])
     MPI_Finalize();
     return 0;
 }
-
-// std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles)
-// {
-//     std::vector<tube::Particle> ret(particles.size());
-//     for (unsigned int i = 0; i < particles.size(); ++i)
-//     {
-//         ret[i].x = particles[i].coord()[0];
-//         ret[i].y = particles[i].coord()[1];
-//         ret[i].z = particles[i].coord()[2];
-//         ret[i].pd = particles[i].scalar(0);
-//         ret[i].id = particles[i].id();
-//     }
-//     return ret;
-// }

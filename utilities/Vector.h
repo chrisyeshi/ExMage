@@ -26,9 +26,15 @@ public:
 	T& w() { return Vals[4]; }
 
 	// operators
+	//
+	// =
+
 	// 
 	// "<<"" stream extraction operator is provided
 	//
+	// <
+	bool operator<(const Vector<Dim, T>& right) const;
+	bool operator>(const Vector<Dim, T>& right) const;
 	// ==
 	bool operator==(const Vector<Dim, T>& right) const;
 	bool operator!=(const Vector<Dim, T>& right) const;
@@ -110,12 +116,28 @@ std::ostream& operator<<(std::ostream& os, const Vector<Dim, T>& v)
 }
 
 template <int Dim, class T>
+bool Vector<Dim, T>::operator<(const Vector<Dim, T>& right) const
+{
+	for (int i = Dim - 1; i >= 0; --i)
+	{
+		if (this->Vals[i] - right[i] < -0.0001)
+			return true;
+		else if (this->Vals[i] - right[i] > 0.0001)
+			return false;
+	}
+	return false;
+}
+
+template <int Dim, class T>
+bool Vector<Dim, T>::operator>(const Vector<Dim, T>& right) const
+{
+	return right < *this;
+}
+
+template <int Dim, class T>
 bool Vector<Dim, T>::operator==(const Vector<Dim, T>& right) const
 {
-	for (int i = 0; i < Dim; ++i)
-		if (fabs(this->Vals[i] - right[i]) >= 0.0001)
-			return false;
-	return true;
+	return !(*this < right) && !(*this > right);
 }
 
 template <int Dim, class T>

@@ -5,16 +5,20 @@
 #include <cassert>
 
 #include "Vector.h"
+#include "VectorField.h"
 
 template <class T = float>
 class Particle
 {
+private:
+	const static int vDim = 3;
+
 public:
 	Particle();
 
 	// general [] getter:
-	// when idx < 3, it returns the particle position,
-	// when idx >= 3, it returns the scalar values
+	// when idx < vDim, it returns the particle position,
+	// when idx >= vDim, it returns the scalar values
 	T operator[](unsigned int idx) const;
 	T& operator[](unsigned int idx);
 
@@ -25,8 +29,8 @@ public:
 	T& y() { return Coord[1]; }
 	T z() const { return Coord[2]; }
 	T& z() { return Coord[2]; }
-	const Vector<3, T>& coord() const { return Coord; }
-	Vector<3, T>& coord() { return Coord; }
+	const Vector<vDim, T>& coord() const { return Coord; }
+	Vector<vDim, T>& coord() { return Coord; }
 	const std::vector<T>& scalars() const { return Scalars; }
 	unsigned int numScalars() const { return Scalars.size(); }
 	std::vector<T>& scalars() { return Scalars; }
@@ -36,11 +40,11 @@ public:
 	unsigned int& id() { return Id; }
 
 protected:
-	unsigned int Id;
-	Vector<3, T> Coord;
-	std::vector<T> Scalars;
 
 private:
+	unsigned int Id;
+	Vector<vDim, T> Coord;
+	std::vector<T> Scalars;
 };
 
 ////////////////////////////////////////////////////
@@ -55,7 +59,7 @@ private:
 //
 ////////////////////////////////////////////////////
 template <class T>
-Particle<T>::Particle() : Coord(3)
+Particle<T>::Particle() : Coord(vDim)
 {
 	Coord[0] = Coord[1] = Coord[2] = 0.0;
 }
@@ -63,23 +67,24 @@ Particle<T>::Particle() : Coord(3)
 template <class T>
 T Particle<T>::operator[](unsigned int idx) const
 {
-	if (idx < 3)
+	if (idx < vDim)
 		return Coord[idx];
-	return Scalars[idx - 3];
+	return this->scalar(idx - vDim);
 }
 
 template <class T>
 T& Particle<T>::operator[](unsigned int idx)
 {
-	if (idx < 3)
+	if (idx < vDim)
 		return Coord[idx];
-	return Scalars[idx - 3];
+	return this->scalar(idx - vDim);
 }
 
 template <class T>
 T Particle<T>::scalar(unsigned int idx) const
 {
-	assert(idx < Scalars.size());
+	if (idx >= Scalars.size())
+		return 0.0;
 	return Scalars[idx];
 }
 

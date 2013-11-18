@@ -8,6 +8,7 @@
 #include "ConfigReader.h"
 #include "Particle.h"
 #include "VectorField.h"
+#include "DomainUtility.h"
 
 class ParticleAdvector
 {
@@ -33,8 +34,7 @@ protected:
   std::vector<Particle<> > leaving_particles_next_;
   std::vector<Particle<> > inc_particles_current_;
   std::vector<Particle<> > inc_particles_next_;
-//  CoreTube coretube_;
-//  std::vector<int> times_;
+  DomainUtility comm_;
 
   void initializeParticles(int particle_count);
   Particle<> findBoundaryParticle(const Particle<> & curr, const Particle<>& next) const;
