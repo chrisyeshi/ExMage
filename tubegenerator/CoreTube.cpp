@@ -96,6 +96,7 @@ void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
       setupCamera();
       setupLightEnv();
 
+      assert(particles1.size() == particles2.size());
       for (unsigned int i = 0; i < particles1.size(); ++i)
       {
         if (distance(particles1[i].coord(), particles2[i].coord()) > max_particle_gap())

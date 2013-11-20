@@ -22,32 +22,18 @@ public:
 
 	// setters
 	void set(const std::vector<Field<T> >& fields) { this->fields = fields; }
-	void set(const std::vector<T*>& fields, int x, int y, int z);
-	void set(const std::vector<T*>& fields, const std::vector<int>& dimension);
-	void set(const std::vector<T*>& fields, int* dimension);
-	void set(T** fields, int nFields, int x, int y, int z);
-	void set(T** fields, int nFields, const std::vector<int>& dimension);
-	void set(T** fields, int nFields, int* dimension);
+	void set(const std::vector<T*>& fields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
+	void set(T** fields, int nFields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
 
 	void setVelocities(const std::vector<Field<T> >& velocities);
-	void setVelocities(const std::vector<T*>& velocities, int x, int y, int z);
-	void setVelocities(const std::vector<T*>& velocities, const std::vector<int>& dimension);
-	void setVelocities(const std::vector<T*>& velocities, int* dimension);
-	void setVelocities(T** velocities, int x, int y, int z);
-	void setVelocities(T** velocities, const std::vector<int>& dimension);
-	void setVelocities(T** velocities, int* dimension);
+	void setVelocities(const std::vector<T*>& velocities, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
+	void setVelocities(T** velocities, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
 
 	void setScalars(const std::vector<Field<T> >& scalars);
-	void setScalars(const std::vector<T*>& scalars, int x, int y, int z);
-	void setScalars(const std::vector<T*>& scalars, const std::vector<int>& dimension);
-	void setScalars(const std::vector<T*>& scalars, int* dimension);
-	void setScalars(T** scalars, int nFields, int x, int y, int z);
-	void setScalars(T** scalars, int nFields, const std::vector<int>& dimension);
-	void setScalars(T** scalars, int nFields, int* dimension);
+	void setScalars(const std::vector<T*>& scalars, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
+	void setScalars(T** scalars, int nFields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
 
-	void addScalar(T* field, int x, int y, int z);
-	void addScalar(T* field, const std::vector<int>& dimension);
-	void addScalar(T* field, int* dimension);
+	void addScalar(T* field, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc = Field<T>::Center);
 
 	// accessors
 	template <class U>
@@ -56,9 +42,11 @@ public:
 	std::vector<T> getScalars(const Vector<vDim, U>& loc) const;
 	template <class U>
 	std::vector<T> get(const Vector<vDim, U>& loc) const ;
+	unsigned int nVelocities() const { return vDim; }
+	unsigned int nScalars() const { return fields.size() - vDim; }
+	unsigned int nFields() const { return nVelocities() + nScalars(); }
 
 protected:
-	unsigned int nScalars() const { return fields.size() - vDim; }
 
 private:
 	std::vector<Field<T> > fields;
@@ -69,45 +57,21 @@ VectorField<T>::VectorField() : fields(vDim)
 {}
 
 template <class T>
-void VectorField<T>::set(const std::vector<T*>& fields, int x, int y, int z)
+void VectorField<T>::set(const std::vector<T*>& fields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
 	std::vector<Field<T> > fFields(fields.size());
 	for (unsigned int i = 0; i < fields.size(); ++i)
-		fFields[i] = Field<T>(fields[i], x, y, z);
+		fFields[i] = Field<T>(fields[i], dimension, dataLoc);
 	this->set(fFields);
 }
 
 template <class T>
-void VectorField<T>::set(const std::vector<T*>& fields, const std::vector<int>& dimension)
-{
-	this->set(fields, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::set(const std::vector<T*>& fields, int* dimension)
-{
-	this->set(fields, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::set(T** fields, int nFields, int x, int y, int z)
+void VectorField<T>::set(T** fields, int nFields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
 	std::vector<T*> vFields(nFields);
 	for (int i = 0; i < nFields; ++i)
 		vFields[i] = fields[i];
-	this->set(vFields, x, y, z);
-}
-
-template <class T>
-void VectorField<T>::set(T** fields, int nFields, const std::vector<int>& dimension)
-{
-	this->set(fields, nFields, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::set(T** fields, int nFields, int* dimension)
-{
-	this->set(fields, nFields, dimension[0], dimension[1], dimension[2]);
+	this->set(vFields, dimension, dataLoc);
 }
 
 template <class T>
@@ -117,45 +81,21 @@ void VectorField<T>::setVelocities(const std::vector<Field<T> >& velocities)
 }
 
 template <class T>
-void VectorField<T>::setVelocities(const std::vector<T*>& velocities, int x, int y, int z)
+void VectorField<T>::setVelocities(const std::vector<T*>& velocities, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
 	std::vector<Field<T> > fVelocities(velocities.size());
 	for (unsigned int i = 0; i < velocities.size(); ++i)
-		fVelocities[i] = Field<T>(velocities[i], x, y, z);
+		fVelocities[i] = Field<T>(velocities[i], dimension, dataLoc);
 	this->setVelocities(fVelocities);
 }
 
 template <class T>
-void VectorField<T>::setVelocities(const std::vector<T*>& velocities, const std::vector<int>& dimension)
-{
-	this->setVelocities(velocities, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::setVelocities(const std::vector<T*>& velocities, int* dimension)
-{
-	this->setVelocities(velocities, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::setVelocities(T** velocities, int x, int y, int z)
+void VectorField<T>::setVelocities(T** velocities, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
 	std::vector<T*> vVelocities(vDim);
 	for (unsigned int i = 0; i < vDim; ++i)
 		vVelocities[i] = velocities[i];
-	this->setVelocities(vVelocities, x, y, z);
-}
-
-template <class T>
-void VectorField<T>::setVelocities(T** velocities, const std::vector<int>& dimension)
-{
-	this->setVelocities(velocities, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::setVelocities(T** velocities, int* dimension)
-{
-	this->setVelocities(velocities, dimension[0], dimension[1], dimension[2]);
+	this->setVelocities(vVelocities, dimension, dataLoc);
 }
 
 template <class T>
@@ -166,63 +106,27 @@ void VectorField<T>::setScalars(const std::vector<Field<T> >& scalars)
 }
 
 template <class T>
-void VectorField<T>::setScalars(const std::vector<T*>& scalars, int x, int y, int z)
+void VectorField<T>::setScalars(const std::vector<T*>& scalars, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
 	std::vector<Field<T> > fScalars(scalars.size());
 	for (unsigned int i = 0; i < scalars.size(); ++i)
-		fScalars[i] = Field<T>(scalars[i], x, y, z);
+		fScalars[i] = Field<T>(scalars[i], dimension, dataLoc);
 	this->setScalars(fScalars);
 }
 
 template <class T>
-void VectorField<T>::setScalars(const std::vector<T*>& scalars, const std::vector<int>& dimension)
-{
-	this->setScalars(scalars, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::setScalars(const std::vector<T*>& scalars, int* dimension)
-{
-	this->setScalars(scalars, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::setScalars(T** scalars, int nFields, int x, int y, int z)
+void VectorField<T>::setScalars(T** scalars, int nFields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
 	std::vector<T*> vScalars(nFields);
 	for (unsigned int i = 0; i < vScalars.size(); ++i)
 		vScalars[i] = scalars[i];
-	this->setScalars(vScalars, x, y, z);
+	this->setScalars(vScalars, dimension, dataLoc);
 }
 
 template <class T>
-void VectorField<T>::setScalars(T** scalars, int nFields, const std::vector<int>& dimension)
+void VectorField<T>::addScalar(T* field, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)
 {
-	this->setScalars(scalars, nFields, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::setScalars(T** scalars, int nFields, int* dimension)
-{
-	this->setScalars(scalars, nFields, dimension[0], dimension[1], dimension[2]);
-}
-
-template <class T>
-void VectorField<T>::addScalar(T* field, int x, int y, int z)
-{
-	fields.push_back(Field<T>(field, x, y, z));
-}
-
-template <class T>
-void VectorField<T>::addScalar(T* field, const std::vector<int>& dimension)
-{
-	fields.push_back(Field<T>(field, dimension));
-}
-
-template <class T>
-void VectorField<T>::addScalar(T* field, int* dimension)
-{
-	fields.push_back(Field<T>(field, dimension));
+	fields.push_back(Field<T>(field, dimension, dataLoc));
 }
 
 template <class T>

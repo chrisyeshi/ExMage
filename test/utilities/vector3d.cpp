@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <map>
 
 int main(void)
 {
@@ -64,6 +65,30 @@ int main(void)
 	// distance
 	float dist = distance(Vector<3>(0.f, 0.f, 0.f), Vector<3>(1.f, 0.f, 0.f));
 	assert(fabs(dist - 1.f) < 0.0001);
+
+	// int
+	assert((Vector<3, int>(0, 0, 0) == Vector<3, int>(0, 0, 0)));
+	assert((Vector<3, int>(0, 0, 0) != Vector<3, int>(1, 0, -1)));
+	assert((Vector<3, int>(1, 0, 0) < Vector<3, int>(2, 0, 0)));
+	assert((Vector<3, int>(3, 0, 0) < Vector<3, int>(2, 0, 1)));
+	assert((Vector<3, int>(3, 9, 0) < Vector<3, int>(2, 0, 1)));
+	assert((Vector<3, int>(-1, 0, -1) < Vector<3, int>(-1, -1, 0)));
+	assert((Vector<3, int>(-1, 0, -1) < Vector<3, int>(-1, -1, 1)));
+	assert((Vector<3, int>(-1, 0, -1) > Vector<3, int>(-1, -1, -1)));
+	assert((Vector<3, int>(-1, -1, -1) < Vector<3, int>(0, -1, -1)));
+	Vector<3, int> copy = Vector<3, int>(-1, 0, 1);
+	assert((copy == Vector<3, int>(-1, 0, 1)));
+
+	// map
+	std::map<Vector<3, int>, int> vMap;
+	// vMap[Vector<3, int>(-1, -1, -1)] = 1;
+	// vMap[Vector<3, int>(-1, -1, 0)] = 1;
+	vMap[Vector<3, int>(-1, -1, 1)] = 1;
+	vMap[Vector<3, int>(-1, 0, -1)] = 1;
+	std::map<Vector<3, int>, int>::iterator itr = vMap.find(Vector<3, int>(-1, 0, -1));
+	std::cout << itr->first << std::endl;
+	assert((itr->first == Vector<3, int>(-1, 0, -1)));
+
 	std::cout << "all working!" << std::endl;
 
 	return 0;

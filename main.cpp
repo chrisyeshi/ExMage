@@ -13,6 +13,7 @@
 #include "CoreTube.h"
 #include "Frame.h"
 #include "mkpath.h"
+#include "DomainUtility.h"
 
 CoreTube coretube;
 // std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
@@ -26,7 +27,7 @@ int main(int argc, char* argv[])
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    srand(time(0) * rank);
+    // srand(time(0) * rank);
 
     // choose configure file
     ConfigReader::setFile("configure.json");
@@ -47,9 +48,14 @@ int main(int argc, char* argv[])
     coretube.Initialize();
     coretube.SetCameras(config.GetCameras());
     coretube.SetLightPosition(config.GetLightPosition());
+    DomainUtility domain;
     double extent[6];
-    for (int i = 0; i < 6; ++i)
-        extent[i] = sim.region_bound()[i];
+    extent[0] = domain.getBounds()[0].x();
+    extent[1] = domain.getBounds()[1].x();
+    extent[2] = domain.getBounds()[0].y();
+    extent[3] = domain.getBounds()[1].y();
+    extent[4] = domain.getBounds()[0].z();
+    extent[5] = domain.getBounds()[1].z();
     coretube.SetExtent(extent);
 
     // trace particles
@@ -69,17 +75,3 @@ int main(int argc, char* argv[])
     MPI_Finalize();
     return 0;
 }
-
-// std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles)
-// {
-//     std::vector<tube::Particle> ret(particles.size());
-//     for (unsigned int i = 0; i < particles.size(); ++i)
-//     {
-//         ret[i].x = particles[i].coord()[0];
-//         ret[i].y = particles[i].coord()[1];
-//         ret[i].z = particles[i].coord()[2];
-//         ret[i].pd = particles[i].scalar(0);
-//         ret[i].id = particles[i].id();
-//     }
-//     return ret;
-// }
