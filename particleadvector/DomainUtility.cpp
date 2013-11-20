@@ -87,6 +87,24 @@ void DomainUtility::scatter()
 			nextInc[neighbor3][i].scalars() = flow.getScalars(nextInc[neighbor3][i].coord() - bounds()[0]);
 		// assert(currInc[neighbor3].size() == nextInc[neighbor3].size());
 	}
+	// second round ---- GO!!!
+	// Here we return the scalar values of the nextInc particles
+	// 1. send them back
+	for (int x = -1; x <= 1; ++x)
+	for (int y = -1; y <= 1; ++y)
+	for (int z = -1; z <= 1; ++z)
+	{
+		Vector<vDim, int> neighbor3(x, y, z);
+		send(neighbor3, nextInc[neighbor3]);
+	}
+	// 2. receive from neighbors
+	for (int x = -1; x <= 1; ++x)
+	for (int y = -1; y <= 1; ++y)
+	for (int z = -1; z <= 1; ++z)
+	{
+		Vector<vDim, int> neighbor3(x, y, z);
+		nextOut[neighbor3] = recv(neighbor3);
+	}
 }
 
 void DomainUtility::send(const Vector<vDim, int> neighbor3, const PtclArr& ptcls) const
