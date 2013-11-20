@@ -13,18 +13,21 @@ template <class T = float>
 class Field
 {
 public:
-	Field();
-	Field(const T* const buffer, int x, int y, int z);
-	Field(const T* const buffer, const std::vector<int>& dimension);
-	Field(const T* const buffer, int* dimension);
+	enum DataLoc { Center, Vertex };
+
+	Field(DataLoc dataLoc = Vertex);
+	Field(const T* const buffer, int x, int y, int z, DataLoc dataLoc = Vertex);
+	Field(const T* const buffer, const std::vector<int>& dimension, DataLoc dataLoc = Vertex);
+	Field(const T* const buffer, int* dimension, DataLoc dataLoc = Vertex);
 
 	void setBuffer(const T* const buffer);
+	void setDataLoc(DataLoc dataLoc) { this->dataLoc = dataLoc; }
 	void setDimension(int x, int y, int z);
 	void setDimension(const std::vector<int>& dimension);
 	void setDimension(int* dimension);
-	void set(const T* const buffer, int x, int y, int z);
-	void set(const T* const buffer, const std::vector<int>& dimension);
-	void set(const T* const buffer, int* dimension);
+	void set(const T* const buffer, int x, int y, int z, DataLoc dataLoc = Vertex);
+	void set(const T* const buffer, const std::vector<int>& dimension, DataLoc dataLoc = Vertex);
+	void set(const T* const buffer, int* dimension, DataLoc dataLoc = Vertex);
 
 	T interpolate(const Vector<>& loc) const;
 
@@ -33,33 +36,31 @@ protected:
 private:
 	const T* field;
 	std::vector<int> dim;
+	DataLoc dataLoc;
 };
 
 template <class T>
-Field<T>::Field() : field(NULL)
+Field<T>::Field(DataLoc dataLoc) : field(NULL), dataLoc(dataLoc), dim(3)
 {
-	dim.resize(3);
 	dim[0] = dim[1] = dim[2] = 0;
 }
 
 template <class T>
-Field<T>::Field(const T* const buffer, int x, int y, int z) : field(buffer)
+Field<T>::Field(const T* const buffer, int x, int y, int z, DataLoc dataLoc) : field(buffer), dataLoc(dataLoc), dim(3)
 {
-	dim.resize(3);
 	dim[0] = x; dim[1] = y; dim[2] = z;
 }
 
 template <class T>
-Field<T>::Field(const T* const buffer, const std::vector<int>& dimension) : field(buffer)
+Field<T>::Field(const T* const buffer, const std::vector<int>& dimension, DataLoc dataLoc) : field(buffer), dataLoc(dataLoc)
 {
 	assert(dimension.size() == 3);
 	dim = dimension;
 }
 
 template <class T>
-Field<T>::Field(const T* const buffer, int* dimension) : field(buffer)
+Field<T>::Field(const T* const buffer, int* dimension, DataLoc dataLoc) : field(buffer), dataLoc(dataLoc), dim(3)
 {
-	dim.resize(3);
 	dim[0] = dimension[0]; dim[1] = dimension[1]; dim[2] = dimension[2];
 }
 
@@ -88,22 +89,23 @@ void Field<T>::setDimension(int* dimension)
 }
 
 template <class T>
-void Field<T>::set(const T* const buffer, int x, int y, int z)
+void Field<T>::set(const T* const buffer, int x, int y, int z, DataLoc dataLoc)
 {
 	this->setBuffer(buffer);
 	this->setDimension(x, y, z);
+	this->setDataLoc(dataLoc);
 }
 
 template <class T>
-void Field<T>::set(const T* const buffer, const std::vector<int>& dimension)
+void Field<T>::set(const T* const buffer, const std::vector<int>& dimension, DataLoc dataLoc)
 {
-	this->set(buffer, dimension[0], dimension[1], dimension[2]);
+	this->set(buffer, dimension[0], dimension[1], dimension[2], dataLoc);
 }
 
 template <class T>
-void Field<T>::set(const T* const buffer, int* dimension)
+void Field<T>::set(const T* const buffer, int* dimension, DataLoc dataLoc)
 {
-	this->set(buffer, dimension[0], dimension[1], dimension[2]);
+	this->set(buffer, dimension[0], dimension[1], dimension[2], dataLoc);
 }
 
 template <class T>

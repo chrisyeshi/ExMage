@@ -13,6 +13,7 @@
 #include "CoreTube.h"
 #include "Frame.h"
 #include "mkpath.h"
+#include "DomainUtility.h"
 
 CoreTube coretube;
 // std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
@@ -47,9 +48,14 @@ int main(int argc, char* argv[])
     coretube.Initialize();
     coretube.SetCameras(config.GetCameras());
     coretube.SetLightPosition(config.GetLightPosition());
+    DomainUtility domain;
     double extent[6];
-    for (int i = 0; i < 6; ++i)
-        extent[i] = sim.region_bound()[i];
+    extent[0] = domain.getBounds()[0].x();
+    extent[1] = domain.getBounds()[1].x();
+    extent[2] = domain.getBounds()[0].y();
+    extent[3] = domain.getBounds()[1].y();
+    extent[4] = domain.getBounds()[0].z();
+    extent[5] = domain.getBounds()[1].z();
     coretube.SetExtent(extent);
 
     // trace particles

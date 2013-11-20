@@ -25,9 +25,11 @@ public:
 	void set(const std::vector<T*>& fields, int x, int y, int z);
 	void set(const std::vector<T*>& fields, const std::vector<int>& dimension);
 	void set(const std::vector<T*>& fields, int* dimension);
+	void set(const std::vector<T*>& fields, const Vector<3, int> dimension);
 	void set(T** fields, int nFields, int x, int y, int z);
 	void set(T** fields, int nFields, const std::vector<int>& dimension);
 	void set(T** fields, int nFields, int* dimension);
+	void set(T** fields, int nFields, const Vector<3, int> dimension);
 
 	void setVelocities(const std::vector<Field<T> >& velocities);
 	void setVelocities(const std::vector<T*>& velocities, int x, int y, int z);
@@ -92,6 +94,12 @@ void VectorField<T>::set(const std::vector<T*>& fields, int* dimension)
 }
 
 template <class T>
+void VectorField<T>::set(const std::vector<T*>& fields, const Vector<3, int> dimension)
+{
+	this->set(fields, dimension[0], dimension[1], dimension[2]);
+}
+
+template <class T>
 void VectorField<T>::set(T** fields, int nFields, int x, int y, int z)
 {
 	std::vector<T*> vFields(nFields);
@@ -108,6 +116,12 @@ void VectorField<T>::set(T** fields, int nFields, const std::vector<int>& dimens
 
 template <class T>
 void VectorField<T>::set(T** fields, int nFields, int* dimension)
+{
+	this->set(fields, nFields, dimension[0], dimension[1], dimension[2]);
+}
+
+template <class T>
+void VectorField<T>::set(T** fields, int nFields, const Vector<3, int> dimension)
 {
 	this->set(fields, nFields, dimension[0], dimension[1], dimension[2]);
 }
