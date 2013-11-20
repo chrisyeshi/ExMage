@@ -11,7 +11,7 @@ DomainUtility::DomainUtility()
 bool DomainUtility::inBounds(const Vector<>& coord) const
 {
 	for (int i = 0; i < vDim; ++i)
-		if (coord[i] < bounds()[0][i] || coord[i] >= (bounds()[1][i] + 1.0))
+		if (coord[i] < bounds()[0][i] || coord[i] >= bounds()[1][i])
 			return false;
 	return true;
 }

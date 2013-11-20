@@ -39,9 +39,7 @@ void ParticleAdvector::trace(std::vector<float*> fields)
 {
     std::vector<Vector<> > bounds = comm_.getBounds();
     Vector<> range = bounds[1] - bounds[0];
-    flow_.set(fields, int(range[0] + 0.5),
-                            int(range[1] + 0.5),
-                            int(range[2] + 0.5));
+    flow_.set(fields, Vector<3, int>(int(range[0] + 0.5), int(range[1] + 0.5), int(range[2] + 0.5)));
     static bool first_time = true;
     if (first_time)
     {
