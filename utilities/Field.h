@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <cassert>
+#include <limits>
 
 #include "Vector.h"
 
@@ -28,14 +29,18 @@ public:
 	void setDimension(const Vector<3, int>& dimension) { dim = dimension; }
 	void set(const T* const buffer, const Vector<3, int>& dimension, DataLoc = Center);
 
-	T interpolate(const Vector<>& loc) const;
+	template <class U>
+	T interpolate(const Vector<3, U>& loc) const;
 
 protected:
 	Vector<3, int> gridDim() const;
 	Vector<3, int> cellDim() const;
-	T gridInterpolate(const Vector<>& loc) const;
-	T cellInterpolate(const Vector<>& loc) const;
-	T interpolate(const Vector<>& loc, const Vector<3, int>& dimension) const;
+	template <class U>
+	T gridInterpolate(const Vector<3, U>& loc) const;
+	template <class U>
+	T cellInterpolate(const Vector<3, U>& loc) const;
+	template <class U>
+	T interpolate(const Vector<3, U>& loc, const Vector<3, int>& dimension) const;
 
 private:
 	const T* field;
@@ -64,7 +69,8 @@ void Field<T>::set(const T* const buffer, const Vector<3, int>& dimension, DataL
 }
 
 template <class T>
-T Field<T>::interpolate(const Vector<>& loc) const
+template <class U>
+T Field<T>::interpolate(const Vector<3, U>& loc) const
 {
 	if (dataLoc == Vertex)
 		return gridInterpolate(loc);
@@ -88,30 +94,36 @@ Vector<3, int> Field<T>::cellDim() const
 }
 
 template <class T>
-T Field<T>::gridInterpolate(const Vector<>& loc) const
+template <class U>
+T Field<T>::gridInterpolate(const Vector<3, U>& loc) const
 {
 	assert(loc.x() >= 0.0 && loc.y() >= 0.0 && loc.z() >= 0.0);
-	assert(int(loc.x()) < gridDim().x() && int(loc.y()) < gridDim().y() && int(loc.z()) < gridDim().z());
+	assert(loc.x() <= T(cellDim().x()) && loc.y() <= T(cellDim().y()) && loc.z() <= T(cellDim().z()));
+	Vector<3, U> coord;
+	for (int i = 0; i < 3; ++i)
+		coord[i] = std::min(loc[i], U(cellDim()[i] - std::numeric_limits<T>::epsilon()));
 	return interpolate(loc, gridDim());
 }
 
 template <class T>
-T Field<T>::cellInterpolate(const Vector<>& gridLoc) const
+template <class U>
+T Field<T>::cellInterpolate(const Vector<3, U>& gridLoc) const
 {
 	assert(gridLoc.x() >= 0.0 && gridLoc.y() >= 0.0 && gridLoc.z() >= 0.0);
-	assert(int(gridLoc.x()) < gridDim().x() && int(gridLoc.y()) < gridDim().y() && int(gridLoc.z()) < gridDim().z());
-	Vector<> loc = gridLoc - 0.5;
+	assert(gridLoc.x() <= T(cellDim().x()) && gridLoc.y() <= T(cellDim().y()) && gridLoc.z() <= T(cellDim().z()));
+	Vector<3, U> loc = gridLoc - 0.5;
 	for (int i = 0; i < 3; ++i)
 	{
-		loc[i] = std::max(loc[i], T(0.0));
-		loc[i] = std::min(loc[i], T(cellDim()[i] - 0.0001));
+		loc[i] = std::max(loc[i], U(0.0));
+		loc[i] = std::min(loc[i], U(cellDim()[i] - 1.0 - std::numeric_limits<T>::epsilon()));
 	}
 	return interpolate(loc, cellDim());
 
 }
 
 template <class T>
-T Field<T>::interpolate(const Vector<>& loc, const Vector<3, int>& dimension) const
+template <class U>
+T Field<T>::interpolate(const Vector<3, U>& loc, const Vector<3, int>& dimension) const
 {
 	int lower_bound[3] = {int(loc[0]), int(loc[1]), int(loc[2])};
 	float ratio_xyz[3] = {loc[0] - float(lower_bound[0]),

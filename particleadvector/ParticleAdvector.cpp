@@ -128,7 +128,7 @@ void ParticleAdvector::traceParticles()
 
 Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
 {
-  Vector<> velocity3 = flow_.getVelocity(particle.coord());
+  Vector<> velocity3 = flow_.getVelocity(particle.coord() - comm_.getBounds()[0]);
   float multiplier = config().GetVelocity();
   Particle<> ret;
   ret.coord() = particle.coord() + velocity3 * multiplier;
