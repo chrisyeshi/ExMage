@@ -49,7 +49,8 @@ void ParticleAdvector::trace(std::vector<float*> fields)
         first_time = false;
     } else
     {
-        curr_ = this->nextParticles();
+        curr_ = next_;
+        curr_.insert(curr_.end(), incNext_.begin(), incNext_.end());
         next_.clear();
     }
     std::cout << "Timestep: " << timestep_++ << std::endl;
@@ -60,6 +61,7 @@ void ParticleAdvector::trace(std::vector<float*> fields)
 std::vector<Particle<> > ParticleAdvector::prevParticles() const
 {
     std::vector<Particle<> > p = curr_;
+    p.insert(p.end(), outCurr_.begin(), outCurr_.end());
     p.insert(p.end(), incCurr_.begin(), incCurr_.end());
     return p;
 }
@@ -67,6 +69,7 @@ std::vector<Particle<> > ParticleAdvector::prevParticles() const
 std::vector<Particle<> > ParticleAdvector::nextParticles() const
 {
     std::vector<Particle<> > p = next_;
+    p.insert(p.end(), outNext_.begin(), outNext_.end());
     p.insert(p.end(), incNext_.begin(), incNext_.end());
     return p;
 }
