@@ -1,3 +1,14 @@
+//
+//
+// DomainUtility
+//
+// This class provides the domain information, such as bounds, volume size, number of sub volumes, etc.
+// Also, it handles the communication among sub volumes by performing a 2 step synchronize of the particles.
+// * Step 1: Send the current and next particles to the corresponding neighbors.
+// * Step 2: Receive the next particle properties from the neighbors.
+//
+//
+
 #ifndef __DomainUtility_h__
 #define __DomainUtility_h__
 

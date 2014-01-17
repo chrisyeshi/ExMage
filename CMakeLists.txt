@@ -31,6 +31,6 @@ include_directories( ${OSMESA_INCLUDE_DIR} )
 link_directories( ${OSMESA_LIBRARY} )
 
 # only when both particleadvector and tubegenerator are built, we then build the main function
-add_executable(simulate main.cpp)
+add_executable(simulate main.cpp Explorable.cpp)
 target_link_libraries(simulate tubegenerator particleadvector configreader mkpath)
 file(COPY ${PROJECT_SOURCE_DIR}/tubegenerator/shaders DESTINATION ${PROJECT_BINARY_DIR})
