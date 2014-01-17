@@ -14,6 +14,7 @@
 #include "Frame.h"
 #include "mkpath.h"
 #include "DomainUtility.h"
+#include "Explorable.h"
 
 CoreTube coretube;
 // std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
@@ -27,13 +28,6 @@ int main(int argc, char* argv[])
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    // srand(time(0) * rank);
-
-    // choose configure file
-    ConfigReader::setFile("configure.json");
-
-    // read configure file
-    ConfigReader& config = ConfigReader::getInstance();
 
     // read vector field
     VectorFieldReader reader;
@@ -41,22 +35,50 @@ int main(int argc, char* argv[])
     assert(reader.read());
     fields = reader.getFields();
 
+    //
+    //
+    // This is the expected initialization code.
+    // 1. Initialize our class
+    // 2. Set properties that should be obtained from the simulation codes
+    // 3. Otherwise, the properties are set by the config file
+    //
+    //
+    Explorable explorable;
+    explorable.setConfigFile("configure.json"); // If not set, it's default to be configure.json
+
+    //
+    //
+    // Here is the fake Simulation main loop
+    // Currently, I am still reading the timestep from the config file.
+    // Later on, I should remove that because the simulation should be taking care of that.
+    //
+    //
+    ConfigReader& config = ConfigReader::getInstance();
+    std::vector<int> range = config.GetTimeStepRange();
+    for (int timestep = range[0]; timestep <= range[1]; ++timestep)
+    {
+        //
+        //
+        // Inside the Simulate loop.
+        //
+        //
+        explorable.update(fields);
+    }
+
+    //
+    //
+    // After the Simulation is done, we need the simulation to initiate the output command.
+    //
+    //
+    explorable.output();
+
+/*
+    // choose configure file
+    ConfigReader::setFile("configure.json");
     // particle tracer
     ParticleAdvector sim;
-
     // tube generator
     coretube.Initialize();
-    coretube.SetCameras(config.GetCameras());
-    coretube.SetLightPosition(config.GetLightPosition());
-    DomainUtility domain;
-    double extent[6];
-    extent[0] = domain.getBounds()[0].x();
-    extent[1] = domain.getBounds()[1].x();
-    extent[2] = domain.getBounds()[0].y();
-    extent[3] = domain.getBounds()[1].y();
-    extent[4] = domain.getBounds()[0].z();
-    extent[5] = domain.getBounds()[1].z();
-    coretube.SetExtent(extent);
 
     // trace particles
     std::vector<int> range = config.GetTimeStepRange();
@@ -68,6 +90,10 @@ int main(int argc, char* argv[])
 
     // output and finalize
     coretube.Output();
+*/
+
+
+
     std::cout << "finalize" << std::endl;
     time(&end);
     dif = difftime(end, start);
