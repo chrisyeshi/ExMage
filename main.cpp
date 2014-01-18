@@ -15,6 +15,7 @@
 #include "mkpath.h"
 #include "DomainUtility.h"
 #include "Explorable.h"
+#include "ProcIndex.h"
 
 CoreTube coretube;
 // std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
@@ -71,6 +72,7 @@ int main(int argc, char* argv[])
     //
     //
     explorable.output();
+
 
 /*
     // choose configure file

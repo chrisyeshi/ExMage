@@ -33,7 +33,7 @@ bool VectorFieldReader::read()
     // hdf5
     if (config.GetFileFormat() == "hdf5")
         return readHdf5();
-    
+
     // shouldn't reach here
     return false;
 }

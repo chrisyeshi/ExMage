@@ -35,8 +35,8 @@ public:
 	std::vector<Vector<> > getBounds() const { return bounds(); }
 	bool inBounds(const Vector<>& coord) const;
 	void scatter(const PtclArr& curr, const PtclArr& next, const VectorField<>& flow);
-	PtclArr getCurr() const;
-	PtclArr getNext() const;
+	PtclArr getCurrOut() const;
+	PtclArr getNextOut() const;
 	PtclArr getCurrInc() const;
 	PtclArr getNextInc() const;
 
