@@ -28,13 +28,13 @@ int readData(const char* filename,
     hid_t spac_id = H5Dget_space(dset_id[i]);
     hsize_t htotal_size3[3];
     status = H5Sget_simple_extent_dims(spac_id, htotal_size3, NULL);
-    hsize_t region_size3[3] = {htotal_size3[0] / region_count[0],
+    hsize_t region_size3[3] = {htotal_size3[2] / region_count[2],
                                htotal_size3[1] / region_count[1],
-                               htotal_size3[2] / region_count[2]};
-    hsize_t start[3] = {region_index[0] * region_size3[0],
+                               htotal_size3[0] / region_count[0]};
+    hsize_t start[3] = {region_index[2] * region_size3[2],
                         region_index[1] * region_size3[1],
-                        region_index[2] * region_size3[2]};
-    hsize_t count[3] = {region_size3[0], region_size3[1], region_size3[2]};
+                        region_index[0] * region_size3[0]};
+    hsize_t count[3] = {region_size3[2], region_size3[1], region_size3[0]};
     status = H5Sselect_hyperslab(spac_id, H5S_SELECT_SET, start, NULL, count, NULL);
     hid_t memspace = H5Screate_simple(3, count, NULL);
 
