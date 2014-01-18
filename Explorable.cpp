@@ -1,6 +1,8 @@
 #include "Explorable.h"
 
 #include "ConfigReader.h"
+#include "mpi.h"
+#include "GlobalComposite.h"
 
 //
 //
@@ -37,7 +39,10 @@ void Explorable::update(const std::vector<float*>& fields)
 
 void Explorable::output()
 {
-    tuber.Output();
+    // tuber.Output();
+    GlobalComposite gc;
+    gc.gather(tuber.getFrame(0));
+    gc.composite();
 }
 
 //

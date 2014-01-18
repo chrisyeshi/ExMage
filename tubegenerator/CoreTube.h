@@ -27,13 +27,10 @@ public:
     ~CoreTube();
 
     void Initialize();
-    // void SetCameras(const std::vector<CameraCore>& cameras);
-    // void SetLightPosition(const Vector<>& light) {LightPosition = light;};
-    // void SetExtent(double extent[6]);
     void GenerateTubes(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2);
-    int GetCameraCount() const { return Frames.size(); };
-    Frame* GetFrame(const int index);
+    int GetCameraCount() const { return Frames.size(); }
     void Output();
+    Frame* getFrame(const int index);
 
 protected:
     // double Extent[6];

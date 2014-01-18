@@ -15,6 +15,7 @@
 #include "mkpath.h"
 #include "DomainUtility.h"
 #include "Explorable.h"
+#include "ProcIndex.h"
 
 CoreTube coretube;
 // std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
@@ -71,6 +72,10 @@ int main(int argc, char* argv[])
     //
     //
     explorable.output();
+
+    DomainUtility domainUtil;
+    std::vector<Vector<> > bounds = domainUtil.getBounds();
+    std::cout << "Proc " << rank << " Bounds: [" << bounds[0].x() << ", " << bounds[1].x() << ", " << bounds[0].y() << ", " << bounds[1].y() << ", " << bounds[0].z() << ", " << bounds[1].z() << "]" << std::endl;
 
 /*
     // choose configure file

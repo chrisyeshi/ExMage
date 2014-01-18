@@ -57,25 +57,6 @@ void CoreTube::Initialize()
     initFrames();
 }
 
-// void CoreTube::SetCameras(const std::vector<CameraCore>& cameras)
-// {
-//     for (unsigned int i = 0; i < Frames.size(); ++i)
-//        delete Frames[i];
-//     Frames.resize(cameras.size());
-//     for (unsigned int i = 0; i < Frames.size(); ++i)
-//     {
-//         Frames[i] = new Frame();
-//         Frames[i]->SetCamera(cameras[i]);
-//     }
-//     initFBO();
-// }
-
-// void CoreTube::SetExtent(double extent[6])
-// {
-//     for (int i = 0; i < 6; ++i)
-//         Extent[i] = extent[i];
-// }
-
 void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
                              const std::vector<Particle<> >& particles2)
 {
@@ -112,13 +93,6 @@ void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
     }
 }
 
-Frame* CoreTube::GetFrame(const int index)
-{
-    CurCamIndex = index;
-    snapshot();
-    return Frames[index];
-}
-
 void CoreTube::Output()
 {
     ProcIndex procindex;
@@ -126,7 +100,7 @@ void CoreTube::Output()
     std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
     for (int i = 0; i < GetCameraCount(); ++i)
     {
-        Frame* sum = GetFrame(i);
+        Frame* sum = getFrame(i);
         char proc_index_string[10];
         sprintf(proc_index_string, "%02d", rank);
         char cam_index_string[10];
@@ -151,7 +125,7 @@ void CoreTube::Output()
         sum->Write();
     }
     // output times
-    Frame* sum = GetFrame(0);
+    Frame* sum = getFrame(0);
     char pcs[100];
     int resolution[2];
     sum->GetSize(resolution);
@@ -759,4 +733,11 @@ void CoreTube::calcDomain()
     domain[5] = t;
 
     Frames[CurCamIndex]->SetDataDomain(domain);
+}
+
+Frame* CoreTube::getFrame(const int index)
+{
+    CurCamIndex = index;
+    snapshot();
+    return Frames[index];
 }
