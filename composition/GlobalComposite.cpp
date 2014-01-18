@@ -29,7 +29,6 @@ void GlobalComposite::gather(Frame* leaf)
 {
     double leaf_domain[6];
     leaf->GetDataDomain(leaf_domain);
-    std::cout << "Leaf Domain: [" << leaf_domain[0] << ", " << leaf_domain[1] << ", " << leaf_domain[2] << ", " << leaf_domain[3] << ", " << leaf_domain[4] << ", " << leaf_domain[5] << "]" << std::endl;
     // Let's say for now we only support 1 camera
     // And Let's gather each buffer separatly... (stupid)
     // Assume we only have 1 scalar map
@@ -138,7 +137,6 @@ void GlobalComposite::composite()
         frames[i]->GetSize(size);
         double domain[6];
         frames[i]->GetDataDomain(domain);
-        std::cout << "Domain: [" << domain[0] << ", " << domain[1] << ", " << domain[2] << ", " << domain[3] << ", " << domain[4] << ", " << domain[5] << "]" << std::endl;
         for (int y = 0; y < size[1]; ++y)
         {
             for (int x = 0; x < size[0]; ++x)

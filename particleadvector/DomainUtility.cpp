@@ -23,6 +23,24 @@ void DomainUtility::scatter(const PtclArr& curr, const PtclArr& next, const Vect
 	this->scatter();
 }
 
+DomainUtility::PtclArr DomainUtility::getCurrOut() const
+{
+    PtclArr ret;
+    PtclMap::const_iterator itr = currOut.begin();
+    for (; itr != currOut.end(); ++itr)
+        ret.insert(ret.end(), itr->second.begin(), itr->second.end());
+    return ret;
+}
+
+DomainUtility::PtclArr DomainUtility::getNextOut() const
+{
+    PtclArr ret;
+    PtclMap::const_iterator itr = nextOut.begin();
+    for (; itr != nextOut.end(); ++itr)
+        ret.insert(ret.end(), itr->second.begin(), itr->second.end());
+    return ret;
+}
+
 DomainUtility::PtclArr DomainUtility::getCurrInc() const
 {
 	PtclArr ret;
@@ -165,7 +183,6 @@ DomainUtility::PtclArr DomainUtility::recv(const Vector<vDim, int> neighbor3) co
 	// if no particle, then stop
 	if (count == 0)
 		return PtclArr();
-	std::cout << "Proc " << myRank() << " bounds: " << bounds()[0] << ", " << bounds()[1] << std::endl;
 	std::cout << "Recv: Proc " << myRank() << " is receiving " << count << " particles from Proc" << neiRank << std::endl;
 	// otherwise receive actual particles data
 	// first receive the ids

@@ -142,6 +142,7 @@ Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
 void ParticleAdvector::communicateWithNeighbors()
 {
     comm_.scatter(outCurr_, outNext_, flow_);
+    outNext_ = comm_.getNextOut();
     incCurr_ = comm_.getCurrInc();
     incNext_ = comm_.getNextInc();
     assert(incCurr_.size() == incNext_.size());
