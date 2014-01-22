@@ -6,19 +6,8 @@
 #include <string>
 
 #include "mpi.h"
-
-#include "ParticleAdvector.h"
-#include "ConfigReader.h"
 #include "VectorFieldReader.h"
-#include "CoreTube.h"
-#include "Frame.h"
-#include "mkpath.h"
-#include "DomainUtility.h"
 #include "Explorable.h"
-#include "ProcIndex.h"
-
-CoreTube coretube;
-// std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
 
 int main(int argc, char* argv[])
 {
@@ -72,29 +61,6 @@ int main(int argc, char* argv[])
     //
     //
     explorable.output();
-
-
-/*
-    // choose configure file
-    ConfigReader::setFile("configure.json");
-    // particle tracer
-    ParticleAdvector sim;
-    // tube generator
-    coretube.Initialize();
-
-    // trace particles
-    std::vector<int> range = config.GetTimeStepRange();
-    for (int timestep = range[0]; timestep <= range[1]; ++timestep)
-    {
-        sim.trace(fields);
-        coretube.GenerateTubes(sim.prevParticles(), sim.nextParticles());
-    }
-
-    // output and finalize
-    coretube.Output();
-*/
-
-
 
     std::cout << "finalize" << std::endl;
     time(&end);

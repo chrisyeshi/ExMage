@@ -14,9 +14,9 @@
 #include "Frame.h"
 #include "PNGWriter.h"
 #include "ConfigReader.h"
-#include "ProcIndex.h"
 #include "mkpath.h"
-#include "DomainUtility.h"
+#include "PtclSync.h"
+#include "DomainInfo.h"
 
 #ifdef USE_OSMESA
 #else
@@ -95,8 +95,7 @@ void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
 
 void CoreTube::Output()
 {
-    ProcIndex procindex;
-    int rank = procindex.getGlobalIndex();
+    int rank = DomainInfo::myRank();
     std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
     for (int i = 0; i < GetCameraCount(); ++i)
     {
@@ -530,9 +529,9 @@ void CoreTube::setupLightEnv()
 
 void CoreTube::setupClipPlane()
 {
-    DomainUtility domain;
-    Vector<> lower = domain.getBounds()[0];
-    Vector<> upper = domain.getBounds()[1];
+    PtclSync domain;
+    Vector<> lower = DomainInfo::bounds()[0];
+    Vector<> upper = DomainInfo::bounds()[1];
     // front
     setupClipPlane(0, lower, Vector<>(0.0, 0.0, 1.0).normal());
     // // back
@@ -709,16 +708,16 @@ void CoreTube::calcDomain()
 {
     GLdouble modelMatrix[16];
     glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-    DomainUtility domainUtil;
+    PtclSync domainUtil;
     double domain[6] = {FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX};
 
     for (int a = 0; a < 2; ++a)
         for (int b = 0; b < 2; ++b)
             for (int c = 0; c < 2; ++c)
             {
-                double v[4] = {domainUtil.getBounds()[a].x(),
-                        domainUtil.getBounds()[b].y(),
-                        domainUtil.getBounds()[c].z(), 1.0};
+                double v[4] = { DomainInfo::bounds()[a].x(),
+                        DomainInfo::bounds()[b].y(),
+                        DomainInfo::bounds()[c].z(), 1.0 };
                 double n[4];
                 mvMult(modelMatrix, v, n);
                 domain[0] = std::min(domain[0], n[0]);

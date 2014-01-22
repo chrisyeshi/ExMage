@@ -33,7 +33,6 @@ public:
     Frame* getFrame(const int index);
 
 protected:
-    // double Extent[6];
 #ifdef USE_OSMESA
     OSMesaContext Ctx;
     GLubyte* ColorBuffer;
@@ -43,7 +42,6 @@ protected:
 #endif
     TransferFunction Tf;
     int CurCamIndex;
-    // Vector<> LightPosition;
     std::vector<Frame*> Frames;
     GLuint DisplayListIndex;
     GLuint* Fbo;

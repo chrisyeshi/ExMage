@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include "ConfigReader.h"
-#include "ProcIndex.h"
+#include "DomainInfo.h"
 
 extern "C" {
     int readData(const char* filename,
@@ -53,8 +53,7 @@ bool VectorFieldReader::readHdf5()
 
     // region information
     std::vector<int> region_count = config.GetRegionCount();
-    ProcIndex procIndex;
-    std::vector<int> region_index = procIndex.getRegionIndex();
+    Vector<3, int> region_index = DomainInfo::myRank3();
 
     // read
     int ret = readData(filename.c_str(),

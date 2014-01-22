@@ -8,7 +8,7 @@
 #include "ConfigReader.h"
 #include "Particle.h"
 #include "VectorField.h"
-#include "DomainUtility.h"
+#include "PtclSync.h"
 
 class ParticleAdvector
 {
@@ -31,7 +31,7 @@ protected:
   std::vector<Particle<> > outNext_;
   std::vector<Particle<> > incCurr_;
   std::vector<Particle<> > incNext_;
-  DomainUtility comm_;
+  PtclSync comm_;
 
   void initializeParticles(int particle_count);
   void traceParticles();
