@@ -136,7 +136,9 @@ void PtclSync::send(const Vector<vDim, int> neighbor3, const PtclArr& ptcls) con
 	// if no particle, then stop
 	if (count == 0)
 		return;
+#ifdef DEBUG_TEXT
 	std::cout << "Send: Proc " << DomainInfo::myRank() << " is sending " << count << " particles to Proc" << neiRank << std::endl;
+#endif
 	// otherwise send the actual particles data
 	// first send the ids
 	std::vector<unsigned int> ids(count);
@@ -150,7 +152,9 @@ void PtclSync::send(const Vector<vDim, int> neighbor3, const PtclArr& ptcls) con
 	std::vector<float> values(count * nFields);
 	for (unsigned int i = 0; i < count; ++i)
 	{
+#ifdef DEBUG_TEXT
 		std::cout << "Send: Proc " << DomainInfo::myRank() << ": " << ptcls[i].coord() << std::endl;
+#endif
 		for (unsigned int j = 0; j < vDim; ++j)
 			values[i * nFields + j] = ptcls[i].coord()[j];
 		for (unsigned int j = 0; j < nScalars; ++j)
@@ -175,7 +179,9 @@ PtclSync::PtclArr PtclSync::recv(const Vector<vDim, int> neighbor3) const
 	// if no particle, then stop
 	if (count == 0)
 		return PtclArr();
+#ifdef DEBUG_TEXT
 	std::cout << "Recv: Proc " << DomainInfo::myRank() << " is receiving " << count << " particles from Proc" << neiRank << std::endl;
+#endif
 	// otherwise receive actual particles data
 	// first receive the ids
 	std::vector<unsigned int> ids(count);
@@ -193,7 +199,9 @@ PtclSync::PtclArr PtclSync::recv(const Vector<vDim, int> neighbor3) const
 		particles[i].id() = ids[i];
 		for (unsigned int j = 0; j < nFields; ++j)
 			particles[i][j] = values[i * nFields + j];
+#ifdef DEBUG_TEXT
 		std::cout << "Recv: Proc " << DomainInfo::myRank() << ": " << particles[i].coord() << std::endl;
+#endif
 	}
 	return particles;
 }

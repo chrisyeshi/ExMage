@@ -16,7 +16,6 @@ CameraCore ConfigValue::asCamera() const
     camera.Position   = Vector<3>(p[0].get<double>(), p[1].get<double>(), p[2].get<double>());
     camera.Focal      = Vector<3>(f[0].get<double>(), f[1].get<double>(), f[2].get<double>());
     camera.ViewUp     = Vector<3>(u[0].get<double>(), u[1].get<double>(), u[2].get<double>());
-    std::cout << camera.Position << std::endl;
     return camera;
 }
 

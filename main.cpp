@@ -64,10 +64,8 @@ int main(int argc, char* argv[])
     //
     explorable.output();
 
-    std::cout << "finalize" << std::endl;
     time(&end);
     dif = difftime(end, start);
-    std::cout << "Time: " << dif << "\n";
     MPI_Finalize();
     return 0;
 }

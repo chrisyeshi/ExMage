@@ -96,7 +96,9 @@ void CoreTube::GenerateTubes(const std::vector<Particle<> >& particles1,
 void CoreTube::Output()
 {
     int rank = DomainInfo::myRank();
+#ifdef DEBUG_TEXT
     std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
+#endif
     for (int i = 0; i < 1; ++i)
     {
         Frame* sum = getFrame(i);

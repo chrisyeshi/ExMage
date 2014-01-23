@@ -53,7 +53,6 @@ void ParticleAdvector::trace(std::vector<float*> fields)
         curr_.insert(curr_.end(), incNext_.begin(), incNext_.end());
         next_.clear();
     }
-    std::cout << "Timestep: " << timestep_++ << std::endl;
     traceParticles();
     communicateWithNeighbors();
 }
