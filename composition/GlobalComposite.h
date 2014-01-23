@@ -5,6 +5,7 @@
 #include <map>
 
 #include "Frame.h"
+#include "ConfigReader.h"
 
 class PixelInfo
 {
@@ -41,6 +42,8 @@ private:
     double global_extent[6];
     std::vector<Frame *> frames;
     std::map<float, PixelInfo>* depth_list;
+
+    ConfigReader& config() const { return ConfigReader::getInstance(); }
 };
 
 #endif

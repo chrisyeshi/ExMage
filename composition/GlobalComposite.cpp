@@ -119,12 +119,14 @@ void GlobalComposite::composite()
             global_extent[j * 2 + 1] = std::max(global_extent[j * 2 + 1], frame_domain[j * 2 + 1]);
         }
     }
-    std::cout << "Global Extent: [" << global_extent[0] << ", " << global_extent[1] << ", " << global_extent[2] << ", " << global_extent[3] << ", " << global_extent[4] << ", " << global_extent[5] << "]" << std::endl;
     // calculate the total resolution
-    std::cout << "individual resolution " << frame_size[0] << " " << frame_size[1] << std::endl;
     global_resolution[0] = double(frame_size[0]) * (global_extent[1] - global_extent[0]) / (frame_domain[1] - frame_domain[0]);
     global_resolution[1] = double(frame_size[1]) * (global_extent[3] - global_extent[2]) / (frame_domain[3] - frame_domain[2]);
+#ifdef DEBUG_TEXT
+    std::cout << "Global Extent: [" << global_extent[0] << ", " << global_extent[1] << ", " << global_extent[2] << ", " << global_extent[3] << ", " << global_extent[4] << ", " << global_extent[5] << "]" << std::endl;
+    std::cout << "individual resolution " << frame_size[0] << " " << frame_size[1] << std::endl;
     std::cout << "estimated actual resolution " << global_resolution[0] << " " << global_resolution[1] << std::endl;
+#endif
     // initialize the global image space
     if (depth_list)
         delete [] depth_list;
@@ -200,12 +202,10 @@ void GlobalComposite::composite()
                 max_depth_level = std::max(int(pixel_depth_list.size()), max_depth_level);
             }
         }
-// delete frames[i];
     }
-    std::cout << "done reading" << std::endl;
-// output it back
+    // output it back
     APNGWriter writer;
-    writer.setFileName("apng.png");
+    writer.setFileName(config().get("output.file").asString() + ".png");
     writer.setSize(global_resolution);
     writer.setGlobalDomain(global_extent);
     writer.setNumberOfScalarMaps(NUM_SCALARS);
@@ -214,8 +214,10 @@ void GlobalComposite::composite()
     writer.setIdEnabled(enableId);
     for (int depth_level = 0; depth_level < max_depth_level; ++depth_level)
     {
+#ifdef DEBUG_TEXT
         std::cout << "depth level " << depth_level << std::endl;
-// buffer
+#endif
+        // buffer
         unsigned char* color = new unsigned char [4 * global_resolution[0] * global_resolution[1]];
         unsigned short* normal = new unsigned short [2 * global_resolution[0] * global_resolution[1]];
         float* depth = new float [global_resolution[0] * global_resolution[1]];
@@ -289,69 +291,52 @@ void GlobalComposite::composite()
         if (enableId)
             writer.addImage(id);
 
-        Frame frame;
-        char filename[20];
-        sprintf(filename, "depth_level_%d", depth_level);
-        frame.SetFileName(filename);
-        frame.SetSize(global_resolution);
-        frame.SetDataDomain(global_extent);
-        frame.SetNumberOfScalarMaps(NUM_SCALARS);
-        frame.SetColorMap(color);
-        frame.SetDepthMap(depth);
-        frame.SetNormalMap(reinterpret_cast<unsigned char *>(normal));
-        //    frame.SetScalarMap(0, scalar);
-        frame.SetScalarMap(0, id);
-        frame.Write();
-
-        /*
-        delete [] color;
-        delete [] normal;
-        delete [] depth;
-        delete [] scalar;
-        delete [] id;
-        */
+        // Frame frame;
+        // char filename[20];
+        // sprintf(filename, "depth_level_%d", depth_level);
+        // frame.SetFileName(filename);
+        // frame.SetSize(global_resolution);
+        // frame.SetDataDomain(global_extent);
+        // frame.SetNumberOfScalarMaps(NUM_SCALARS);
+        // frame.SetColorMap(color);
+        // frame.SetDepthMap(depth);
+        // frame.SetNormalMap(reinterpret_cast<unsigned char *>(normal));
+        // //    frame.SetScalarMap(0, scalar);
+        // frame.SetScalarMap(0, id);
+        // frame.Write();
     }
     writer.write();
 }
 
 void GlobalComposite::convertNormal(unsigned char x, unsigned char y, unsigned char z, unsigned short spherical[2]) const
 {
-  float fx, fy, fz;
-  fx = float(x) / UCHAR_MAX * 2.0 - 1.0;
-  fy = float(y) / UCHAR_MAX * 2.0 - 1.0;
-  fz = float(z) / UCHAR_MAX * 2.0 - 1.0; 
-  if (fz < 0.0)
-  {
-//    std::cout << "normal: " << fx << ", " << fy << ", " << fz << std::endl;
-    spherical[0] = 0;
-    spherical[1] = 0;
-    return;
-  }
-  float sphericalF[2];
-  convertNormalF(fx, fy, fz, sphericalF);
-  for (int i = 0; i < 2; ++i)
-  {
-    float normalize_spherical = (sphericalF[i] - (-M_PI)) / (2.0 * M_PI);
-    if (normalize_spherical < 0.0 || normalize_spherical > 1.0)
-      std::cout << "normalize spherical: " << normalize_spherical << std::endl;
-    spherical[i] = normalize_spherical * USHRT_MAX;
-  }
+    float fx, fy, fz;
+    fx = float(x) / UCHAR_MAX * 2.0 - 1.0;
+    fy = float(y) / UCHAR_MAX * 2.0 - 1.0;
+    fz = float(z) / UCHAR_MAX * 2.0 - 1.0; 
+    if (fz < 0.0)
+    {
+        spherical[0] = 0;
+        spherical[1] = 0;
+        return;
+    }
+    float sphericalF[2];
+    convertNormalF(fx, fy, fz, sphericalF);
+    for (int i = 0; i < 2; ++i)
+    {
+        float normalize_spherical = (sphericalF[i] - (-M_PI)) / (2.0 * M_PI);
+        spherical[i] = normalize_spherical * USHRT_MAX;
+    }
 }
 
 void GlobalComposite::convertNormalF(float x, float y, float z, float spherical[2]) const
 {
-//  if (x > 0.0)
-//    printf("normal: %2.2f, %2.2f, %2.2f\n", x, y, z);
-  float S = sqrt(y * y + z * z);
-  float p = sqrt(x * x + y * y + z * z);
-  float theta = asin(y / S);
-  float lamda = asin(x / p);
-//  if (theta > 1.5 || lamda > 1.5 || theta < 0.0 || lamda < 0.0)
-//    printf("theta = %2.2f, lamda = %2.2f\n", theta, lamda);
-  spherical[0] = theta;
-  spherical[1] = lamda;
-//  std::cout << "original angles: " << spherical[0] << ", " << spherical[1] << std::endl;
-//  std::cout << "xyz: " << x << ", " << y << ", " << z << std::endl;
+    float S = sqrt(y * y + z * z);
+    float p = sqrt(x * x + y * y + z * z);
+    float theta = asin(y / S);
+    float lamda = asin(x / p);
+    spherical[0] = theta;
+    spherical[1] = lamda;
 }
 
 unsigned int GlobalComposite::combineDepthNormal(float depth, unsigned char x, unsigned char y, unsigned char z) const
@@ -363,16 +348,12 @@ unsigned int GlobalComposite::combineDepthNormal(float depth, unsigned char x, u
   for (int i = 0; i < 2; ++i)
   {
     usnormal[i] = float(spherical[i]) / float(USHRT_MAX) * float(UCHAR_MAX);
-//    printf("%d, ", usnormal[i]);
   }
   unsigned char temp[4];
   memcpy(temp, &usdepth, 2);
   temp[2] = usnormal[0];
   temp[3] = usnormal[1];
-//  memcpy(&(temp[2]), &usnormal, 2);
   unsigned int ret = 0;
   memcpy(&ret, temp, 4);
-//  std::cout << "    depth: " << ret;
-//  std::cout << "    depthnormal: " << ret << std::endl;
   return ret;
 }

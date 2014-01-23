@@ -7,6 +7,18 @@ if( BUILD_TEST )
     enable_testing()
 endif( BUILD_TEST )
 
+#status text output
+set(STATUS_TEXT ON CACHE BOOL "output status text while running?")
+if ( STATUS_TEXT )
+	add_definitions(-DSTATUS_TEXT)
+endif( STATUS_TEXT )
+
+# debug text output
+set(DEBUG_TEXT OFF CACHE BOOL "output debug text while running?")
+if ( DEBUG_TEXT )
+	add_definitions(-DDEBUG_TEXT)
+endif( DEBUG_TEXT )
+
 # directories that are always built
 include_directories(utilities)
 add_subdirectory(utilities)

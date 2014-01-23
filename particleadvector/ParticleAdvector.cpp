@@ -13,9 +13,9 @@
 #include "mpi.h"
 #include "Frame.h"
 #include "ConfigReader.h"
-#include "ProcIndex.h"
 #include "mkpath.h"
 #include "VectorField.h"
+#include "DomainInfo.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -37,13 +37,13 @@ ParticleAdvector::~ParticleAdvector()
 
 void ParticleAdvector::trace(std::vector<float*> fields)
 {
-    std::vector<Vector<> > bounds = comm_.getBounds();
-    Vector<> range = bounds[1] - bounds[0];
+    std::vector<Vector<> > bounds = DomainInfo::bounds();
+    Vector<> range = DomainInfo::ranges();
     flow_.set(fields, Vector<3, int>(int(range[0] + 0.5), int(range[1] + 0.5), int(range[2] + 0.5)));
     static bool first_time = true;
     if (first_time)
     {
-        int particle_count = ConfigReader::getInstance().GetRegionParticleCount();
+        int particle_count = config().get("tube.count").asNumber<int>();
         initializeParticles(particle_count);
         timestep_ = 0;
         first_time = false;
@@ -53,7 +53,6 @@ void ParticleAdvector::trace(std::vector<float*> fields)
         curr_.insert(curr_.end(), incNext_.begin(), incNext_.end());
         next_.clear();
     }
-    std::cout << "Timestep: " << timestep_++ << std::endl;
     traceParticles();
     communicateWithNeighbors();
 }
@@ -87,7 +86,7 @@ std::vector<Particle<> > ParticleAdvector::nextParticles() const
 void ParticleAdvector::initializeParticles(int particle_count)
 {
     curr_.resize(particle_count);
-    std::vector<Vector<> > bounds = comm_.getBounds();
+    std::vector<Vector<> > bounds = DomainInfo::bounds();
     Vector<> range = bounds[1] - bounds[0];
     for (int j = 0; j < particle_count; ++j)
     {
@@ -112,10 +111,10 @@ void ParticleAdvector::traceParticles()
   for (unsigned int i = 0; i < curr_.size(); ++i)
   {
     Particle<> next_particle = traceParticle(curr_[i]);
-    if (comm_.inBounds(next_particle.coord()))
+    if (DomainInfo::inBounds(next_particle.coord()))
     {
       particles_current.push_back(curr_[i]);
-      next_particle.scalars() = flow_.getScalars(next_particle.coord() - comm_.getBounds()[0]);
+      next_particle.scalars() = flow_.getScalars(next_particle.coord() - DomainInfo::bounds()[0]);
       next_particle.scalar(0) *= 10.0;
       particles_next.push_back(next_particle);
     } else
@@ -131,8 +130,8 @@ void ParticleAdvector::traceParticles()
 
 Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
 {
-  Vector<> velocity3 = flow_.getVelocity(particle.coord() - comm_.getBounds()[0]);
-  float multiplier = config().GetVelocity();
+  Vector<> velocity3 = flow_.getVelocity(particle.coord() - DomainInfo::bounds()[0]);
+  float multiplier = config().get("tube.velocity").asNumber<float>();
   Particle<> ret;
   ret.coord() = particle.coord() + velocity3 * multiplier;
   ret.id() = particle.id();

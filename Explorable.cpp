@@ -3,6 +3,7 @@
 #include "ConfigReader.h"
 #include "mpi.h"
 #include "GlobalComposite.h"
+#include "DomainInfo.h"
 
 //
 //
@@ -35,6 +36,10 @@ void Explorable::update(const std::vector<float*>& fields)
 {
     advector.trace(fields);
     tuber.GenerateTubes(advector.prevParticles(), advector.nextParticles());
+#ifdef STATUS_TEXT
+    static int progress = 0;
+    std::cout << "ExMage: (Rank " << DomainInfo::myRank() << ") updated (Progress " << ++progress << ")" << std::endl;
+#endif
 }
 
 void Explorable::output()

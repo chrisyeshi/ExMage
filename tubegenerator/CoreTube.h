@@ -26,14 +26,30 @@ public:
     CoreTube();
     ~CoreTube();
 
+    //
+    //
+    // Initialize GL context and all the GL stuff including frame buffer objects
+    //
+    //
     void Initialize();
+
+    //
+    //
+    // Given two sets of equal lengthed arrays of particles,
+    // connect them into tubes.
+    //
+    //
     void GenerateTubes(const std::vector<Particle<> >& particles1, const std::vector<Particle<> >& particles2);
-    int GetCameraCount() const { return Frames.size(); }
+
+    //
+    //
+    // This function outputs the scattered images
+    //
+    //
     void Output();
     Frame* getFrame(const int index);
 
 protected:
-    // double Extent[6];
 #ifdef USE_OSMESA
     OSMesaContext Ctx;
     GLubyte* ColorBuffer;
@@ -43,7 +59,6 @@ protected:
 #endif
     TransferFunction Tf;
     int CurCamIndex;
-    // Vector<> LightPosition;
     std::vector<Frame*> Frames;
     GLuint DisplayListIndex;
     GLuint* Fbo;

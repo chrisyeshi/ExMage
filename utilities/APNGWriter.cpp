@@ -288,7 +288,9 @@ void APNGWriter::write()
   h0 = height;
   bop = 0;
 
+#ifdef STATUS_TEXT
   printf("saving %s (frame %d of %d)\n", filename.c_str(), 1 - first, frame_count - first);
+#endif
   deflate_rect(images[0].p, x0, y0, w0, h0, bpp, rowbytes, zbuf_size, 0);
 
   if (op[0].zstream.total_out <= op[1].zstream.total_out)
@@ -312,7 +314,9 @@ void APNGWriter::write()
     unsigned int	op_min;
     int			op_best;
 
+#ifdef STATUS_TEXT
     printf("saving %s (frame %d of %d)\n", filename.c_str(), i - first + 2, frame_count - first);
+#endif
     for (j = 0; j < 12; ++j)
       op[j].valid = 0;
 

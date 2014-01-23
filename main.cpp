@@ -6,19 +6,8 @@
 #include <string>
 
 #include "mpi.h"
-
-#include "ParticleAdvector.h"
-#include "ConfigReader.h"
 #include "VectorFieldReader.h"
-#include "CoreTube.h"
-#include "Frame.h"
-#include "mkpath.h"
-#include "DomainUtility.h"
 #include "Explorable.h"
-#include "ProcIndex.h"
-
-CoreTube coretube;
-// std::vector<tube::Particle> translate2tubeparticle(const std::vector<Particle<> >& particles);
 
 int main(int argc, char* argv[])
 {
@@ -55,13 +44,15 @@ int main(int argc, char* argv[])
     //
     //
     ConfigReader& config = ConfigReader::getInstance();
-    std::vector<int> range = config.GetTimeStepRange();
+    std::vector<int> range = config.get("input.time").asArray<double, int>();
     for (int timestep = range[0]; timestep <= range[1]; ++timestep)
     {
         //
         //
         // Inside the Simulate loop.
         //
+        // The first 3 fields are the velocity fields, the 4th/last field is
+        // the scalar field that we do visualization on.
         //
         explorable.update(fields);
     }
@@ -73,33 +64,8 @@ int main(int argc, char* argv[])
     //
     explorable.output();
 
-
-/*
-    // choose configure file
-    ConfigReader::setFile("configure.json");
-    // particle tracer
-    ParticleAdvector sim;
-    // tube generator
-    coretube.Initialize();
-
-    // trace particles
-    std::vector<int> range = config.GetTimeStepRange();
-    for (int timestep = range[0]; timestep <= range[1]; ++timestep)
-    {
-        sim.trace(fields);
-        coretube.GenerateTubes(sim.prevParticles(), sim.nextParticles());
-    }
-
-    // output and finalize
-    coretube.Output();
-*/
-
-
-
-    std::cout << "finalize" << std::endl;
     time(&end);
     dif = difftime(end, start);
-    std::cout << "Time: " << dif << "\n";
     MPI_Finalize();
     return 0;
 }

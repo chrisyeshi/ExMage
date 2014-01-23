@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include "ConfigReader.h"
-#include "ProcIndex.h"
+#include "DomainInfo.h"
 
 extern "C" {
     int readData(const char* filename,
@@ -31,7 +31,7 @@ bool VectorFieldReader::read()
 {
     ConfigReader& config = ConfigReader::getInstance();
     // hdf5
-    if (config.GetFileFormat() == "hdf5")
+    if (config.get("input.format").asString() == "hdf5")
         return readHdf5();
 
     // shouldn't reach here
@@ -41,20 +41,19 @@ bool VectorFieldReader::read()
 bool VectorFieldReader::readHdf5()
 {
     ConfigReader& config = ConfigReader::getInstance();
-    std::string filename = config.GetReadRoot();
+    std::string filename = config.get("input.file").asString();
 
     // attributes
-    std::vector<std::string> input_attributes = config.GetInputAttributes();
-    int attribute_count = config.GetAttributeCount();
+    std::vector<std::string> input_attributes = config.get("input.attributes").asArray<std::string, std::string>();
+    int attribute_count = input_attributes.size();
     fields.resize(attribute_count);
     char attributes[attribute_count][50];
     for (int i = 0; i < attribute_count; ++i)
         sprintf(attributes[i], "%s", input_attributes[i].c_str());
 
     // region information
-    std::vector<int> region_count = config.GetRegionCount();
-    ProcIndex procIndex;
-    std::vector<int> region_index = procIndex.getRegionIndex();
+    std::vector<int> region_count = config.get("domain.count").asArray<double, int>();
+    Vector<3, int> region_index = DomainInfo::myRank3();
 
     // read
     int ret = readData(filename.c_str(),
@@ -66,10 +65,10 @@ bool VectorFieldReader::readHdf5()
 
 std::string VectorFieldReader::ext() const
 {
-    return ConfigReader::getInstance().GetFileFormat();
+    return ConfigReader::getInstance().get("input.format").asString();
 }
 
 std::vector<int> VectorFieldReader::timestepRange() const
 {
-    return ConfigReader::getInstance().GetTimeStepRange();
+    return ConfigReader::getInstance().get("input.time").asArray<double, int>();
 }

@@ -1,6 +1,3 @@
-# procindex
-add_library(procindex ProcIndex.cpp)
-
 # mkpath
 add_library(mkpath mkpath.cpp)
 
@@ -9,6 +6,11 @@ add_library(configreader ConfigReader.cpp)
 
 # frame
 add_library(frame Frame.cpp)
+
+# domain info
+find_package(MPI REQUIRED)
+add_library(domaininfo DomainInfo.cpp)
+target_link_libraries(domaininfo ${MPI_LIBRARIES})
 
 # pngio
 include( ${CMAKE_ROOT}/Modules/FindPNG.cmake )
