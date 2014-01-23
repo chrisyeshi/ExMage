@@ -97,7 +97,7 @@ void CoreTube::Output()
 {
     int rank = DomainInfo::myRank();
     std::cout << "Proc: " << rank << " Progress: Saving..." << std::endl;
-    for (int i = 0; i < GetCameraCount(); ++i)
+    for (int i = 0; i < 1; ++i)
     {
         Frame* sum = getFrame(i);
         char proc_index_string[10];
