@@ -43,7 +43,7 @@ void ParticleAdvector::trace(std::vector<float*> fields)
     static bool first_time = true;
     if (first_time)
     {
-        int particle_count = ConfigReader::getInstance().GetRegionParticleCount();
+        int particle_count = config().get("tube.count").asNumber<int>();
         initializeParticles(particle_count);
         timestep_ = 0;
         first_time = false;
@@ -132,7 +132,7 @@ void ParticleAdvector::traceParticles()
 Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
 {
   Vector<> velocity3 = flow_.getVelocity(particle.coord() - DomainInfo::bounds()[0]);
-  float multiplier = config().GetVelocity();
+  float multiplier = config().get("tube.velocity").asNumber<float>();
   Particle<> ret;
   ret.coord() = particle.coord() + velocity3 * multiplier;
   ret.id() = particle.id();

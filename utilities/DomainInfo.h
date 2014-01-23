@@ -25,15 +25,15 @@ public:
     static bool inBounds(const Vector<vDim>& coord); // test against my bounds
     static bool inBounds(const Vector<vDim>& coord, const int& rank);
     static bool inBounds(const Vector<vDim>& coord, const Vector<vDim, int>& rank3);
-    
+
     static bool inVolume(const Vector<vDim, int>& rank3);
 
 protected:
 
 private:
     static ConfigReader& config() { return ConfigReader::getInstance(); }
-    static std::vector<int> volDim() { return config().GetTotalSize(); }
-    static std::vector<int> nRegions3() { return config().GetRegionCount(); }
+    static std::vector<int> volDim() { return config().get("domain.volume").asArray<double, int>(); }
+    static std::vector<int> nRegions3() { return config().get("domain.count").asArray<double, int>(); }
 
 };
 

@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 template <int Dim = 3, class T = float>
 class Vector
@@ -12,6 +13,8 @@ public:
 	Vector();
 	Vector(const Vector<Dim, T>& v);
 	Vector(const T& x, const T& y = 0.0, const T& z = 0.0);
+    template <typename Type>
+    Vector(const std::vector<Type>& v);
 
 	// convenient accessors
 	T operator[](unsigned int idx) const;
@@ -71,7 +74,8 @@ private:
 template <int Dim, class T>
 Vector<Dim, T>::Vector()
 {
-	Vals[0] = Vals[1] = Vals[2] = 0.0;
+    for (int i = 0; i < Dim; ++i)
+        Vals[i] = 0.0;
 }
 
 template <int Dim, class T>
@@ -89,6 +93,15 @@ Vector<Dim, T>::Vector(const T& x, const T& y, const T& z)
 	this->Vals[1] = y;
 	if (Dim <= 2) return;
 	this->Vals[2] = z;
+}
+
+template <int Dim, class T>
+template <typename Type>
+Vector<Dim, T>::Vector(const std::vector<Type>& v)
+{
+    assert(Dim <= v.size());
+    for (int i = 0; i < Dim; ++i)
+        this->Vals[i] = v[i];
 }
 
 template <int Dim, class T>

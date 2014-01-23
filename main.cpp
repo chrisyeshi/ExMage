@@ -44,13 +44,15 @@ int main(int argc, char* argv[])
     //
     //
     ConfigReader& config = ConfigReader::getInstance();
-    std::vector<int> range = config.GetTimeStepRange();
+    std::vector<int> range = config.get("input.time").asArray<double, int>();
     for (int timestep = range[0]; timestep <= range[1]; ++timestep)
     {
         //
         //
         // Inside the Simulate loop.
         //
+        // The first 3 fields are the velocity fields, the 4th/last field is
+        // the scalar field that we do visualization on.
         //
         explorable.update(fields);
     }

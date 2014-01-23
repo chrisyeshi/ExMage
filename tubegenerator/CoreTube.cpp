@@ -109,12 +109,12 @@ void CoreTube::Output()
         int resolution[2];
         sum->GetSize(resolution);
         sprintf(pcs, "n%d_p%d_r%d_t%d",
-                config().GetRegionCount()[0],
-                config().GetRegionParticleCount(),
+                config().get("domain.count").asArray<double, int>()[0],
+                config().get("tube.count").asNumber<int>(),
                 resolution[0],
-                config().GetTimeStepRange()[1] - config().GetTimeStepRange()[0]);
+                config().get("input.time").asArray<double, int>()[1] - config().get("input.time").asArray<double, int>()[0]);
 
-        std::string dir = config().GetOutRoot() + "/" + pcs
+        std::string dir = config().get("output.file").asString() + "/" + pcs
                         + std::string("/cam") + cam_index_string;
         std::string spt_path = dir + "/output_proc" + proc_index_string;
         mkpath(dir.c_str(), 0777);
@@ -129,12 +129,12 @@ void CoreTube::Output()
     int resolution[2];
     sum->GetSize(resolution);
     sprintf(pcs, "n%d_p%d_r%d_t%d",
-            config().GetRegionCount()[0],
-            config().GetRegionParticleCount(),
+            config().get("domain.count").asArray<double, int>()[0],
+            config().get("tube.count").asNumber<int>(),
             resolution[0],
-            config().GetTimeStepRange()[1] - config().GetTimeStepRange()[0]);
+            config().get("input.time").asArray<double, int>()[1] - config().get("input.time").asArray<double, int>()[0]);
 
-    std::string dir = config().GetOutRoot() + "/" + pcs + "/time";
+    std::string dir = config().get("output.file").asString() + "/" + pcs + "/time";
     char global_index_string[10];
     sprintf(global_index_string, "%02d", rank);
     std::string time_path = dir + "/proc" + global_index_string + ".txt";
@@ -150,22 +150,22 @@ void CoreTube::Output()
 
 int CoreTube::window_width() const
 {
-    return config().GetResolution()[0];
+    return config().get("output.resolution").asArray<double, int>()[0];
 }
 
 int CoreTube::window_height() const
 {
-    return config().GetResolution()[1];
+    return config().get("output.resolution").asArray<double, int>()[1];
 }
 
 float CoreTube::radius() const
 {
-    return config().GetTubeRadius();
+    return config().get("tube.radius").asNumber<float>();
 }
 
 float CoreTube::max_particle_gap() const
 {
-    return config().GetMaxParticleGap();
+    return config().get("tube.gap").asNumber<float>();
 }
 
 void CoreTube::createDisplayList(const std::vector<Particle<> >& particles1,
@@ -264,7 +264,10 @@ void CoreTube::initGLEnv()
 void CoreTube::initFrames()
 {
     assert(Frames.empty());
-    std::vector<CameraCore> cameras = config().GetCameras();
+    // We only allow 1 camera for this version.
+    CameraCore camera = config().get("camera").asCamera();
+    std::vector<CameraCore> cameras;
+    cameras.push_back(camera);
     Frames.resize(cameras.size());
     for (unsigned int i = 0; i < Frames.size(); ++i)
     {
@@ -522,8 +525,9 @@ void CoreTube::setupCamera()
 
 void CoreTube::setupLightEnv()
 {
-    Vector<> light = config().GetLightPosition();
-    GLfloat light_position[] = { light.x(), light.y(), light.z(), 0.0 };
+    Vector<> light = config().get("light.position").asArray<double, float>();
+    // std::vector<double> light = config().get("light.position").asArray<double>();
+    GLfloat light_position[] = { light[0], light[1], light[2], 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
@@ -708,7 +712,6 @@ void CoreTube::calcDomain()
 {
     GLdouble modelMatrix[16];
     glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-    PtclSync domainUtil;
     double domain[6] = {FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX};
 
     for (int a = 0; a < 2; ++a)
