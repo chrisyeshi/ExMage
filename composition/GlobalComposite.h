@@ -35,7 +35,7 @@ private:
     static const int NUM_SCALARS = 1;
     static const int root = 0;
     static const int nCameras = 1;
-    static const int compressMode = 4;
+    static const int compressMode = 3;
     static const bool enableId = false;
 
     int global_resolution[2];

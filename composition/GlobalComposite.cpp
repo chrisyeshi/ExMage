@@ -301,8 +301,8 @@ void GlobalComposite::composite()
         // frame.SetColorMap(color);
         // frame.SetDepthMap(depth);
         // frame.SetNormalMap(reinterpret_cast<unsigned char *>(normal));
-        // //    frame.SetScalarMap(0, scalar);
-        // frame.SetScalarMap(0, id);
+        // frame.SetScalarMap(0, scalar);
+        // // frame.SetScalarMap(0, id);
         // frame.Write();
     }
     writer.write();
