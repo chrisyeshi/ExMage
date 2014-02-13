@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1164</width>
+    <height>735</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="Viewer" name="viewer" native="true"/>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0,0,0,0,0">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="open">
+          <property name="text">
+           <string>&amp;Open</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="TFEditor" name="tf" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>500</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="zoom_label">
+          <property name="text">
+           <string>Zoom</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="zoom">
+          <property name="maximum">
+           <number>999</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="cut_label">
+          <property name="text">
+           <string>Cut Plane</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="cut">
+          <property name="maximum">
+           <number>999</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Info</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextBrowser" name="info">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>DejaVu Sans</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Viewer</class>
+   <extends>QWidget</extends>
+   <header>viewer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TFEditor</class>
+   <extends>QWidget</extends>
+   <header>TFEditor.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
