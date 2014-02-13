@@ -1,0 +1,35 @@
+{
+  "camera": {
+    "position": [75.0, 1075.0, 75.0],
+    "focal": [75.0, 75.0, 75.0],
+    "up": [1.0, 0.0, 0.0]
+  },
+  "light": {
+    "position": [150.0, 150.0, 75.0]
+  },
+  "output": {
+    "resolution": [512, 512],
+    "file": "supernova"
+  },
+  "tube": {
+    "count": 15,
+    "radius": 0.1,
+    "velocity": 2.0,
+    "gap": 10.0
+  },
+  "domain": {
+    "count": [2, 2, 2],
+    "volume": [75, 75, 75]
+  },
+  "input": {
+    "file": "supernova75.h5",
+    "format": "hdf5",
+    "attributes": [
+      "xvelocity",
+      "yvelocity",
+      "zvelocity",
+      "entropy"
+    ],
+    "time": [1, 20]
+  }
+}

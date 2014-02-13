@@ -1,1 +1,3 @@
-add_subdirectory(utilities)
+enable_testing ()
+
+add_subdirectory (insitu)
