@@ -45,3 +45,6 @@ FORMS    += mainwindow.ui
 OTHER_FILES += \
     shaders/pointcloud.vert \
     shaders/pointcloud.frag
+
+RESOURCES += \
+    shaders.qrc

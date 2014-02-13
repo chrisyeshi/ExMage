@@ -19,8 +19,13 @@ const QColor Viewer::bgColor = QColor::fromHsv(0, 0, 50);
 //
 
 Viewer::Viewer(QWidget *parent) :
-    QGLWidget(parent), domain(6), vbo(0), tfTex(0)
+    QGLWidget(parent), mpng(NULL), nVerts(0), domain(6), vbo(0), tfTex(0)
 {
+}
+
+Viewer::~Viewer()
+{
+    if (mpng) delete mpng;
 }
 
 //
@@ -32,18 +37,19 @@ Viewer::Viewer(QWidget *parent) :
 bool Viewer::open(const std::string& filename)
 {
     reset();
-    mpng.setFileName(filename);
-    if (!mpng.read())
+    mpng = new APNGReader;
+    mpng->setFileName(filename);
+    if (!mpng->read())
     {
         // TODO: handle error
         return false;
     }
     // camera
-    domain = mpng.getGlobalDomain();
+    domain = mpng->getGlobalDomain();
     scaleDomain();
     updateVBO();
     updateOrtho();
-    camera = mpng.getCamera();
+    camera = mpng->getCamera();
     updateCamera();
     emit infoChanged();
     updateGL();
@@ -81,7 +87,8 @@ void Viewer::tfChanged(mslib::TF &tf)
 
 void Viewer::zoomChanged(int level)
 {
-    float oriYRange = mpng.getGlobalDomain()[3] - mpng.getGlobalDomain()[2];
+    if (!mpng) return;
+    float oriYRange = mpng->getGlobalDomain()[3] - mpng->getGlobalDomain()[2];
     float yRange = (float(level) / 999.f) * (minYRangeDomain() - oriYRange) + oriYRange;
     float yMin = (domain[3] + domain[2]) * 0.5 - yRange * 0.5;
     float yMax = (domain[3] + domain[2]) * 0.5 + yRange * 0.5;
@@ -94,8 +101,9 @@ void Viewer::zoomChanged(int level)
 
 void Viewer::cutChanged(int distance)
 {
-    float zMin = mpng.getGlobalDomain()[4];
-    float zMax = mpng.getGlobalDomain()[5];
+    if (!mpng) return;
+    float zMin = mpng->getGlobalDomain()[4];
+    float zMax = mpng->getGlobalDomain()[5];
     float z = (float(distance) / 999.f) * (zMax - zMin) + zMin;
     domain[4] = z;
     updateOrtho();
@@ -112,7 +120,6 @@ void Viewer::initializeGL()
 {
     initializeGLFunctions();
     qglClearColor(bgColor);
-    glGenBuffers(1, &vbo);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -126,6 +133,8 @@ void Viewer::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     qglColor(QColor::fromHsv(180, 0, 200));
+
+    if (!vbo) return;
 
     glPointSize(calcPointSize());
 
@@ -242,8 +251,8 @@ void Viewer::initTF()
 void Viewer::initShaders()
 {
     shader.removeAllShaders();
-    shader.addShaderFromSourceFile(QGLShader::Vertex, "shaders/pointcloud.vert");
-    shader.addShaderFromSourceFile(QGLShader::Fragment, "shaders/pointcloud.frag");
+    shader.addShaderFromSourceFile(QGLShader::Vertex, ":/shaders/pointcloud.vert");
+    shader.addShaderFromSourceFile(QGLShader::Fragment, ":/shaders/pointcloud.frag");
     shader.link();
     shader.bind();
     shader.setUniformValue("tf", 0);
@@ -252,8 +261,8 @@ void Viewer::initShaders()
 
 void Viewer::reset()
 {
-//    glDeleteBuffers(1, &vbo); vbo = 0;
-//    glDeleteTextures(1, &tfTex); tfTex = 0;
+    glDeleteBuffers(1, &vbo); vbo = 0;
+    if (mpng) delete mpng;
 }
 
 void Viewer::updateOrtho()
@@ -278,9 +287,10 @@ void Viewer::updateCamera()
 
 void Viewer::updateVBO()
 {
+    if (!mpng) return;
     makeCurrent();
     std::vector<Vertex> sortVerts;
-    std::vector<Frame*> frames = mpng.getFrames();
+    std::vector<Frame*> frames = mpng->getFrames();
     for (unsigned int i = 0; i < frames.size(); ++i)
     {
         Frame* f = frames[i];
@@ -296,13 +306,13 @@ void Viewer::updateVBO()
             GLfloat z = depthMap[pixel];
             if (z > 0.9999 || z < 0.0001)
                 continue;
-            std::vector<float> oriDomain = mpng.getGlobalDomain();
+            std::vector<float> oriDomain = mpng->getGlobalDomain();
             GLfloat zz = z * (oriDomain[5] - oriDomain[4]) + oriDomain[4];
             GLfloat nxx = GLfloat(x) / size[0];
             GLfloat xx = nxx * (oriDomain[1] - oriDomain[0]) + oriDomain[0];
             GLfloat nyy = GLfloat(y) / size[1];
             GLfloat yy = nyy * (oriDomain[3] - oriDomain[2]) + oriDomain[2];
-            CameraCore cam = mpng.getCamera();
+            CameraCore cam = mpng->getCamera();
             Vector view = cam.Focal - cam.Position;
             view.normalize();
             Vector t = cam.ViewUp;
@@ -334,6 +344,7 @@ void Viewer::updateVBO()
         normals[3 * i + 2] = sortVerts[i].nz;
         scalars[i] = sortVerts[i].s;
     }
+    glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, nVerts * 7 * sizeof(GLfloat), 0, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, nVerts * 3 * sizeof(GLfloat), &vertices[0]);
@@ -344,9 +355,10 @@ void Viewer::updateVBO()
 
 void Viewer::scaleDomain()
 {
-    std::vector<int> oriResolution = mpng.getResolution();
+    if (!mpng) return;
+    std::vector<int> oriResolution = mpng->getResolution();
     float oriResRatio = float(oriResolution[0]) / oriResolution[1];
-    std::vector<float> oriDomain = mpng.getGlobalDomain();
+    std::vector<float> oriDomain = mpng->getGlobalDomain();
     float oriDomainRatio = (oriDomain[1] - oriDomain[0]) / (oriDomain[3] - oriDomain[2]);
     float resRatio = float(width()) / height();
     float domainRatio = resRatio * oriDomainRatio / oriResRatio;
@@ -359,8 +371,9 @@ void Viewer::scaleDomain()
 
 float Viewer::calcPointSize() const
 {
-    float oriYDomain = mpng.getGlobalDomain()[3] - mpng.getGlobalDomain()[2];
-    float oriYResolution = mpng.getResolution()[1];
+    if (!mpng) return 1.f;
+    float oriYDomain = mpng->getGlobalDomain()[3] - mpng->getGlobalDomain()[2];
+    float oriYResolution = mpng->getResolution()[1];
     float oriRatio = oriYDomain / oriYResolution;
     float yDomain = domain[3] - domain[2];
     float yResolution = height();
@@ -375,13 +388,15 @@ float Viewer::minYRangeDomain() const
 
 float Viewer::maxYRangeDomain() const
 {
-    return mpng.getGlobalDomain()[3] - mpng.getGlobalDomain()[2];
+    if (!mpng) return 0.f;
+    return mpng->getGlobalDomain()[3] - mpng->getGlobalDomain()[2];
 }
 
 float Viewer::minDomainResRatio() const
 {
-    float oriYDomain = mpng.getGlobalDomain()[3] - mpng.getGlobalDomain()[2];
-    float oriYResolution = mpng.getResolution()[1];
+    if (!mpng) return 1.f;
+    float oriYDomain = mpng->getGlobalDomain()[3] - mpng->getGlobalDomain()[2];
+    float oriYResolution = mpng->getResolution()[1];
     float oriRatio = oriYDomain / oriYResolution;
     return oriRatio / maxPointSize();
 }

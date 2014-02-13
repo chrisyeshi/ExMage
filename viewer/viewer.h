@@ -13,6 +13,7 @@ class Viewer : public QGLWidget, protected QGLFunctions
     Q_OBJECT
 public:
     explicit Viewer(QWidget *parent = 0);
+    ~Viewer();
 
     bool open(const std::string& filename);
     std::string getInfo() const;
@@ -71,7 +72,7 @@ private:
     // Private members
     //
     //
-    APNGReader mpng;
+    APNGReader* mpng;
     unsigned int nVerts;
     CameraCore camera;
     std::vector<float> domain;
