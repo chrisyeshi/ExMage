@@ -218,5 +218,6 @@ set (SOURCES
 # build library
 #
 #
+message (${HDF5_LIBRARIES})
 add_library (exmage ${LIBTYPE} ${SOURCES})
 target_link_libraries (exmage ${HDF5_LIBRARIES} ${PNG_LIBRARIES} OSMesa ${MPI_LIBRARIES} GLU)

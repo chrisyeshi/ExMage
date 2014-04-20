@@ -1,4 +1,8 @@
 #include "TFEditor.h"
+#include <iostream>
+#include <QSlider>
+#include <QGridLayout>
+#include <QColorDialog>
 
 #ifndef nullptr
 #define nullptr 0
@@ -424,7 +428,7 @@ TFDrawArea::~TFDrawArea()
 
 void TFDrawArea::mouseMoveEvent(QMouseEvent *e)
 {
-    QPointF pos = getTransform().map(e->posF());
+    QPointF pos = getTransform().map(e->localPos());
     TFControlPoint ctrl = findControl(pos);
     setMouseCursor(ctrl);
 
@@ -510,7 +514,7 @@ void TFDrawArea::mouseMoveEvent(QMouseEvent *e)
 
 void TFDrawArea::mousePressEvent(QMouseEvent *e)
 {
-    QPointF pos = getTransform().map(e->posF());
+    QPointF pos = getTransform().map(e->localPos());
     int index = valueToIndex(pos.x(), tf().arraySize());
     if (e->buttons() & Qt::LeftButton)
     {
@@ -557,7 +561,7 @@ void TFDrawArea::mouseReleaseEvent(QMouseEvent *e)
 {
     _draggedControl.type = TFControlPoint::VOID_CONTROL;
 
-    QPointF pos = getTransform().map(e->posF());
+    QPointF pos = getTransform().map(e->localPos());
     TFControlPoint ctrl = findControl(pos);
     setMouseCursor(ctrl);
 
@@ -589,7 +593,9 @@ void TFDrawArea::paintEvent(QPaintEvent *e)
     if (_showGrid)
     {
         QPen gridPen(Qt::DashLine);
+        gridPen.setWidthF(0.f);
         gridPen.setColor(Qt::white);
+
         painter.setPen(gridPen);
         painter.setBrush(QBrush(QColor(255, 255, 255), Qt::SolidPattern));
         float y = atoy(0.5f);
@@ -647,7 +653,10 @@ void TFDrawArea::paintEvent(QPaintEvent *e)
         painter.drawPolygon(points, res + 4);
 
         // the curve
-        painter.setPen(QPen(Qt::black));
+        QPen pen;
+        pen.setWidth(0);
+        pen.setColor(Qt::black);
+        painter.setPen(pen);
         painter.setBrush(QBrush(QColor(255, 255, 255), Qt::SolidPattern));
         painter.drawPolyline(&points[1], res + 2);
     }
@@ -671,8 +680,11 @@ void TFDrawArea::paintEvent(QPaintEvent *e)
     painter.setBrush(QBrush(QColor(255, 255, 255, 96), Qt::SolidPattern));
     painter.drawPolygon(points, size + 4);
 
+    QPen pen;
+    pen.setWidth(0);
     // the curve
-    painter.setPen(QPen(Qt::black));
+    pen.setColor(Qt::black);
+    painter.setPen(pen);
     painter.setBrush(QBrush(QColor(255, 255, 255), Qt::SolidPattern));
     painter.drawPolyline(&points[1], size + 2);
 
@@ -688,7 +700,6 @@ void TFDrawArea::paintEvent(QPaintEvent *e)
         TFControlPoint posCtrl = getGaussianPositionControl(i);
 
         QPointF r = QPointF(_gaussianControlRadius / (double)width(), _gaussianControlRadius / (double)height());
-        QPointF center(gaus.mean, r.y());
         painter.drawRect(QRectF(posCtrl.pos.x() - r.x(), posCtrl.pos.y() - r.y(), r.x() * 2.0, r.y() * 2.0));
         
         // height control
@@ -881,7 +892,7 @@ void TFColorControlArea::mouseDoubleClickEvent(QMouseEvent *e)
 {
     if (e->buttons() & Qt::LeftButton)
     {
-        QPointF pos = getTransform().map(e->posF());
+        QPointF pos = getTransform().map(e->localPos());
         int index = findControl(pos);
         if (index >= 0)
         {
@@ -912,7 +923,7 @@ void TFColorControlArea::mouseDoubleClickEvent(QMouseEvent *e)
 void TFColorControlArea::mouseMoveEvent(QMouseEvent *e)
 {
     QTransform tm = getTransform();
-    QPointF pos = tm.map(e->posF());
+    QPointF pos = tm.map(e->localPos());
     double controlWidthF = (double)_controlWidth / (double)(width() - _leftMargin - _rightMargin);
 
     if (e->buttons() & Qt::LeftButton)
@@ -952,7 +963,7 @@ void TFColorControlArea::mousePressEvent(QMouseEvent *e)
 {
     if (e->buttons() & Qt::LeftButton)
     {
-        QPointF pos = getTransform().map(e->posF());
+        QPointF pos = getTransform().map(e->localPos());
         int index = findControl(pos);
         _activeControl = index;
         _draggedControl = index;
@@ -962,7 +973,7 @@ void TFColorControlArea::mousePressEvent(QMouseEvent *e)
     }
     else if (e->buttons() & Qt::RightButton)
     {
-        QPointF pos = getTransform().map(e->posF());
+        QPointF pos = getTransform().map(e->localPos());
         int index = findControl(pos);
         if (index >= 0 && tf().colorControlCount() > 1)
         {
@@ -1008,10 +1019,13 @@ void TFColorControlArea::paintEvent(QPaintEvent *e)
                             QPointF(pos, 1.0)};
         QColor color = fromRgb(tf().colorControl(i).color);
         painter.setBrush(QBrush(color, Qt::SolidPattern));
+        QPen pen;
+        pen.setWidthF(0.f);
         if (i == _activeControl || i == _hoveredControl)
-            painter.setPen(QPen(Qt::white));
+            pen.setColor(Qt::white);
         else
-            painter.setPen(QPen(Qt::black));
+            pen.setColor(Qt::black);
+        painter.setPen(pen);
         painter.drawPolygon(points, 3);
     }
 
@@ -1023,7 +1037,10 @@ void TFColorControlArea::paintEvent(QPaintEvent *e)
                             QPointF(pos, 1.0)};
         QColor color = fromRgb(tf().colorControl(_activeControl).color);
         painter.setBrush(QBrush(color, Qt::SolidPattern));
-        painter.setPen(QPen(Qt::white));
+        QPen pen;
+        pen.setWidthF(0.f);
+        pen.setColor(Qt::white);
+        painter.setPen(pen);
         painter.drawPolygon(points, 3);
     }
 }

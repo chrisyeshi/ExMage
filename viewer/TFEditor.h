@@ -2,6 +2,8 @@
 #define TFEDITOR_H
 
 #include <QtGui>
+#include <QMenu>
+#include <QPushButton>
 
 #include "TF.h"
 
