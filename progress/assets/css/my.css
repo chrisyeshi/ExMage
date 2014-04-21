@@ -1,0 +1,23 @@
+.myheader {
+	height: 150px;
+	background-color: #4B4B4B;
+	padding-top: 60px;
+}
+
+.myheader h1 {
+	color: #eee;
+}
+
+.entry {
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #eee;
+}
+
+.container h3 {
+	color: #4B4B4B;
+}
+
+.container p {
+	color: #4B4B4B;
+}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Explorable Image Progres</title>
+
+    <!-- MyCSS -->
+    <link href='assets/css/my.css' rel='stylesheet'>
+    <!-- Bootstrap -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Lightbox -->
+    <link href='assets/css/lightbox.css' rel='stylesheet'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <!-- The Model Dialog for lightbox -->
+    <div id="lightbox" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <button type="button" class="close hidden" data-dismiss="modal" aria-hidden="true">
+              <span class="glyphicon glyphicon-remove"></span>
+            </button>
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="" alt="" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class='myheader'>
+      <div class='container'>
+        <h1>Explorable Image Progress</h1>
+      </div>
+    </div>
+
+    <div class='container'>
+
+      <!-- Contents -->
+      <div class='contents'>
+
+        <!-- 5 -->
+        <div class='entry'>
+          <!-- title -->
+          <h3>Wrong Lighting <small>April 20</small></h3>
+          <!-- images -->
+          <div class='row'>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z10.png'>
+              </a> 
+            </div>
+          </div>
+          <!-- text -->
+          <p>As Hongfeng recommended, I used amb_diff as attenuation in the ray attenuation function, which is mathematically incorrect. Because by using amb_diff, we actually revealed the bins that should be occluded.</p>
+          <p>For example, we have slab A and slab B, where slab A is in front of slab B and slab A is fully opaque. If we are using alpha as attenuation, we will not be able to see slab B, which is correct, but if we use amb_diff as attenuation, we will be seeing slab B because slab A is no longer fully opaque.</p>
+        </div>
+
+        <!-- 4 -->
+        <div class='entry'>
+          <!-- title -->
+          <h3>First Image from Dr. Ono's Simulation <small>April 18</small></h3>
+          <!-- images -->
+          <div class='row'>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z9.png'>
+              </a> 
+            </div>
+          </div>
+          <!-- text -->
+          <p>This image is rendered from Dr. Ono's simulation output data. This is not genereated in situ, rather I used the output data that Yang generated in the past. And this is not generated in parallel because the data is not stored in a parallel way.</p>
+        </div>
+
+        <!-- 3 -->
+        <div class='entry'>
+          <!-- title -->
+          <h3>Opacity Modulation <small>April 18</small></h3>
+          <!-- images -->
+          <div class='row'>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z6.png'>
+              </a> 
+            </div>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z7.png'>
+              </a>
+            </div>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z8.png'>
+              </a>
+            </div>
+          </div>
+          <!-- text -->
+          <p>Implemented opacity modulation as described in the paper. The 3 images are generated from a single explorable image.</p>
+          <p>We can change the opacity map to reveal internal structures, from image 1 to image 2.</p>
+          <p>They made a big assumption that a ray traverse from low intensity to high intensity. As a result, when we change the opacity value of a lower intensity bin, it affects the opacity of the higher intensity bins. In image 3, we lower the opacity value of some lower intensity bins, it amplifies the opacity values in the higher intensity bins, which makes them all white.</p>
+        </div>
+
+        <!-- 2 -->
+        <div class='entry'>
+          <!-- title -->
+          <h3>Rendered with Smaller Step Size <small>April 18</small></h3>
+          <!-- images -->
+          <div class='row'>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z3.png'>
+              </a> 
+            </div>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z4.png'>
+              </a>
+            </div>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z5.png'>
+              </a>
+            </div>
+          </div>
+          <!-- text -->
+          <p>These images are rendered with a ray step size 0.5, which eliminates the ring artifacts. Of course we can change the colors. I tried to incorporate opacity change in the third image. This opacity change doesn't have opacity modulation. I am going to implement it next.</p>
+        </div>
+
+        <!-- 1 -->
+        <div class='entry'>
+          <!-- title -->
+          <h3>First Images <small>April 17</small></h3>
+          <!-- images -->
+          <div class='row'>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z1.png'>
+              </a> 
+            </div>
+            <div class='col-sm-6 col-md-4'>
+              <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <img src='contents/images/z2.png'>
+              </a>
+            </div>
+          </div>
+          <!-- text -->
+          <p>This is the first sets of explorable images generated using Hongfeng's codes. They are generated using a fairly big ray step size (2.0). That is why the ring like artifacts appear. I am using a big step size because it is slow since it is a software renderer. The two images demonstrate that we can change the colormap, but I still need to add the functonality in the viewer to be able to change the opaicty map.</p>
+        </div>
+
+      </div>
+
+    </div> 
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Bootstrap Lightbox -->
+    <script src='assets/js/lightbox.js'></script>
+  </body>
+</html>
