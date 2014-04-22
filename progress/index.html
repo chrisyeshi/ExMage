@@ -39,15 +39,59 @@
     <!-- Header -->
     <div class='myheader'>
       <div class='container'>
-        <h1>Explorable Image Progress</h1>
+        <h1>Explorable Image</h1>
       </div>
     </div>
 
     <div class='container'>
 
-      <!-- Contents -->
-      <div class='contents'>
+      <!-- Milestones -->
+      <div class='summary'>
 
+        <h2>Milestones <small>LDAV 5/14</small></h2>
+        <!-- The 3 Major Components -->
+        <div class='component'>
+          <h4>Explorable Image Renderer</h4>
+          <ul>
+            <li>Generate explorable image with Hongfeng's parallel renderer.</li>
+            <li>Implement Anna's version</li>
+            <ul>
+              <li>Relighting using depth proxy images</li>
+              <li>Attenuation clustering and model learning</li>
+            </ul>
+            <li>Parallel reading the data from Dr Ono's simulation.</li>
+          </ul>
+        </div>
+        <div class='component'>
+          <h4>Yang's Feature Tracking</h4>
+          <ul>
+            <li>Yang needs the depth proxy images.</li>
+            <li>Be able to extract image from a single explorable image.</li>
+            <li>Track features over time.</li>
+          </ul>
+        </div>
+        <div class='component'>
+          <h4>Explorable Image Viewer</h4>
+          <ul>
+            <li>Incorporate depth proxy images to provide lighting.</li>
+            <li>Provide interface to specify parameters for the parallel renderer.</li>
+            <li>Provide interface to select feature from explorable image.</li>
+            <li>Interface design (timelie?)</li>
+          </ul>
+        </div>
+        <div class='component'>
+          <h4>Write the Paper</h4>
+          <ul>
+            <li>We need at least a proof of concept demo before we can write the paper.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Updates -->
+      <div class='updates'>
+
+        <h2>Progress</h2>
         <!-- 5 -->
         <div class='entry'>
           <!-- title -->

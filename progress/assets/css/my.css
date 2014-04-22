@@ -6,6 +6,7 @@
 
 .myheader h1 {
 	color: #eee;
+	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
 }
 
 .entry {
@@ -14,10 +15,31 @@
 	border-bottom-color: #eee;
 }
 
+.container h2 {
+	color: #4B4B4B;
+	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
+}
+
 .container h3 {
 	color: #4B4B4B;
+	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
+}
+
+.container h4 {
+	color: #4B4B4B;
+	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
+}
+
+.container li {
+	color: #4B4B4B;
+	font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+	font-size: 16px;
+	line-height: 24px;
 }
 
 .container p {
 	color: #4B4B4B;
+	font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+	font-size: 16px;
+	line-height: 24px;
 }
