@@ -1,6 +1,7 @@
 .myheader {
 	height: 150px;
-	background-color: #4B4B4B;
+	background-color: rgb(33, 33, 33);
+	background-image: -webkit-linear-gradient(top, rgb(55, 55, 55), rgb(33, 33, 33));
 	padding-top: 60px;
 }
 
@@ -9,36 +10,50 @@
 	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
 }
 
+.content-section {
+	background-color: rgb(242, 242, 242);
+}
+
+.summary {
+	border-bottom-width: 1px;
+	border-bottom-style: dashed;
+	border-bottom-color: rgb(150, 150, 150);
+}
+
 .entry {
 	border-bottom-width: 1px;
-	border-bottom-style: solid;
-	border-bottom-color: #eee;
+	border-bottom-style: dashed;
+	border-bottom-color: rgb(150, 150, 150);
+}
+
+.container {
+	max-width: 640px;
 }
 
 .container h2 {
-	color: #4B4B4B;
+	color: rgb(33, 33, 33);
 	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
 }
 
 .container h3 {
-	color: #4B4B4B;
+	color: rgb(33, 33, 33);
 	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
 }
 
 .container h4 {
-	color: #4B4B4B;
+	color: rgb(33, 33, 33);
 	font-family: 'Lucida Grande', Calibri, Helvetica, Arial, sans-serif;
 }
 
 .container li {
-	color: #4B4B4B;
+	color: rgb(33, 33, 33);
 	font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
 	font-size: 16px;
 	line-height: 24px;
 }
 
 .container p {
-	color: #4B4B4B;
+	color: rgb(33, 33, 33);
 	font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
 	font-size: 16px;
 	line-height: 24px;
