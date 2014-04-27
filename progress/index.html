@@ -94,10 +94,28 @@
 
           <h2>Progress</h2>
 
-          <!-- 6 -->
+          <!-- 8 -->
           <div class='entry'>
             <!-- title -->
-            <h3>Video from Dr. Ono's Simulation Data</h3>
+            <h3>Need Input for Transfer Function</h3>
+            <!-- images -->
+            <div class='row'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/supernova_transferfunction.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>This image is generated using the transfer function on the left, also I hard coded it to cutaway the front part. There are artifacts which I do not understand why/how. I assume they are artifacts from the viewing stage. Generating such an image is time consuming, generating a image sequence can take hours, so we have 1 chance (tonight) to generate the video.</p>
+            <p>As long as the view angle and the opacity map is good enougth, we can change the colors later. And I hope I can fix the artifacts tomorrow.</p>
+            <p>Bob, do you have any idea where these artifacts might come from?</p>
+          </div>
+
+          <!-- 7 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Video from Dr. Ono's Simulation Data <small>April 26</small></h3>
             <!-- video -->
             <div class='row'>
               <video class='col-xs-12 col-sm-6' controls>
@@ -109,6 +127,33 @@
             </div>
             <!-- text -->
             <p>This is actually generated using ParaView. It is intended to be used by Yang to make a proof of concept video for feature tracking because making the actual feature tracking to work is time consuming and we don't have enough time at this stage.
+          </div>
+
+          <!-- 6 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Lighting with Depth Proxy <small>April 25</small></h3>
+            <!-- images -->
+            <div class='row'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/lighting1.png'>
+                </a> 
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/lighting2.png'>
+                </a> 
+              </div>
+            </div>
+            <!-- text -->
+            <p>From Bob:</p>
+            <blockquote>
+              <p>I've added Phong lighting to Chris's viewer (Actually I was done with that at about 9PM).</p>
+              <p>What I've been experimenting with since then is: I don't understand the behavior I'm getting from the transfer function editor. I believe it's what Chris is complaining about with respect to the assumptions made within the structure of the RAFs. Color modulation works great, but opacity modulation is extremely finicky: If I even slightly raise the low intensity value opacity, the higher values are either completely hidden or oversaturate immediately. I confirmed that Chris's code conforms to the description in the paper, so there must be something Anna and the others felt to be trivial that's necessary to fix it. Chris: I think we can fix this issue now that we have the depths, by sorting the bins by depth before rendering. I'm tired for now, but I'll test my hypothesis tomorrow. My implementation is on our dropbox share.</p>
+              <p>The first attached image is just a quick demonstration with opacity disabled so that you can more clearly see the lighting changes. It's just the Phong model: The parameters are all configurable within the shader, and whenever we like we can expose them in the interface.</p>
+              <p>The second attached image is the same except with opacity enabled. I recognize the quality is bad: as I said, I really had to play around a lot with the opacities to get a half-decent picture...this needs to be fixed, so hopefully my idea will work.</p>
+            </blockquote>
           </div>
 
           <!-- 5 -->
