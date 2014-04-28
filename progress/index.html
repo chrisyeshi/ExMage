@@ -10,8 +10,9 @@
     <link href='assets/css/my.css' rel='stylesheet'>
     <!-- Bootstrap -->
     <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Lightbox -->
-    <link href='assets/css/lightbox.css' rel='stylesheet'>
+    <!-- Ekko Lightbox -->
+    <link href='assets/bootstrap/css/ekko-lightbox.css' rel='stylesheet'>
+    <link href='assets/bootstrap/css/dark.css' rel='stylesheet'>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -21,20 +22,6 @@
     <![endif]-->
   </head>
   <body>
-
-    <!-- The Model Dialog for lightbox -->
-    <div id="lightbox" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <button type="button" class="close hidden" data-dismiss="modal" aria-hidden="true">
-              <span class="glyphicon glyphicon-remove"></span>
-            </button>
-            <div class="modal-content">
-                <div class="modal-body">
-                    <img src="" alt="" />
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Header -->
     <div class='myheader'>
@@ -138,31 +125,31 @@
             <h3>Fixed Normals <small>April 27</small></h3>
             <!-- images -->
             <div class='row'>
-              <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
-                  <img src='contents/images/supernova_fixed_normal_1403.png'>
-                </a>
-              </div>
-              <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+              <a href='contents/images/supernova_fixed_normal_1403.png' class='col-sm-6 col-md-4' data-gallery='multiimages' data-toggle='lightbox'>
+                <div class='thumbnail'>
+                  <img src='contents/images/supernova_fixed_normal_1403.png' class='img-responsive'>
+                </div>
+              </a>
+              <a href='contents/images/supernova_fixed_normal_1440.png' class='col-sm-6 col-md-4' data-gallery='multiimages' data-toggle='lightbox'>
+                <div class='thumbnail'>
                   <img src='contents/images/supernova_fixed_normal_1440.png'>
-                </a>
-              </div>
-              <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                </div>
+              </a>
+              <a href='contents/images/supernova_fixed_normal_1470.png' class='col-sm-6 col-md-4' data-gallery='multiimages' data-toggle='lightbox'>
+                <div class='thumbnail'>
                   <img src='contents/images/supernova_fixed_normal_1470.png'>
-                </a>
-              </div>
-              <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                </div>
+              </a>
+              <a href='contents/images/supernova_fixed_normal_1540.png' class='col-sm-6 col-md-4' data-gallery='multiimages' data-toggle='lightbox'>
+                <div class='thumbnail'>
                   <img src='contents/images/supernova_fixed_normal_1540.png'>
-                </a>
-              </div>
-              <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                </div>
+              </a>
+              <a href='contents/images/supernova_fixed_normal_1580.png' class='col-sm-6 col-md-4' data-gallery='multiimages' data-toggle='lightbox'>
+                <div class='thumbnail'>
                   <img src='contents/images/supernova_fixed_normal_1580.png'>
-                </a>
-              </div>
+                </div>
+              </a>
             </div>
             <!-- text -->
             <p>I fixed an issue in the normal estimation process based on Bob's input. Images from left to right are from timestep 1403, 1440, 1470, 1540 and 1580. A few things:</p>
@@ -180,7 +167,7 @@
             <!-- images -->
             <div class='row'>
               <div class='col-sm-6 col-md-6'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/supernova_transferfunction.png' class='thumbnail' data-toggle='lightbox'>
                   <img src='contents/images/supernova_transferfunction.png'>
                 </a>
               </div>
@@ -213,14 +200,16 @@
             <!-- title -->
             <h3>Lighting with Depth Proxy <small>April 25</small></h3>
             <!-- images -->
-            <div class='row'>
+            <div class='row gallery-wrapper'>
               <div class='col-sm-6 col-md-6'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/lighting1.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/lighting1.png'>
                 </a> 
               </div>
               <div class='col-sm-6 col-md-6'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/lighting2.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/lighting2.png'>
                 </a> 
               </div>
@@ -242,7 +231,7 @@
             <!-- images -->
             <div class='row'>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z10.png' class='thumbnail' data-toggle='lightbox'>
                   <img src='contents/images/z10.png'>
                 </a> 
               </div>
@@ -259,7 +248,7 @@
             <!-- images -->
             <div class='row'>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z9.png' class='thumbnail' data-toggle='lightbox'>
                   <img src='contents/images/z9.png'>
                 </a> 
               </div>
@@ -273,19 +262,22 @@
             <!-- title -->
             <h3>Opacity Modulation <small>April 18</small></h3>
             <!-- images -->
-            <div class='row'>
+            <div class='row gallery-wrapper'>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z6.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z6.png'>
                 </a> 
               </div>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z7.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z7.png'>
                 </a>
               </div>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z8.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z8.png'>
                 </a>
               </div>
@@ -301,19 +293,22 @@
             <!-- title -->
             <h3>Rendered with Smaller Step Size <small>April 18</small></h3>
             <!-- images -->
-            <div class='row'>
+            <div class='row gallery-wrapper'>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z3.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z3.png'>
                 </a> 
               </div>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z4.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z4.png'>
                 </a>
               </div>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z5.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z5.png'>
                 </a>
               </div>
@@ -327,14 +322,16 @@
             <!-- title -->
             <h3>First Images <small>April 17</small></h3>
             <!-- images -->
-            <div class='row'>
+            <div class='row gallery-wrapper'>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z1.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z1.png'>
                 </a> 
               </div>
               <div class='col-sm-6 col-md-4'>
-                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                <a href='contents/images/z2.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
                   <img src='contents/images/z2.png'>
                 </a>
               </div>
@@ -350,9 +347,19 @@
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Ekko Lightbox -->
+    <script src='assets/bootstrap/js/ekko-lightbox.js'></script>
+    <!-- Ekko Lightbox Setup -->
+    <script type="text/javascript">
+      $(document).ready(function ($) {
+        $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
+          event.preventDefault();
+          return $(this).ekkoLightbox();
+        });
+      });
+    </script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <!-- Bootstrap Lightbox -->
-    <script src='assets/js/lightbox.js'></script>
+
   </body>
 </html>
