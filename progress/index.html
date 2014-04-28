@@ -94,10 +94,51 @@
 
           <h2>Progress</h2>
 
+          <!-- 9 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Fixed Normals <small>April 27</small></h3>
+            <!-- images -->
+            <div class='row'>
+              <div class='col-sm-6 col-md-4'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/supernova_fixed_normal_1403.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/supernova_fixed_normal_1440.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/supernova_fixed_normal_1470.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/supernova_fixed_normal_1540.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='#' class='thumbnail' data-toggle='modal' data-target='#lightbox'>
+                  <img src='contents/images/supernova_fixed_normal_1580.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>I fixed an issue in the normal estimation process based on Bob's input. Images from left to right are from timestep 1403, 1440, 1470, 1540 and 1580. A few things:</p>
+            <ul>
+              <li>There are still visible artifacts (the black lines). Those are where the depth layers disjoint. We might be able to interpolate a more accurate depth value based on neighbor bins, but I don't think I can make the fix in time.</li>
+              <li>It was my mistake that used a viewport that only captures the first timestep entirely. It seems like the supernova moves around significantly.</li>
+              <li>Using one transfer function is not enough for the whole time span of this supernova dataset. When the transfer function looks good in 1580, it doesn't look interesting in 1403. That actually makes it more interesting because we can demonstrate how explorable images can deal with this problem.</li>
+            </ul>
+          </div>
+
           <!-- 8 -->
           <div class='entry'>
             <!-- title -->
-            <h3>Need Input for Transfer Function</h3>
+            <h3>Need Input for Transfer Function <small>April 26</small></h3>
             <!-- images -->
             <div class='row'>
               <div class='col-sm-6 col-md-6'>
