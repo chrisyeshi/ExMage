@@ -81,6 +81,39 @@
 
           <h2>Progress</h2>
 
+          <!-- 12 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Found Some Artifacts at Boundary <small>May 1st</small</h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/boundary_png1.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/boundary_png1.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/boundary_raf1.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/boundary_raf1.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/boundary_raf2.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/boundary_raf2.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>I was trying to clean the codes and make it run in a cluster (thehead). When I make it to run in parallel, I found some artifacts at the process boundaries. As shown in image 2 and image 3.</p>
+            <ul>
+              <li>It seems that these artifacts only appears when we are generating RAF formats because image 1 (a static image) does not have the artifacts.</li>
+              <li>There is a function named "block_exchange_boundary()" in Hongfeng's codes. It is used to exchange boundary volume data and it fixed the boundary artifacts when we are generating static images. However, the situation is different when we are generating RAF images. If we enable "block_exchange_boundary()", it generates image 2. If we do not enable "block_exchange_boundary()", it generates image 3. That is, it fixes some of the artifacts.</li>
+            </ul>
+          </div>
+
           <!-- 11 -->
           <div class='entry'>
             <!-- title -->
