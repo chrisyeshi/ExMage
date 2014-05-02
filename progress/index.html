@@ -81,6 +81,40 @@
 
           <h2>Progress</h2>
 
+          <!-- 13 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Boundary Artifacts Conquered</h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/boundary_fixed.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/boundary_fixed.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/boundary_wo_early_ray_termination.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/boundary_wo_early_ray_termination.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/boundary_with_early_ray_termination.png' class='thumbnail' data-toggle='lightbox'
+                   data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/boundary_with_early_ray_termination.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>I found the bug. It is a small but serious bug in the attenuation calculation. It was using</p>
+            <pre>accumulate_alpha += current_alpha</pre>
+            <p>and then clamp the accumulate_alpha to [0, 1], which is wrong but the image generated looked ok. After changing it to</p>
+            <pre>accumulate_alpha += (1.0 - accumulate_alpha) * current_alpha</pre>
+            <p>the boundary artifacts disappeared.</p>
+            <p>Image 1 is using the correct equation. Image 2 is using the wrong equation but not clamp to [0, 1]. Image 3 is using the wrong equation and clamp to [0, 1].</p>
+          </div>
+
           <!-- 12 -->
           <div class='entry'>
             <!-- title -->
