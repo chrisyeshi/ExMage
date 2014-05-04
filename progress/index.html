@@ -81,6 +81,29 @@
 
           <h2>Progress</h2>
 
+          <!-- 14 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Current Stage of Depths/Normals and Viewer <small>May 4th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/mpi_depth_bin_edge.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Depth at Bin Edge'>
+                  <img src='contents/images/mpi_depth_bin_edge.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/mpi_depth_bin_avg.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Depth at Bin Average'>
+                  <img src='contents/images/mpi_depth_bin_avg.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>As Kwan-Liu pointed out, the images generated with MPI don't have lighting, so I was trying to fix it. The reason happens to be that the depth values are initialized to 0 for rays that are not intersecting the bounding box. As a result, when we composite the images from different processors, we use the smallest depth value, which is 0. It's fixed now, but there are other problems with depth.</p>
+            <p>I tried to compute depth with different intensity values. Image 1 is using the lowest intensity value of a bin and image 2 is using the average intensity of a bin. They don't differentiate much. I think we need a better method to compute the depth/normal so that we don't have those black lines.</p>
+            <p>We extracted the viewer from the original messy one. The current one is more robust and allows resizing the window. Bob will continue on extending this viewer to allow temporal exploration.</p>
+          </div>
+
           <!-- 13 -->
           <div class='entry'>
             <!-- title -->
