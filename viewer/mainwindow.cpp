@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->zoom, SIGNAL(valueChanged(int)), ui->viewer, SLOT(zoomChanged(int)));
     connect(ui->viewer, SIGNAL(zoomSignal(int)), ui->zoom, SLOT(setValue(int)));
     connect(ui->cut, SIGNAL(valueChanged(int)), ui->viewer, SLOT(cutChanged(int)));
+    connect(ui->light, SIGNAL(lightDirChanged(QVector3D)), ui->viewer, SLOT(lightDirChanged(QVector3D)));
 }
 
 MainWindow::~MainWindow()

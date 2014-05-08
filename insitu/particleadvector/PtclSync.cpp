@@ -9,11 +9,30 @@ PtclSync::PtclSync()
 {
 }
 
-void PtclSync::scatter(const PtclArr& curr, const PtclArr& next, const VectorField<>& flow)
+void PtclSync::scatter(const PtclArr& currBorder, const PtclArr& nextBorder, const PtclArr& curr, const PtclArr& next, const VectorField<>& flow)
 {
+    mapBorder(currBorder, nextBorder);
 	mapPtcls(curr, next);
 	this->flow = flow;
 	this->scatter();
+}
+
+PtclSync::PtclArr PtclSync::getCurrOutBorder() const
+{
+    PtclArr ret;
+    PtclMap::const_iterator itr = currOutBorder.begin();
+    for (; itr != currOutBorder.end(); ++itr)
+        ret.insert(ret.end(), itr->second.begin(), itr->second.end());
+    return ret;
+}
+
+PtclSync::PtclArr PtclSync::getNextOutBorder() const
+{
+    PtclArr ret;
+    PtclMap::const_iterator itr = nextOutBorder.begin();
+    for (; itr != nextOutBorder.end(); ++itr)
+        ret.insert(ret.end(), itr->second.begin(), itr->second.end());
+    return ret;
 }
 
 PtclSync::PtclArr PtclSync::getCurrOut() const
@@ -52,10 +71,51 @@ PtclSync::PtclArr PtclSync::getNextInc() const
 	return ret;
 }
 
+void PtclSync::mapBorder(const PtclArr& currBorder, const PtclArr& nextBorder)
+{
+    currInBorder.clear();
+    nextInBorder.clear();
+    assert(currBorder.size() == nextBorder.size());
+    for (unsigned int i = 0; i < currBorder.size(); ++i)
+    {
+        // neighbor3 should capture the corner borders
+        Vector<vDim, int> neighbor3(0, 0, 0);
+        for (int j = 0; j < vDim; ++j)
+        {
+            // nei3 should capture the side borders
+            Vector<vDim, int> nei3(0, 0, 0);
+            if (currBorder[i].coord()[j] <= (DomainInfo::bounds()[0][j] + DomainInfo::borderWidth())
+             || nextBorder[i].coord()[j] <= (DomainInfo::bounds()[0][j] + DomainInfo::borderWidth()))
+            {
+                neighbor3[j] = -1;
+                nei3[j] = -1;
+            } else
+            if (currBorder[i].coord()[j] >= (DomainInfo::bounds()[1][j] - DomainInfo::borderWidth())
+             || nextBorder[i].coord()[j] >= (DomainInfo::bounds()[1][j] - DomainInfo::borderWidth()))
+            {
+                neighbor3[j] = 1;
+                nei3[j] = 1;
+            } else
+            {
+                continue;
+            }
+            // insert the particle into neighbor particle map
+            currInBorder[nei3].push_back(currBorder[i]);
+            nextInBorder[nei3].push_back(nextBorder[i]);
+            if (neighbor3 != nei3)
+            {
+                currInBorder[neighbor3].push_back(currBorder[i]);
+                nextInBorder[neighbor3].push_back(nextBorder[i]);
+            }
+        }
+    }
+}
+
 void PtclSync::mapPtcls(const PtclArr& curr, const PtclArr& next)
 {
 	currOut.clear();
 	nextOut.clear();
+    assert(curr.size() == next.size());
 	for (unsigned int i = 0; i < next.size(); ++i)
 	{
 		Vector<vDim, int> neighbor3(0, 0, 0);
@@ -63,7 +123,7 @@ void PtclSync::mapPtcls(const PtclArr& curr, const PtclArr& next)
 		{
 			if (next[i].coord()[j] < DomainInfo::bounds()[0][j])
 				neighbor3[j] = -1;
-			if (next[i].coord()[j] >= DomainInfo::bounds()[1][j])
+			else if (next[i].coord()[j] >= DomainInfo::bounds()[1][j])
 				neighbor3[j] = 1;
 		}
 		assert((neighbor3 != Vector<vDim, int>(0, 0, 0)));
@@ -74,8 +134,29 @@ void PtclSync::mapPtcls(const PtclArr& curr, const PtclArr& next)
 
 void PtclSync::scatter()
 {
+    currOutBorder.clear();
+    nextOutBorder.clear();
 	currInc.clear();
 	nextInc.clear();
+    // pre round: send border particles
+    // send
+    for (int x = -1; x <= 1; ++x)
+    for (int y = -1; y <= 1; ++y)
+    for (int z = -1; z <= 1; ++z)
+    {
+        Vector<vDim, int> neighbor3(x, y, z);
+        send(neighbor3, currInBorder[neighbor3]);
+        send(neighbor3, nextInBorder[neighbor3]);
+    }
+    // pre round receive
+    for (int x = -1; x <= 1; ++x)
+    for (int y = -1; y <= 1; ++y)
+    for (int z = -1; z <= 1; ++z)
+    {
+        Vector<vDim, int> neighbor3(x, y, z);
+        currOutBorder[neighbor3] = recv(neighbor3);
+        nextOutBorder[neighbor3] = recv(neighbor3);
+    }
 	// first round: send current and next particles
     // send
 	for (int x = -1; x <= 1; ++x)
@@ -93,7 +174,6 @@ void PtclSync::scatter()
 	{
 		Vector<vDim, int> neighbor3(x, y, z);
 		currInc[neighbor3] = recv(neighbor3);
-		PtclMap::iterator itr = currInc.find(neighbor3);
 		nextInc[neighbor3] = recv(neighbor3);
 		for (unsigned int i = 0; i < nextInc[neighbor3].size(); ++i)
 			nextInc[neighbor3][i].scalars() = flow.getScalars(nextInc[neighbor3][i].coord() - DomainInfo::bounds()[0]);

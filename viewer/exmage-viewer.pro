@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     PNGReader.cpp \
     CameraCore.cpp \
     TF.cpp \
-    TFEditor.cpp
+    TFEditor.cpp \
+    lightctrl.cpp
 
 HEADERS  += mainwindow.h \
     viewer.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     PNGReader.h \
     Vector.h \
     TF.h \
-    TFEditor.h
+    TFEditor.h \
+    lightctrl.h
 
 FORMS    += mainwindow.ui
 

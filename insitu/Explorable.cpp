@@ -38,7 +38,8 @@ void Explorable::update(const std::vector<float*>& fields)
     tuber.GenerateTubes(advector.prevParticles(), advector.nextParticles());
 #ifdef STATUS_TEXT
     static int progress = 0;
-    std::cout << "ExMage: (Rank " << DomainInfo::myRank() << ") updated (Progress " << ++progress << ")" << std::endl;
+    if (DomainInfo::myRank() == 0)
+        std::cout << "ExMage: (Progress " << ++progress << ")" << std::endl;
 #endif
 }
 

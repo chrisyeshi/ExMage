@@ -26,6 +26,7 @@ public slots:
     void tfChanged(mslib::TF& tf);
     void zoomChanged(int level);
     void cutChanged(int distance);
+    void lightDirChanged(QVector3D lightDir);
 
 protected:
     //
@@ -59,6 +60,8 @@ protected:
     float minDomainResRatio() const;
     float maxPointSize() const;
 
+
+
 private:
     //
     //
@@ -90,8 +93,8 @@ private:
     {
     public:
         Vertex(GLfloat x, GLfloat y, GLfloat z,
-               GLfloat nx, GLfloat ny, GLfloat nz, GLfloat s = 0.f);
-        GLfloat x, y, z, nx, ny, nz, s;
+               GLfloat nx, GLfloat ny, GLfloat nz, GLfloat s = 0.f, GLfloat depth = 1.f);
+        GLfloat x, y, z, nx, ny, nz, s, depth;
         bool operator<(const Vertex& right) const;
     };
 };

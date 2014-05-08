@@ -54,7 +54,8 @@ private:
 
 template <class T>
 VectorField<T>::VectorField() : fields(vDim)
-{}
+{
+}
 
 template <class T>
 void VectorField<T>::set(const std::vector<T*>& fields, const Vector<3, int> dimension, typename Field<T>::DataLoc dataLoc)

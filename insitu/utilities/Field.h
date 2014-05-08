@@ -7,7 +7,7 @@
 // Dimension in this class is tricky...
 // When the Data Location is set to Vertex, dimension represents the grid dimension
 // When the Data Location is set to Center, dimension represents the cell dimension
-// user gridDim() and cellDim() as appropriate since the automatically calculate the values
+// use gridDim() and cellDim() as appropriate since the automatically calculate the values
 
 #include <vector>
 #include <cassert>
@@ -118,7 +118,6 @@ T Field<T>::cellInterpolate(const Vector<3, U>& gridLoc) const
 		loc[i] = std::min(loc[i], U(cellDim()[i] - 1.0 - std::numeric_limits<T>::epsilon()));
 	}
 	return interpolate(loc, cellDim());
-
 }
 
 template <class T>

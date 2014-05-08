@@ -1,6 +1,6 @@
 #include "viewer.h"
-#include <sstream>
 #include <GL/glu.h>
+#include <sstream>
 #include <QPoint>
 #include "Frame.h"
 
@@ -107,6 +107,17 @@ void Viewer::cutChanged(int distance)
     float z = (float(distance) / 999.f) * (zMax - zMin) + zMin;
     domain[4] = z;
     updateOrtho();
+    updateGL();
+}
+
+void Viewer::lightDirChanged(QVector3D lightDir)
+{
+    QVector3D light = lightDir;
+    light.setZ(1.f - light.z());
+    makeCurrent();
+    shader.bind();
+    shader.setUniformValue("lightDir", light);
+    shader.release();
     updateGL();
 }
 
@@ -256,6 +267,7 @@ void Viewer::initShaders()
     shader.link();
     shader.bind();
     shader.setUniformValue("tf", 0);
+    shader.setUniformValue("lightDir", QVector3D(0.f, 0.f, 1.f));
     shader.release();
 }
 
@@ -296,8 +308,8 @@ void Viewer::updateVBO()
         Frame* f = frames[i];
         int size[2];
         f->GetSize(size);
-        for (int x = 0; x < size[0]; ++x)
         for (int y = 0; y < size[1]; ++y)
+        for (int x = 0; x < size[0]; ++x)
         {
             int pixel = x + y * size[0];
             float* depthMap = f->GetDepthMap();
@@ -326,7 +338,7 @@ void Viewer::updateVBO()
             GLfloat ny = normalMap[3 * pixel + 1];
             GLfloat nz = normalMap[3 * pixel + 2];
             GLfloat scalar = scalarMap[pixel];
-            sortVerts.push_back(Vertex(p.x, p.y, p.z, nx, ny, nz, scalar));
+            sortVerts.push_back(Vertex(p.x, p.y, p.z, nx, ny, nz, scalar, zz));
         }
     }
     std::sort(sortVerts.begin(), sortVerts.end());
@@ -421,12 +433,12 @@ float Viewer::maxPointSize() const
 //
 
 Viewer::Vertex::Vertex(GLfloat x, GLfloat y, GLfloat z,
-                       GLfloat nx, GLfloat ny, GLfloat nz, GLfloat s)
-    : x(x), y(y), z(z), nx(nx), ny(ny), nz(nz), s(s)
+                       GLfloat nx, GLfloat ny, GLfloat nz, GLfloat s, GLfloat depth)
+    : x(x), y(y), z(z), nx(nx), ny(ny), nz(nz), s(s), depth(depth)
 {
 }
 
 bool Viewer::Vertex::operator<(const Vertex& right) const
 {
-    return this->z < right.z;
+    return this->depth > right.depth;
 }

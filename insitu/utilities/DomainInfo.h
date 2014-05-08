@@ -2,6 +2,7 @@
 #define __DomainInfo_h__
 
 #include <vector>
+#include <limits>
 #include "ConfigReader.h"
 #include "Vector.h"
 
@@ -28,13 +29,20 @@ public:
 
     static bool inVolume(const Vector<vDim, int>& rank3);
 
+    static float borderWidth() { return config().get("tube.radius").asNumber<float>() * 2.f + std::numeric_limits<float>::epsilon(); }
+    static bool inBorder(const Vector<vDim>& coord);
+    static bool inBorder(const Vector<vDim>& coord, const int& rank);
+    static bool inBorder(const Vector<vDim>& coord, const Vector<vDim, int>& rank3);
+
 protected:
 
 private:
+    static const int MIN = 0;
+    static const int MAX = 1;
+
     static ConfigReader& config() { return ConfigReader::getInstance(); }
     static std::vector<int> volDim() { return config().get("domain.volume").asArray<double, int>(); }
     static std::vector<int> nRegions3() { return config().get("domain.count").asArray<double, int>(); }
-
 };
 
 #endif //__DomainInfo_h__

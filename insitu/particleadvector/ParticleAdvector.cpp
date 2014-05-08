@@ -60,16 +60,24 @@ void ParticleAdvector::trace(std::vector<float*> fields)
 std::vector<Particle<> > ParticleAdvector::prevParticles() const
 {
     std::vector<Particle<> > p = curr_;
+    // We don't need to append the inBorder because it is already in curr_.
+    p.insert(p.end(), outBorderCurr_.begin(), outBorderCurr_.end());
     p.insert(p.end(), outCurr_.begin(), outCurr_.end());
     p.insert(p.end(), incCurr_.begin(), incCurr_.end());
+    for (unsigned int i = 0; i < p.size(); ++i)
+        p[i].scalar(0) *= 10.0;
     return p;
 }
 
 std::vector<Particle<> > ParticleAdvector::nextParticles() const
 {
     std::vector<Particle<> > p = next_;
+    // We don't need to append the inBorder because it is already in curr_.
+    p.insert(p.end(), outBorderNext_.begin(), outBorderNext_.end());
     p.insert(p.end(), outNext_.begin(), outNext_.end());
     p.insert(p.end(), incNext_.begin(), incNext_.end());
+    for (unsigned int i = 0; i < p.size(); ++i)
+        p[i].scalar(0) *= 10.0;
     return p;
 }
 
@@ -87,7 +95,7 @@ void ParticleAdvector::initializeParticles(int particle_count)
 {
     curr_.resize(particle_count);
     std::vector<Vector<> > bounds = DomainInfo::bounds();
-    Vector<> range = bounds[1] - bounds[0];
+    Vector<> range = bounds[1] - bounds[0] - 1;
     for (int j = 0; j < particle_count; ++j)
     {
         for (int i = 0; i < 3; ++i)
@@ -96,7 +104,7 @@ void ParticleAdvector::initializeParticles(int particle_count)
         }
         std::vector<float> scalars = flow_.getScalars(curr_[j].coord() - bounds[0]);
         curr_[j].scalars() = scalars;
-        curr_[j].scalar(0) *= 10.0;
+        // curr_[j].scalar(0) *= 10.0;
         // id
         curr_[j].id() = j;
     }
@@ -104,28 +112,36 @@ void ParticleAdvector::initializeParticles(int particle_count)
 
 void ParticleAdvector::traceParticles()
 {
-  outCurr_.clear();
-  outNext_.clear();
-  std::vector<Particle<> > particles_current;
-  std::vector<Particle<> > particles_next;
-  for (unsigned int i = 0; i < curr_.size(); ++i)
-  {
-    Particle<> next_particle = traceParticle(curr_[i]);
-    if (DomainInfo::inBounds(next_particle.coord()))
+    outCurr_.clear();
+    outNext_.clear();
+    inBorderCurr_.clear();
+    inBorderNext_.clear();
+    std::vector<Particle<> > particles_current;
+    std::vector<Particle<> > particles_next;
+    for (unsigned int i = 0; i < curr_.size(); ++i)
     {
-      particles_current.push_back(curr_[i]);
-      next_particle.scalars() = flow_.getScalars(next_particle.coord() - DomainInfo::bounds()[0]);
-      next_particle.scalar(0) *= 10.0;
-      particles_next.push_back(next_particle);
-    } else
-    {
-      Particle<> current_particle = curr_[i];
-      outCurr_.push_back(current_particle);
-      outNext_.push_back(next_particle);
+        Particle<> curr_particle = curr_[i];
+        Particle<> next_particle = traceParticle(curr_particle);
+        if (DomainInfo::inBounds(next_particle.coord()))
+        { // particles that stay in this domain
+            particles_current.push_back(curr_particle);
+            next_particle.scalars() = flow_.getScalars(next_particle.coord() - DomainInfo::bounds()[0]);
+            particles_next.push_back(next_particle);
+            // border particles -- the inBorder particles are already in particles_current and particles_next
+            if (DomainInfo::inBorder(curr_particle.coord()) || DomainInfo::inBorder(next_particle.coord()))
+            {
+                inBorderCurr_.push_back(curr_particle);
+                inBorderNext_.push_back(next_particle);
+            }
+
+        } else
+        { // particles that travels to other domains
+            outCurr_.push_back(curr_particle);
+            outNext_.push_back(next_particle);
+        }
     }
-  }
-  curr_ = particles_current;
-  next_ = particles_next;
+    curr_ = particles_current;
+    next_ = particles_next;
 }
 
 Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
@@ -140,7 +156,10 @@ Particle<> ParticleAdvector::traceParticle(const Particle<>& particle) const
 
 void ParticleAdvector::communicateWithNeighbors()
 {
-    comm_.scatter(outCurr_, outNext_, flow_);
+    comm_.scatter(inBorderCurr_, inBorderNext_, outCurr_, outNext_, flow_);
+    outBorderCurr_ = comm_.getCurrOutBorder();
+    outBorderNext_ = comm_.getNextOutBorder();
+    assert(outBorderCurr_.size() == outBorderNext_.size());
     outNext_ = comm_.getNextOut();
     incCurr_ = comm_.getCurrInc();
     incNext_ = comm_.getNextInc();

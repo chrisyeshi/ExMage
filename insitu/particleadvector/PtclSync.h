@@ -32,19 +32,26 @@ private:
 public:
 	PtclSync();
 
-	void scatter(const PtclArr& curr, const PtclArr& next, const VectorField<>& flow);
+	void scatter(const PtclArr& currBorder, const PtclArr& nextBorder, const PtclArr& curr, const PtclArr& next, const VectorField<>& flow);
+    PtclArr getCurrOutBorder() const;
+    PtclArr getNextOutBorder() const;
 	PtclArr getCurrOut() const;
 	PtclArr getNextOut() const;
 	PtclArr getCurrInc() const;
 	PtclArr getNextInc() const;
 
 protected:
+    void mapBorder(const PtclArr& currBorder, const PtclArr& nextBorder);
 	void mapPtcls(const PtclArr& curr, const PtclArr& next);
 	void scatter();
 	void send(const Vector<vDim, int> neighbor3, const PtclArr& ptcls) const;
 	PtclArr recv(const Vector<vDim, int> neighbor3) const;
 
 private:
+    PtclMap currInBorder;
+    PtclMap nextInBorder;
+    PtclMap currOutBorder;
+    PtclMap nextOutBorder;
 	PtclMap currOut;
 	PtclMap nextOut;
 	PtclMap currInc;
