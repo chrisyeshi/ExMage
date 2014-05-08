@@ -81,6 +81,35 @@
 
           <h2>Progress</h2>
 
+          <!-- 15 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Simple Integration over Ray Segments <small>May 8th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/integrate_spot.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Without Integration'>
+                  <img src='contents/images/integrate_spot.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/integrate_avg.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Integration without Depth'>
+                  <img src='contents/images/integrate_avg.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/integrate_avg_depth.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Integration with Depth'>
+                  <img src='contents/images/integrate_avg_depth.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>I implemented "preintegration" like feature. When a ray segment cross multiple bins, it should add the attenuation to each of the bins instead of the bin at the end of the ray segment. And of course the boundary artifacts come back for no reason...</p>
+            <p>Image 1: without "preintegration," Image 2: with "preintegration." The iso surfaces look alot better. Image 3: with depth. We can see the boundary artifacts again.</p>
+            <p>Bob is working on smoothing the normals.</p>
+            <p>Yang is working on tracking the features. He have a set of RAF files of Dr. Ono's simulation to work with.</p>
+          </div>
+
           <!-- 14 -->
           <div class='entry'>
             <!-- title -->
