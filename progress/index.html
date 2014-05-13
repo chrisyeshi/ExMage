@@ -81,6 +81,24 @@
 
           <h2>Progress</h2>
 
+          <!-- 16 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Probably the Final Revision of the Rendering Side</h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/iso.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Nearly Perfect'>
+                  <img src='contents/images/iso.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>I fixed most of the artifacts, both from rendering and compositing. I changed the rendering equation slightly to accomodate to the depth buffers. The concept is to render isosurfaces instead of volume rendering according to the given transfer function. The reason is people tend to create small slabs in the opacity map to create these thin semi-transparent isosurfaces.</p>
+            <p>In terms of coding, it's actually a very small change from the previous revision. Now I am only testing if a ray segment cross the average value of a bin and attenuate if it does. Also, the attenuation is fixed to 1/16 if a ray segment cross the average value of a bin. It's sort of cheating, but we can argue that it looks better and the user doesn't need to provide a transfer function anymore.</p>
+            <p>Next I will be generating results using this revision. I will generate 2 sets, 1 with supernova and 1 with Dr. Ono's simulation. Then I will start writing the paper. Bob will work on the smoother normal implementation and then the interface to select feature. Yang, well, will continue to work on the feature tracking.</p>
+          </div>
+
           <!-- 15 -->
           <div class='entry'>
             <!-- title -->
