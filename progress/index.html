@@ -81,10 +81,116 @@
 
           <h2>Progress</h2>
 
+          <!-- 23 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>LDAV Paper <small>June 4th</small></h3>
+            <!-- text -->
+            <p><a href='contents/yyb401.pdf'>In Situ Volumetric Data Visualization with Feature Tracking using Explorable Images</a></p>
+            <p>Big thanks to Bob and Yang.</p>
+          </div>
+
+          <!-- 22 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Jet Simulation Video <small>June 4th</small></h3>
+            <!-- videos -->
+            <div class='row'>
+              <video class='col-xs-12 col-sm-6' controls>
+                <source src='contents/videos/jet_after_ldav.mp4' type='video/mp4'/>
+                <source src='contents/videos/jet_after_ldav.webm' type='video/webm'/>
+                <source src='contents/videos/jet_after_ldav.ogv' type='video/ogg'/>
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <!-- text -->
+            <p>This video is generated using explorable images. It is here to show how the jet simulation looks like.</p>
+          </div>
+
+          <!-- 21 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Better Normal Map Approximation <small>June 4th</small></h3>
+            <!-- images -->
+            <!-- text -->
+            <p>I changed the normal map approximation again. Before we were generating the normals in the same phase as the actual rendering, but normal smoothing cannot be done with that approach. The new approach generates the normals before hand when the file is loaded. We then bind the normals to a texture and the fragment shader can query it.</p>
+            <p>The new normal approximation forms 8 triangles around the center sample, and the normal is the average of the normals of the 8 triangles.</p>
+          </div>
+
+          <!-- 20 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Feature Extraction and Tracking <small>June 4th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/fet1.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/fet1.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/fet2.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/fet2.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/fet3.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/fet3.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/fet4.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/fet4.png'>
+                </a>
+              </div>
+              <div class='col-sm-12 col-md-12'>
+                <a href='contents/images/fet6.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper'>
+                  <img src='contents/images/fet6.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>Feature extraction is done by enabling the FET mode in the viewer by pressing 'f', then clicking the left mouse button to select a feature. The current version of feature extraction only uses the 7th layer of the depth proxy images.</p>
+            <p>Feature tracking is a proof of concept at the moment.</p>
+          </div>
+
+          <!-- 19 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Adaptive Binning <small>June 4th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/sn_best.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Uniform Bin Distribution'>
+                  <img src='contents/images/sn_best.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/as_best.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Adaptive Bin Distribution'>
+                  <img src='contents/images/as_best.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/adaptive_binning_bad.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Adaptive Bin Distribution'>
+                  <img src='contents/images/adaptive_binning_bad.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/adaptive_binning_good.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Adaptive Bin Distribution'>
+                  <img src='contents/images/adaptive_binning_good.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>Using adaptive binning, we are able to reveal more layers in the interesting regions of the supernova dataset. Note that these images are rendered without lighting.</p>
+            <p>Because of the complex features in supernova, adding lighting is non trivial. For a single isovalue, the depth proxy image generated only shows the first layer of the isosurface. However, the isosurfaces in the supernova are like manifolds, which they wrap around multiple times. As a result, using a single layer of depth proxy image to approximate the normal map for such isosurface is wrong.</p>
+            <p>The last two images are generated using Dr. Ono's simulation. We can change the binning range to match the data distribution in the intensity domain so that more features can be shown.</p>
+          </div>
+
           <!-- 18 -->
           <div class='entry'>
             <!-- title -->
-            <h3>All Possible Features in Supernova</h3>
+            <h3>All Possible Features in Supernova <small>May 25th</small></h3>
             <!-- images -->
             <div class='row gallery-wrapper'>
               <div class='col-sm-6 col-md-4'>
@@ -133,6 +239,8 @@
                 </a>
               </div>
             </div>
+            <!-- text -->
+            <p>By using the simplified default transfer function technique, these are the all possible isosurfaces that can be generated with the supernova dataset. Not much internal features are visualized.</p>
           </div>
 
           <!-- 17 -->
@@ -194,6 +302,16 @@
               <div class='col-sm-6 col-md-4'>
                 <a href='contents/images/integrate_avg_depth.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Integration with Depth'>
                   <img src='contents/images/integrate_avg_depth.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/integrate_no_2.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Without Integration'>
+                  <img src='contents/images/integrate_no_2.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-4'>
+                <a href='contents/images/integrate_yes_2.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='With Integration'>
+                  <img src='contents/images/integrate_yes_2.png'>
                 </a>
               </div>
             </div>
