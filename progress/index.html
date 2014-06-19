@@ -86,6 +86,20 @@
 
           <h2>Progress</h2>
 
+          <!-- 24 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Faster Normal Map <small>June 19th</small></h3>
+            <!-- text -->
+            <p>The speed of generating normal maps when loading a RAF file is drastically increased.</p>
+            <p>The normal estimation in the viewer has been a tricky question. At first, we compute the normal in the same pass with the rendering. The problem with that is we don't get the benefit of hardware interploation of the normal vectors.</p>
+            <p>Later on, we switched to a 2-pass approach. We generate the normal maps prior to the rendering pass. By doing this, we can offload the normal map generation routine to file loading time, which increases the rendering performance.</p>
+            <p>However, when we implement the 2-pass approach, it was right before LDAV submission, so we calculate the normals in the CPU, using OpenMP to accelerate. As a result, the speed was quite slow, it took approximately 3 seconds to generate 16 normal maps with 1024x1024 resolution. We can do a lot better than this.</p>
+            <p>Instead of using OpenMP to accelerate, we can of course use GLSL. The first try was to use a single framebuffer object. For each layer of the normal maps, we use glFramebufferTextureLayer() to bind the according texture to the GL_COLOR_ATTACHMENT0. It boosts the performance to about 200ms for generating all 16 normal maps, but it's still slow.</p>
+            <p>After some investigation, glFramebufferTextureLayer() is very slow, it took most of the time of the 200ms. As a result, we changed the configuration to have a framebuffer for each layer, and glFramebufferTextureLayer() is called before hand so when we load a new file, it avoids the time to call glFramebufferTextureLayer() over and over again. As a result, the time to compute all normal maps reduced to about 30ms.</p>
+            <p>The other bottleneck is the file loading time. Each RAF file in the Jet dataset is 134.2MB, and loading a file takes about 1800ms. If the page is already in the memory, it takes about 90ms.</p>
+          </div>
+
           <!-- 23 -->
           <div class='entry'>
             <!-- title -->
