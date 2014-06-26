@@ -89,15 +89,31 @@
           <!-- 26 -->
           <div class='entry'>
             <!-- title -->
-            <h3>Next Up: Revisit Viewing Function</h3>
+            <h3>Depth-aware Enhancement <small>June 26th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/depth_unaware.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Unaware'>
+                  <img src='contents/images/depth_unaware.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/depth_aware.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Aware'>
+                  <img src='contents/images/depth_aware.png'>
+                </a>
+              </div>
+            </div>
             <!-- text -->
-            <p>In the images we generated for the paper, it seems like the colors in the front are being added to the colors in the back, which dramatically changes the colors in the back.</p>
+            <p>I found in Anna's TVCG 2010 paper, there is a depth-aware enhancement equation that somehow fakes lighting, so I implemented it. First image is depth unaware and the second image is depth aware...</p>
+            <p>The depth-aware enhancement uses the 2d gradient of the bin attenuation values to enhance the depth perception but there is no ways to change the lighting parameters such as light directions.</p>
+            <p>It seems to me that with depth-aware enhancement, it brings out the edges.</p>
+            <p>I will take a look at whether it is possible to incorporate depth-aware enhancement with the lighting we did using the depth proxy images.</p>
           </div>
 
           <!-- 25 -->
           <div class='entry'>
             <!-- title -->
-            <h3>A Cache for Loading Images</h3>
+            <h3>A Cache for Loading Images <small>June 24th</small></h3>
             <!-- text -->
             <p>After solving the performance issue of the normal map, the file I/O of the RAF files become the bottleneck. I am trying to use a buffer window to ease the pain of loading files. This will incorporate threading so the other benefit for me is to learn threading.</p>
             <p>I choose to go with std::thread instead of Qt tread because std::thread can be used in more places.</p>
