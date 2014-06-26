@@ -86,6 +86,18 @@
 
           <h2>Progress</h2>
 
+          <!-- 27 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Plan for Lighting</h3>
+            <!-- images -->
+            <!-- text -->
+            <p>The tools we have for now: depth-aware enhancement using attenuation gradients and iso surfaces with depth proxy images. The plan is to combine them and provide better lighting.</p>
+            <p>Depth-aware enhancement is able to highlight the shapes of the features even when they are not the first surface. This enhancement is based on gradients of the attenuation values. The plan is to use these gradients to estimate the normals of these hidden features so that the rendering can react to the direction of lighting.</p>
+            <p>On the other hand, we have the depth proxy images. Also, for each depth proxy image, we know the intensity value of it. As a result, we essentially have isosurfaces. The plan is to render these depth proxy images the way we render isosurfaces. The point is to keep it separate from the attenuation values.</p>
+            <p>At the end, we then combine the two approaches above into a single image. The picture will contain semi transparent isosurfaces while the hidden features are highlighted by depth-aware enhancement.</p>
+          </div>
+
           <!-- 26 -->
           <div class='entry'>
             <!-- title -->
@@ -100,6 +112,16 @@
               <div class='col-sm-6 col-md-6'>
                 <a href='contents/images/depth_aware.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Aware'>
                   <img src='contents/images/depth_aware.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/depth_unaware_cut.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Aware'>
+                  <img src='contents/images/depth_unaware_cut.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/depth_aware_cut.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Aware'>
+                  <img src='contents/images/depth_aware_cut.png'>
                 </a>
               </div>
             </div>
