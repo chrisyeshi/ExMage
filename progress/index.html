@@ -91,6 +91,18 @@
             <!-- title -->
             <h3>Plan for Lighting <small>June 26th</small></h3>
             <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/depth_aware.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-tittle='depth-aware enhancement'>
+                  <img src='contents/images/depth_aware.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/better_lighting_isosurface.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-tittle='isosurface from depth proxy image'>
+                  <img src='contents/images/better_lighting_isosurface.png'>
+                </a>
+              </div>
+            </div>
             <!-- text -->
             <p>The tools we have for now: depth-aware enhancement using attenuation gradients and iso surfaces with depth proxy images. The plan is to combine them and provide better lighting.</p>
             <p>Depth-aware enhancement is able to highlight the shapes of the features even when they are not the first surface. This enhancement is based on gradients of the attenuation values. The plan is to use these gradients to estimate the normals of these hidden features so that the rendering can react to the direction of lighting.</p>
