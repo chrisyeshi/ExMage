@@ -86,6 +86,29 @@
 
           <h2>Progress</h2>
 
+          <!-- 28 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>More Translucent Isosurface Rendering <small>July 9th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/iso_opaque.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='The isosurface in this image is like a 2D layer. When the isosurfaces stack up, the colors get blended in a weird way.'>
+                  <img src='contents/images/iso_opaque.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/iso_translucent.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='By increasing the transparency when the normal is pointing to the camera, we are able to see more clearly behind the isosurfaces.'>
+                  <img src='contents/images/iso_translucent.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>Previously, the problem with rendering the isosurfaces was that the colors get blended heavily. The result is that the colors of the deeper isosurfaces got altered to the color of the front isosurface. As a result, the colors seem to come from the same color scheme even though they should be completely different.</p>
+            <p>The way I am approaching this is to alter the opacity based on the normal. When the normal of the pixel is pointing to the camera, we decrease the opacity of the pixel. When the normal of the pixel is orthogonal to the camera, the opacity is higher to indicate there is a surface.</p>
+            <p>The image titles now describe what the image means.</p>
+          </div>
+
           <!-- 27 -->
           <div class='entry'>
             <!-- title -->
@@ -93,12 +116,12 @@
             <!-- images -->
             <div class='row gallery-wrapper'>
               <div class='col-sm-6 col-md-6'>
-                <a href='contents/images/depth_aware.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-tittle='depth-aware enhancement'>
+                <a href='contents/images/depth_aware.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='depth-aware enhancement'>
                   <img src='contents/images/depth_aware.png'>
                 </a>
               </div>
               <div class='col-sm-6 col-md-6'>
-                <a href='contents/images/better_lighting_isosurface.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-tittle='isosurface from depth proxy image'>
+                <a href='contents/images/better_lighting_isosurface.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='isosurface from depth proxy image'>
                   <img src='contents/images/better_lighting_isosurface.png'>
                 </a>
               </div>
