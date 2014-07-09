@@ -98,7 +98,7 @@
                 </a>
               </div>
               <div class='col-sm-6 col-md-6'>
-                <a href='contents/images/iso_translucent.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='By increasing the transparency when the normal is pointing to the camera, we are able to see more clearly behind the isosurfaces.'>
+                <a href='contents/images/iso_translucent.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='By increasing the transparency when the normal is pointing to the camera, we are able to see more clearly behind the isosurfaces. The details on the right side of the yellow layer is not clear.'>
                   <img src='contents/images/iso_translucent.png'>
                 </a>
               </div>
@@ -106,6 +106,7 @@
             <!-- text -->
             <p>Previously, the problem with rendering the isosurfaces was that the colors get blended heavily. The result is that the colors of the deeper isosurfaces got altered to the color of the front isosurface. As a result, the colors seem to come from the same color scheme even though they should be completely different.</p>
             <p>The way I am approaching this is to alter the opacity based on the normal. When the normal of the pixel is pointing to the camera, we decrease the opacity of the pixel. When the normal of the pixel is orthogonal to the camera, the opacity is higher to indicate there is a surface.</p>
+            <p>However, some details of the semi transparent isosurfaces can be hidden due to this feature.</p>
             <p>The image titles now describe what the image means.</p>
           </div>
 
