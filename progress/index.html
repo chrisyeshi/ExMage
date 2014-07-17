@@ -86,6 +86,25 @@
 
           <h2>Progress</h2>
 
+          <!-- 31 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>New Supernova Video (DAE + ISO) <small>July 17th</small></h3>
+            <!-- videos -->
+            <div class='row'>
+              <video class='col-xs-12 col-sm-6' controls>
+                <source src='contents/videos/supernova_isodae.mp4' type='video/mp4'/>
+                <source src='contents/videos/supernova_isodae.webm' type='video/webm'/>
+                <source src='contents/videos/supernova_isodae.ogv' type='video/ogg'/>
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <!-- text -->
+            <p>This video is generated when we enable both isosurface rendering and depth-aware enhancment. The light is comming from the upper left corner.</p>
+            <p>Timestep 62, 63, 160, and 161 are generating some artifacts on the lower right of the image. You can spot the artifacts in the video (They flash for a split second). It seems that the files are partially corrupted since the min max values of these 4 timesteps are significantly different than the others.</p>
+            <p>To generate this video, I had to regenerate the explorable images with a fixed min max range.</p>
+          </div>
+
           <!-- 30 -->
           <div class='entry'>
             <!-- title -->
