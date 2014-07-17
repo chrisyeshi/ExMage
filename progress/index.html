@@ -86,6 +86,59 @@
 
           <h2>Progress</h2>
 
+          <!-- 30 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>Reduced Edge Emphasis <small>July 16th</small></h3>
+            <!-- images -->
+            <div class='row gallery-wrapper'>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeyes_iso_overview.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Emphasized edges. Overview of timestep 139. Isosurface of bin 7.'>
+                  <img src='contents/images/edgeyes_iso_overview.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeno_iso_overview.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Deemphasized edges. Overview of timestep 139. Isosurface of bin 7.'>
+                  <img src='contents/images/edgeno_iso_overview.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeyes_iso_zoom.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Emphasized edges. Zoomed in view of timestep 139. Isosurface of bin 7.'>
+                  <img src='contents/images/edgeyes_iso_zoom.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeno_iso_zoom.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Deemphasized edges. Zoomed in view of timestep 139. Isosurface of bin 7.'>
+                  <img src='contents/images/edgeno_iso_zoom.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeyes_dae_overview.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Emphasized edges. Overview of timestep 139. DAE(Depth-aware enhancement) + ISO(Isosurface).'>
+                  <img src='contents/images/edgeyes_dae_overview.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeno_dae_overview.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Deemphasized edges. Overview of timestep 139. DAE(Depth-aware enhancement) + ISO(Isosurface).'>
+                  <img src='contents/images/edgeno_dae_overview.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeyes_dae_zoom.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Emphasized edges. Zoomed in view of timestep 139. DAE(Depth-aware enhancement) + ISO(Isosurface).'>
+                  <img src='contents/images/edgeyes_dae_zoom.png'>
+                </a>
+              </div>
+              <div class='col-sm-6 col-md-6'>
+                <a href='contents/images/edgeno_dae_zoom.png' class='thumbnail' data-toggle='lightbox' data-gallery='multiimages' data-parent='.gallery-wrapper' data-title='Deemphasized edges. Zoomed in view of timestep 139. DAE(Depth-aware enhancement) + ISO(Isosurface).'>
+                  <img src='contents/images/edgeno_dae_zoom.png'>
+                </a>
+              </div>
+            </div>
+            <!-- text -->
+            <p>I finally found the cause of those bright/black edges, so I fixed them. These images show a comparison between before and after fixing the edges. The images on the left column are the "before" images, which is with clear edges. The images on the right column are the "after" images, which are without clear edges. More detailed descriptions are given in the images.</p>
+            <p>It ends up I need to take the absolute value of the depth difference before comparing it to a constant cutoff value. Without the absolute operator, only one side of the edges were eliminated.</p>
+            <p>Note that this improvement is only affecting the isosurface rendering. Nothing is changed for the DAE(depth-aware enhancement) rendering.</p>
+          </div>
+
           <!-- 29 -->
           <div class='entry'>
             <!-- title -->
