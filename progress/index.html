@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Explorable Image Progres</title>
 
-    <!-- MyCSS -->
-    <link href='assets/css/my.css' rel='stylesheet'>
     <!-- Bootstrap -->
     <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Ekko Lightbox -->
@@ -15,6 +13,12 @@
     <link href='assets/bootstrap/css/dark.css' rel='stylesheet'>
     <!-- Mediaelement Video Player -->
     <link href='assets/mediaelement/mediaelementplayer.min.css' rel='stylesheet'>
+    <!-- hightlight.js -->
+    <link href='assets/highlight/styles/tomorrow-night-eighties.css' rel='stylesheet'>
+    <!-- prism.js -->
+    <!-- <link href='assets/prism/prism.css' rel='stylesheet'> -->
+    <!-- MyCSS -->
+    <link href='assets/css/my.css' rel='stylesheet'>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -87,6 +91,57 @@
         <div class='updates'>
 
           <h2>Progress</h2>
+
+          <!-- 32 -->
+          <div class='entry'>
+            <!-- title -->
+            <h3>JSON as Configuration Format <small>July 23rd</small></h3>
+            <!-- text -->
+            <p>Instead of using binary configuration file, I have changed to use JSON format. The benefit is that users are able to change the configurations easily by any text editors. The format is indicated below:</p>
+            <pre><code>{
+  // format has to be RAF (Ray Attenuation Function) at the moment<br>
+  "format" : "RAF",
+  // type is the floating number type, use float or double
+  "type" : "float",
+  // Specifies the data range. If "minmax" is not provided, the system will calculate it automatically.
+  "minmax" : [0.0, 0.1],
+  "images" : [
+    {
+      // Adaptive binning is specified here:
+      // It's an array of 17 floating point numbers, the first number is always 0.0, and the last number is always 1.0.
+      // If "binTicks" is not provided, the system will use a linear spaced array.
+      "binTicks" : [0.0, 0.25, 0.5, 0.625, 0.65626,
+                    0.6875, 0.71875, 0.75, 0.765625,
+                    0.78125, 0.796875, 0.8125, 0.8281,
+                    0.84375, 0.859375, 0.875, 1.0],
+      // "sampleSpacing" determines how fast the rays move forward.
+      "sampleSpacing" : 0.5
+    }
+  ],
+  "view" : {
+    // These determines the resolution of the output image. Usually the last two number of "viewport" are the same as "width" and "height".
+    "viewport" : [ 0, 0, 1024, 1024 ],
+    "width" : 1024,
+    "height" : 1024,
+    "angle" : 0,
+    "scale" : 0,
+    // The model, view, and projection matrix to specify the camera orientation.
+    "modelview" : [
+      -0.5036, 0.6476, -0.5717, 128.3415,
+      0.5741, -0.2436, -0.7816, 135.3691,
+      -0.6455, -0.7219, -0.2491, -415.0219,
+      0, 0, 0, 1
+    ],
+    "projection" : [
+      2.823912858963013, 0, 0, 0,
+      0, 2.823912858963013, 0, 0,
+      0, 0, -1.649572372436523, -939.01904296875,
+      0, 0, -1, 0
+    ]
+  }
+}</code></pre>
+            <p>This configuration file is used to generate the supernova (600x600x600) explorable images.</p>
+          </div>
 
           <!-- 31 -->
           <div class='entry'>
@@ -940,6 +995,11 @@
         });
       });
     </script>
+    <!-- highlight.js -->
+    <script src='assets/highlight/highlight.pack.js'></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <!-- prism.js -->
+    <!-- <script src='assets/prism/prism.js'></script> -->
 
   </body>
 </html>
