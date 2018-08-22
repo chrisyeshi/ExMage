@@ -4,7 +4,7 @@ In the current stage, XImage provides in situ pathtube generation and visualizat
 
 This repository provides both the library and the viewer of explorable image. The library can be easily plugged into a scientific simulation for in situ pathtube visualization. The output from the library is an explorable image. An explorable image allows the users to explore the generated volume with the most common techniques, including transfer function, lighting, and rotation. Also, an explorable image can be opened by any standard png viewer as a static image. However, when it is opened by our viewer (also provided in the repository), user can perform the exploration techniques that are mentioned before.
 
-The XImage library for scalar field volume visualization: https://chrisyeshi.github.io/ximage-scalar
+The XImage library for scalar field volume visualization: [https://chrisyeshi.github.io/ximage-scalar](https://chrisyeshi.github.io/ximage-scalar)
 
 ### Dependencies:
 
