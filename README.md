@@ -19,7 +19,7 @@ Installation:
 
 ### The Library
 
-Additional documentation: [assets/LibraryDocumentation.pdf](../assets/LibraryDocumentation.pdf)
+Additional documentation: [LibraryDocumentation.pdf](https://chrisyeshi.github.io/ximage-vector/assets/LibraryDocumentation.pdf)
 
 For the library, we use the cmake system to build.
 
@@ -33,7 +33,7 @@ Options such like whether to build the examples and tests are available in cmake
 
 ### The Viewer
 
-Additional documentation: [assets/ViewerDocumentation.pdf](../assets/ViewerDocumentation.pdf)
+Additional documentation: [ViewerDocumentation.pdf](https://chrisyeshi.github.io/ximage-vector/assets/ViewerDocumentation.pdf)
 
 For the viewer, we use the Qt library. Just open the exmage-viewer.pro file in the viewer directory with Qt Creater, it will configure everything correctly.
 
