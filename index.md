@@ -15,7 +15,7 @@ Any MPI library
 
 #### The Library
 
-Additional documentation: [assets/LibraryDocumentation.pdf](../assets/LibraryDocumentation.pdf)
+Additional documentation: [assets/LibraryDocumentation.pdf](/assets/LibraryDocumentation.pdf)
 
 For the library, we use the cmake system to build.
 
