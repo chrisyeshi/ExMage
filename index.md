@@ -11,7 +11,7 @@ Any MPI library
 
 ### Installation:
 
-## The Library
+#### The Library
 
 Additional documentation: [assets/LibraryDocumentation.pdf](../assets/LibraryDocumentation.pdf)
 
@@ -25,7 +25,7 @@ make
 
 Options such like whether to build the examples and tests are available in cmake.
 
-## The Viewer
+#### The Viewer
 
 Additional documentation: [assets/ViewerDocumentation.pdf](../assets/ViewerDocumentation.pdf)
 
