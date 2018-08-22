@@ -29,7 +29,7 @@ Options such like whether to build the examples and tests are available in cmake
 
 #### The Viewer
 
-Additional documentation: [assets/ViewerDocumentation.pdf](../assets/ViewerDocumentation.pdf)
+Additional documentation: [assets/ViewerDocumentation.pdf](/assets/ViewerDocumentation.pdf)
 
 For the viewer, we use the Qt library. Just open the exmage-viewer.pro file in the viewer directory with Qt Creater, it will configure everything correctly.
 
