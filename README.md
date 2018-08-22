@@ -1,4 +1,4 @@
-XImage: Explorable Images for In Situ Pathtube Visualization
+Explorable Images for In Situ Pathtube Visualization
 ======
 
 In the current stage, ExMage provides in situ pathtube generation and visualization. It is an image based technique that tremendously reduce the output data size yet retains certain user exploration techniques, such like transfer function, cut plane, etc. The library outputs a unique image format which can be opened as a static image by any png viewer. However, when it is opened by our specialized viewer (also provided in the repository), user interactions are enabled.
